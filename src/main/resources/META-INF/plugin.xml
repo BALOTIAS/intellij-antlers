@@ -32,5 +32,9 @@
 
         <lang.foldingBuilder language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersFoldingBuilder"/>
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersBalanceAnnotator"/>
+        <localInspection language="Antlers"
+                         implementationClass="com.github.balotias.intellijantlers.inspection.AntlersUnknownModifierInspection"
+                         shortName="AntlersUnknownModifier" displayName="Unknown Antlers modifier"
+                         groupName="Antlers" enabledByDefault="true" level="WARNING"/>
     </extensions>
 </idea-plugin>
