@@ -10,6 +10,7 @@ import com.github.balotias.intellijantlers.scope.AntlersFieldContext
 import com.github.balotias.intellijantlers.scope.AntlersMemberResolver
 import com.github.balotias.intellijantlers.scope.AntlersScopeResolver
 import com.github.balotias.intellijantlers.scope.LoopVariables
+import com.github.balotias.intellijantlers.scope.NavVariables
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
@@ -55,7 +56,8 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     }
                 }
                 // Loop-meta vars only inside an actual iterating tag (E1) — NOT for a page match.
-                if (AntlersScopeResolver.scopesAt(parameters.position).isNotEmpty()) {
+                val scopes = AntlersScopeResolver.scopesAt(parameters.position)
+                if (scopes.isNotEmpty()) {
                     for (lv in LoopVariables.ALL) {
                         if (seen.add(lv.name)) {
                             result.addElement(
@@ -63,6 +65,19 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                                     .withIcon(AntlersIcons.FILE)
                                     .withTypeText("Loop")
                                     .withTailText("  ${lv.description}", true)
+                            )
+                        }
+                    }
+                }
+                // Nav-tree vars only inside a {{ nav … }} scope.
+                if (scopes.any { it.navMeta }) {
+                    for (nv in NavVariables.ALL) {
+                        if (seen.add(nv.name)) {
+                            result.addElement(
+                                LookupElementBuilder.create(nv.name)
+                                    .withIcon(AntlersIcons.FILE)
+                                    .withTypeText("Nav")
+                                    .withTailText("  ${nv.description}", true)
                             )
                         }
                     }
