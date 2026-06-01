@@ -23,6 +23,11 @@ object AntlersDefinitionReferenceHelper {
         // Tag head: element must be the first T_IDENT child of an AntlersNamePathMixin
         val path = PsiTreeUtil.getParentOfType(element, AntlersNamePathMixin::class.java)
             ?: return emptyArray()
+
+        // A name path inside a parameter value (limit=myVar) or a closing tag is not a tag head.
+        if (PsiTreeUtil.getParentOfType(path, com.github.balotias.intellijantlers.psi.AntlersParameterMixin::class.java) != null) return emptyArray()
+        if (PsiTreeUtil.getParentOfType(path, com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin::class.java) != null) return emptyArray()
+
         if (path.head == name &&
             path.node.findChildByType(AntlersTypes.T_IDENT)?.psi == element) {
             return arrayOf(AntlersPhpClassReference(element, name, isModifier = false))

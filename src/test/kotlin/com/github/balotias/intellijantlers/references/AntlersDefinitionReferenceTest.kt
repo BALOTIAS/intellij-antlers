@@ -19,21 +19,6 @@ class $className extends Tags
         )
     }
 
-    private fun setupPhpModifier(className: String): PsiFile {
-        val dollar = "$"
-        return myFixture.addFileToProject(
-            "app/Modifiers/$className.php",
-            """<?php
-namespace App\Modifiers;
-use Statamic\Modifiers\Modifier;
-class $className extends Modifier
-{
-    public function index(${dollar}value) { return ${dollar}value; }
-}
-"""
-        )
-    }
-
     private fun resolveTagAt(antlersText: String): PsiFile? {
         val caret = antlersText.indexOf("<caret>")
         val file = myFixture.addFileToProject(
@@ -60,5 +45,19 @@ class $className extends Modifier
     fun testUnknownNameNotResolved() {
         val resolved = resolveTagAt("{{ totally_unkn<caret>own_tag }}")
         assertNull("Unknown tag should not resolve", resolved)
+    }
+
+    fun testCustomModifierResolves() {
+        myFixture.addFileToProject(
+            "app/Modifiers/MyFormat.php",
+            "<?php\nnamespace App\\Modifiers;\nuse Statamic\\Modifiers\\Modifier;\nclass MyFormat extends Modifier {}\n"
+        )
+        val text = "{{ title | my_for<caret>mat }}"
+        val caret = text.indexOf("<caret>")
+        val file = myFixture.addFileToProject("mpage.antlers.html", text.replace("<caret>", ""))
+        myFixture.configureFromExistingVirtualFile(file.virtualFile)
+        val target = file.findReferenceAt(caret)?.resolve()?.containingFile
+        assertNotNull("custom modifier should resolve to its PHP file", target)
+        assertEquals("MyFormat.php", target!!.name)
     }
 }
