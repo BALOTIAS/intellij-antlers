@@ -818,3 +818,32 @@ git commit -m "Antlers grammar foundation complete (sub-project A)"
 **Placeholder scan:** No TBD/TODO; every code step shows complete file/section content. The one manual step (Task 7 Step 3, pasting generated golden trees) is inherent to `ParsingTestCase` and includes the verification criteria to check before saving.
 
 **Type consistency:** Accessor names used in tests match the mixins — `parameterName`/`isBound`/`valueElement` (`AntlersParameterMixin`), `modifierName` (`AntlersModifierMixin`), `head`/`method`/`pathText` (`AntlersNamePathMixin`), `keyword` (`AntlersConditionMixin`), `closedName` (`AntlersClosingTagMixin`). Token names match between the `.flex` returns and the BNF `tokens` block.
+
+---
+
+## Implementation Deviations (applied during execution)
+
+The grammar in Task 2 above was corrected during implementation and review. The committed
+`src/main/grammar/Antlers.bnf` is the source of truth; the changes versus the draft above:
+
+1. **Condition rule is keyword-gated.** The draft `condition ::= conditionKeyword exprToken_*`
+   with `conditionKeyword ::= T_IDENT` would have matched *every* identifier-led statement as a
+   condition. Fixed with a non-consuming GrammarKit predicate `<<atConditionKeyword>>` backed by a
+   new `AntlersParserUtil` (`parserUtilClass`), which only fires for the actual keywords
+   (`if`/`elseif`/`else`/`unless`/`endif`/`endunless`). So `{{ title }}` parses as a tag/variable.
+2. **`parameter` requires a `:`/`$` prefix or a trailing `=value`.** The draft matched any bare
+   `T_IDENT`, which wrongly captured identifiers in expressions (e.g. `b` in `{{ a == b }}`).
+   Split into `boundParameter_` (`:name` / `:$name` / `$name`) and `staticParameter_`
+   (`name="..."`).
+3. **Bracket/brace interiors use `groupToken_`** (= `exprToken_` minus `T_RBRACKET`/`T_RBRACE`) so
+   `bracketAccess` (`arr[0]`) and braced `paramValue` (`{expr}`) actually close instead of having
+   their closing delimiter swallowed by the inner loop.
+4. **`expr_ ::= namePath tail_* | tail_+`** so string/operator-led statements (`{{ "x" + y }}`)
+   parse even though they don't start with a name path.
+5. **`noparseBlock` is pinned** (`{ pin=1 }`) for better recovery on an unterminated `noparse`.
+6. **`isBound`** also recognises the `$name` (dollar-only) bound form, and Task 3 added tests for
+   the `namePath` / `condition` / `closingTag` mixins (the draft only tested params + modifiers).
+
+Tasks 4–5 were partially satisfied by compile-fixes made during Task 1; Task 4 needed no separate
+work. The ParsingTestCase golden `.txt` files are intentionally absent and generate on the first
+`./gradlew test` run (see `src/test/testData/parsing/README.md`).
