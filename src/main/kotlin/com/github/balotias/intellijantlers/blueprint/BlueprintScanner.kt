@@ -14,6 +14,10 @@ object BlueprintScanner {
     private val DISPLAY_RE = Regex("""^\s*display:\s*['"]?(.+?)['"]?\s*$""")
     private val TYPE_RE = Regex("""^\s*(?:type|field):\s*['"]?([A-Za-z_][A-Za-z0-9_]*)['"]?\s*$""")
     private val IMPORT_RE = Regex("""^\s*(?:-\s*)?import:\s*['"]?([A-Za-z0-9_-]+)['"]?\s*$""")
+    private val COLLECTIONS_RE = Regex("""^\s*collections:\s*(\[[^\]]*\])?\s*$""")
+    private val TAXONOMY_RE = Regex("""^\s*taxonomy:\s*['"]?([A-Za-z0-9_-]+)['"]?\s*$""")
+    private val CONTAINER_RE = Regex("""^\s*container:\s*['"]?([A-Za-z0-9_-]+)['"]?\s*$""")
+    private val LIST_ITEM_RE = Regex("""^\s*-\s*['"]?([A-Za-z0-9_-]+)['"]?\s*$""")
 
     /** An `import: <fieldset>` directive at [atPath] within the blueprint/fieldset of [baseNs]. */
     private data class ImportMarker(val baseNs: BlueprintNamespace, val atPath: List<String>, val imported: String)
@@ -55,14 +59,44 @@ object BlueprintScanner {
                 val handleOffset = pos + (m.groups[1]?.range?.first ?: 0)
                 var display = ""
                 var type = ""
+                val collectionHandles = mutableListOf<String>()
+                var taxonomyHandle: String? = null
+                var containerHandle: String? = null
+                var inCollections = false
+                var collectionsIndent = -1
                 var j = i + 1
-                while (j < lines.size && j < i + 8) {
-                    if (HANDLE_RE.find(lines[j]) != null) break
-                    if (display.isEmpty()) DISPLAY_RE.find(lines[j])?.let { display = it.groupValues[1] }
-                    if (type.isEmpty()) TYPE_RE.find(lines[j])?.let { type = it.groupValues[1] }
+                while (j < lines.size && j < i + 12) {
+                    val l = lines[j]
+                    if (HANDLE_RE.find(l) != null) break
+                    if (display.isEmpty()) DISPLAY_RE.find(l)?.let { display = it.groupValues[1] }
+                    if (type.isEmpty()) TYPE_RE.find(l)?.let { type = it.groupValues[1] }
+                    COLLECTIONS_RE.find(l)?.let { mc ->
+                        val inline = mc.groupValues[1]
+                        if (inline.isNotBlank()) {
+                            inline.trim('[', ']').split(',').forEach { h ->
+                                h.trim().trim('\'', '"').takeIf { s -> s.isNotBlank() }?.let { collectionHandles.add(it) }
+                            }
+                        } else {
+                            inCollections = true
+                            collectionsIndent = leadingWs(l)
+                        }
+                    }
+                    if (taxonomyHandle == null) TAXONOMY_RE.find(l)?.let { taxonomyHandle = it.groupValues[1] }
+                    if (containerHandle == null) CONTAINER_RE.find(l)?.let { containerHandle = it.groupValues[1] }
+                    if (inCollections) {
+                        val li = LIST_ITEM_RE.find(l)
+                        if (li != null && leadingWs(l) > collectionsIndent) collectionHandles.add(li.groupValues[1])
+                    }
                     j++
                 }
-                out.add(BlueprintField(handle, display, type, file, handleOffset, base.copy(path = path)))
+                val linkedNamespaces = when (type.lowercase()) {
+                    "entries", "entry" -> collectionHandles.map { BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, it) }
+                    "terms", "term" -> taxonomyHandle?.let { listOf(BlueprintNamespace(BlueprintNamespace.Kind.TAXONOMY, it)) } ?: emptyList()
+                    "assets", "asset" -> containerHandle?.let { listOf(BlueprintNamespace(BlueprintNamespace.Kind.ASSET, it)) } ?: emptyList()
+                    "users", "user" -> listOf(BlueprintNamespace(BlueprintNamespace.Kind.USER, "user"))
+                    else -> emptyList()
+                }
+                out.add(BlueprintField(handle, display, type, file, handleOffset, base.copy(path = path), linkedNamespaces))
                 stack.addLast(indent to handle)
             } else {
                 val im = IMPORT_RE.find(line)

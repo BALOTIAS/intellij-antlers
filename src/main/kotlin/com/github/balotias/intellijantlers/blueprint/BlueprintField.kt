@@ -9,5 +9,6 @@ data class BlueprintField(
     val type: String,
     val file: VirtualFile,
     val offset: Int,
-    val namespace: BlueprintNamespace
+    val namespace: BlueprintNamespace,
+    val linkedNamespaces: List<BlueprintNamespace> = emptyList()
 )

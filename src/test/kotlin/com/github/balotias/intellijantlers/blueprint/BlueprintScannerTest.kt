@@ -147,4 +147,63 @@ class BlueprintScannerTest : BasePlatformTestCase() {
         assertTrue("rows scope has gallery", grid.any { it.handle == "gallery" })
         assertFalse("rows scope excludes deeper photo_alt", grid.any { it.handle == "photo_alt" })
     }
+
+    fun testRelationshipLinkCapture() {
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            """
+            tabs:
+              main:
+                sections:
+                  - fields:
+                      - handle: author
+                        field:
+                          type: entries
+                          collections:
+                            - team
+                      - handle: topics
+                        field:
+                          type: terms
+                          taxonomy: tags
+                      - handle: hero
+                        field:
+                          type: assets
+                          container: images
+                      - handle: editor
+                        field:
+                          type: users
+            """.trimIndent()
+        )
+        val fields = BlueprintScanner.scan(project)
+        fun linked(h: String) = fields.first { it.handle == h }.linkedNamespaces
+        assertEquals(listOf(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "team")), linked("author"))
+        assertEquals(listOf(BlueprintNamespace(BlueprintNamespace.Kind.TAXONOMY, "tags")), linked("topics"))
+        assertEquals(listOf(BlueprintNamespace(BlueprintNamespace.Kind.ASSET, "images")), linked("hero"))
+        assertEquals(listOf(BlueprintNamespace(BlueprintNamespace.Kind.USER, "user")), linked("editor"))
+    }
+
+    fun testMultiCollectionLinkCapture() {
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            """
+            tabs:
+              main:
+                sections:
+                  - fields:
+                      - handle: related
+                        field:
+                          type: entries
+                          collections:
+                            - team
+                            - news
+            """.trimIndent()
+        )
+        assertEquals(
+            listOf(
+                BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "team"),
+                BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "news")
+            ),
+            BlueprintScanner.scan(project).first { it.handle == "related" }.linkedNamespaces
+        )
+    }
 }
