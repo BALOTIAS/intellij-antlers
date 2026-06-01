@@ -93,7 +93,59 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_LBRACKET exprToken_* T_RBRACKET
+  // T_COLON T_DOLLAR? T_IDENT (T_EQUALS paramValue)?
+  //                           | T_DOLLAR T_IDENT
+  static boolean boundParameter_(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "boundParameter_")) return false;
+    if (!nextTokenIs(builder_, "", T_COLON, T_DOLLAR)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = boundParameter__0(builder_, level_ + 1);
+    if (!result_) result_ = parseTokens(builder_, 0, T_DOLLAR, T_IDENT);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // T_COLON T_DOLLAR? T_IDENT (T_EQUALS paramValue)?
+  private static boolean boundParameter__0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "boundParameter__0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_COLON);
+    result_ = result_ && boundParameter__0_1(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, T_IDENT);
+    result_ = result_ && boundParameter__0_3(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // T_DOLLAR?
+  private static boolean boundParameter__0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "boundParameter__0_1")) return false;
+    consumeToken(builder_, T_DOLLAR);
+    return true;
+  }
+
+  // (T_EQUALS paramValue)?
+  private static boolean boundParameter__0_3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "boundParameter__0_3")) return false;
+    boundParameter__0_3_0(builder_, level_ + 1);
+    return true;
+  }
+
+  // T_EQUALS paramValue
+  private static boolean boundParameter__0_3_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "boundParameter__0_3_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_EQUALS);
+    result_ = result_ && paramValue(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // T_LBRACKET groupToken_* T_RBRACKET
   public static boolean bracketAccess(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "bracketAccess")) return false;
     if (!nextTokenIs(builder_, T_LBRACKET)) return false;
@@ -106,12 +158,12 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // exprToken_*
+  // groupToken_*
   private static boolean bracketAccess_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "bracketAccess_1")) return false;
     while (true) {
       int pos_ = current_position_(builder_);
-      if (!exprToken_(builder_, level_ + 1)) break;
+      if (!groupToken_(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "bracketAccess_1", pos_)) break;
     }
     return true;
@@ -268,6 +320,33 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
+  //   | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET
+  //   | T_LBRACE | T_IDENT | T_SLASH
+  static boolean groupToken_(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "groupToken_")) return false;
+    boolean result_;
+    result_ = consumeToken(builder_, T_OP);
+    if (!result_) result_ = consumeToken(builder_, T_STRING);
+    if (!result_) result_ = consumeToken(builder_, T_NUMBER);
+    if (!result_) result_ = consumeToken(builder_, T_ARROW);
+    if (!result_) result_ = consumeToken(builder_, T_DOT);
+    if (!result_) result_ = consumeToken(builder_, T_COLON);
+    if (!result_) result_ = consumeToken(builder_, T_COMMA);
+    if (!result_) result_ = consumeToken(builder_, T_SEMICOLON);
+    if (!result_) result_ = consumeToken(builder_, T_EQUALS);
+    if (!result_) result_ = consumeToken(builder_, T_DOLLAR);
+    if (!result_) result_ = consumeToken(builder_, T_AT);
+    if (!result_) result_ = consumeToken(builder_, T_LPAREN);
+    if (!result_) result_ = consumeToken(builder_, T_RPAREN);
+    if (!result_) result_ = consumeToken(builder_, T_LBRACKET);
+    if (!result_) result_ = consumeToken(builder_, T_LBRACE);
+    if (!result_) result_ = consumeToken(builder_, T_IDENT);
+    if (!result_) result_ = consumeToken(builder_, T_SLASH);
+    return result_;
+  }
+
+  /* ********************************************************** */
   // T_PIPE T_IDENT (T_LPAREN argList? T_RPAREN)?
   public static boolean modifier(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
@@ -413,7 +492,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_STRING | (T_LBRACE exprToken_* T_RBRACE) | T_NUMBER | namePath
+  // T_STRING | (T_LBRACE groupToken_* T_RBRACE) | T_NUMBER | namePath
   static boolean paramValue(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paramValue")) return false;
     boolean result_;
@@ -426,7 +505,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // T_LBRACE exprToken_* T_RBRACE
+  // T_LBRACE groupToken_* T_RBRACE
   private static boolean paramValue_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paramValue_1")) return false;
     boolean result_;
@@ -438,60 +517,26 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // exprToken_*
+  // groupToken_*
   private static boolean paramValue_1_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "paramValue_1_1")) return false;
     while (true) {
       int pos_ = current_position_(builder_);
-      if (!exprToken_(builder_, level_ + 1)) break;
+      if (!groupToken_(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "paramValue_1_1", pos_)) break;
     }
     return true;
   }
 
   /* ********************************************************** */
-  // T_COLON? T_DOLLAR? T_IDENT (T_EQUALS paramValue)?
+  // boundParameter_ | staticParameter_
   public static boolean parameter(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "parameter")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, PARAMETER, "<parameter>");
-    result_ = parameter_0(builder_, level_ + 1);
-    result_ = result_ && parameter_1(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, T_IDENT);
-    result_ = result_ && parameter_3(builder_, level_ + 1);
+    result_ = boundParameter_(builder_, level_ + 1);
+    if (!result_) result_ = staticParameter_(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, null);
-    return result_;
-  }
-
-  // T_COLON?
-  private static boolean parameter_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "parameter_0")) return false;
-    consumeToken(builder_, T_COLON);
-    return true;
-  }
-
-  // T_DOLLAR?
-  private static boolean parameter_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "parameter_1")) return false;
-    consumeToken(builder_, T_DOLLAR);
-    return true;
-  }
-
-  // (T_EQUALS paramValue)?
-  private static boolean parameter_3(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "parameter_3")) return false;
-    parameter_3_0(builder_, level_ + 1);
-    return true;
-  }
-
-  // T_EQUALS paramValue
-  private static boolean parameter_3_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "parameter_3_0")) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, T_EQUALS);
-    result_ = result_ && paramValue(builder_, level_ + 1);
-    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
@@ -618,6 +663,19 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     if (!result_) result_ = consumeToken(builder_, T_NOPARSE_OPEN);
     if (!result_) result_ = consumeToken(builder_, T_PHP_RAW_OPEN);
     if (!result_) result_ = consumeToken(builder_, T_PHP_ECHO_OPEN);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // T_IDENT T_EQUALS paramValue
+  static boolean staticParameter_(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "staticParameter_")) return false;
+    if (!nextTokenIs(builder_, T_IDENT)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeTokens(builder_, 0, T_IDENT, T_EQUALS);
+    result_ = result_ && paramValue(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 

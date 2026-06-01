@@ -17,6 +17,7 @@ object AntlersParserUtil : GeneratedParserUtilBase() {
      * start with an identifier are not misparsed as conditions.
      */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER")
     fun atConditionKeyword(builder: PsiBuilder, level: Int): Boolean {
         if (builder.tokenType != AntlersTypes.T_IDENT) return false
         return builder.tokenText in CONDITION_KEYWORDS

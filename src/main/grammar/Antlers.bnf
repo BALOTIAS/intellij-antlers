@@ -89,12 +89,15 @@ namePath ::= pathSegment ((T_COLON | T_DOT) pathSegment | bracketAccess)* {
   mixin="com.github.balotias.intellijantlers.psi.AntlersNamePathMixin"
 }
 private pathSegment ::= T_DOLLAR? (T_IDENT | T_NUMBER)
-bracketAccess ::= T_LBRACKET exprToken_* T_RBRACKET
+bracketAccess ::= T_LBRACKET groupToken_* T_RBRACKET
 
-parameter ::= T_COLON? T_DOLLAR? T_IDENT (T_EQUALS paramValue)? {
+parameter ::= boundParameter_ | staticParameter_ {
   mixin="com.github.balotias.intellijantlers.psi.AntlersParameterMixin"
 }
-private paramValue ::= T_STRING | (T_LBRACE exprToken_* T_RBRACE) | T_NUMBER | namePath
+private boundParameter_ ::= T_COLON T_DOLLAR? T_IDENT (T_EQUALS paramValue)?
+                          | T_DOLLAR T_IDENT
+private staticParameter_ ::= T_IDENT T_EQUALS paramValue
+private paramValue ::= T_STRING | (T_LBRACE groupToken_* T_RBRACE) | T_NUMBER | namePath
 
 modifier ::= T_PIPE T_IDENT (T_LPAREN argList? T_RPAREN)? {
   mixin="com.github.balotias.intellijantlers.psi.AntlersModifierMixin"
@@ -105,3 +108,8 @@ private exprToken_ ::=
     T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
   | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET
   | T_LBRACE | T_RBRACE | T_IDENT | T_SLASH
+
+private groupToken_ ::=
+    T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
+  | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET
+  | T_LBRACE | T_IDENT | T_SLASH
