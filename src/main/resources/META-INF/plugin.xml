@@ -4,8 +4,11 @@
     <name>intellij-antlers</name>
     <vendor>balotias</vendor>
     <description><![CDATA[
-        <p><b>intellij-antlers</b> is a repository that provides a pure template to make it easier to create a new plugin project.</p>
-        <p>The main goal of this template is to speed up the setup phase of plugin development for both new and experienced developers by preconfiguring the project scaffold and CI, linking to the proper documentation pages, and keeping everything organized.</p>
+        <p>Language support for <b>Statamic Antlers</b> templates (<code>*.antlers.html</code>).</p>
+        <p>Provides syntax highlighting, an HTML-aware parser, and context-aware completion for Antlers
+        tags, tag methods, parameters, and modifiers — alongside the regular HTML and CSS completion in
+        the surrounding markup. Tag and modifier completion is backed by a bundled Statamic catalog and
+        is extended by custom tags/modifiers discovered in your project.</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
