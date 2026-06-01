@@ -1,10 +1,13 @@
 package com.github.balotias.intellijantlers.completion
 
 import com.github.balotias.intellijantlers.AntlersIcons
+import com.github.balotias.intellijantlers.blueprint.BlueprintField
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.blueprint.SystemVariables
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
+import com.github.balotias.intellijantlers.catalog.FieldtypeProperties
 import com.github.balotias.intellijantlers.scope.AntlersFieldContext
+import com.github.balotias.intellijantlers.scope.AntlersMemberResolver
 import com.github.balotias.intellijantlers.scope.AntlersScopeResolver
 import com.github.balotias.intellijantlers.scope.LoopVariables
 import com.intellij.codeInsight.completion.CompletionParameters
@@ -76,12 +79,24 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                 }
             }
 
-            AntlersCompletionKind.TAG_METHOD ->
-                catalog.tag(info.tagHead ?: "")?.methods?.forEach { m ->
-                    result.addElement(
-                        LookupElementBuilder.create(m).withIcon(AntlersIcons.FILE).withTypeText("Method")
-                    )
+            AntlersCompletionKind.TAG_METHOD -> {
+                val tag = catalog.tag(info.tagHead ?: "")
+                if (tag != null) {
+                    tag.methods.forEach { m ->
+                        result.addElement(
+                            LookupElementBuilder.create(m).withIcon(AntlersIcons.FILE).withTypeText("Method")
+                        )
+                    }
+                } else {
+                    // Not a catalog tag: a blueprint field member access via colon (e.g. {{ group:sub }}).
+                    AntlersMemberResolver.resolveField(parameters.position, info.pathPrefix, project)
+                        ?.let { offerMembers(it, project, result) }
                 }
+            }
+
+            AntlersCompletionKind.FIELD_PATH ->
+                AntlersMemberResolver.resolveField(parameters.position, info.pathPrefix, project)
+                    ?.let { offerMembers(it, project, result) }
 
             AntlersCompletionKind.PARAMETER ->
                 catalog.tag(info.tagHead ?: "")?.parameters?.forEach { p ->
@@ -105,9 +120,31 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     )
                 }
 
-            AntlersCompletionKind.FIELD_PATH -> {} // implemented in Task 3
-
             AntlersCompletionKind.NONE -> {}
+        }
+    }
+
+    private fun offerMembers(field: BlueprintField, project: com.intellij.openapi.project.Project, result: CompletionResultSet) {
+        val seen = mutableSetOf<String>()
+        for (sub in BlueprintService.getInstance(project).fieldsFor(AntlersMemberResolver.childNamespace(field))) {
+            if (seen.add(sub.handle)) {
+                result.addElement(
+                    LookupElementBuilder.create(sub.handle)
+                        .withIcon(AntlersIcons.FILE)
+                        .withTypeText("Field")
+                        .withTailText(if (sub.display.isNotBlank()) "  ${sub.display}" else null, true)
+                )
+            }
+        }
+        for (p in FieldtypeProperties.forType(field.type)) {
+            if (seen.add(p.name)) {
+                result.addElement(
+                    LookupElementBuilder.create(p.name)
+                        .withIcon(AntlersIcons.FILE)
+                        .withTypeText("Property")
+                        .withTailText("  ${p.description}", true)
+                )
+            }
         }
     }
 }
