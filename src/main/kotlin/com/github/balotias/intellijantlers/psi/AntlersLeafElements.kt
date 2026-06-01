@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.psi
 
+import com.github.balotias.intellijantlers.references.AntlersDefinitionReferenceHelper
 import com.github.balotias.intellijantlers.references.AntlersPartialReferenceHelper
 import com.intellij.psi.PsiReference
 import com.intellij.psi.impl.source.tree.LeafPsiElement
@@ -19,12 +20,11 @@ class AntlersStringLeaf(type: IElementType, text: CharSequence) : LeafPsiElement
 
 /**
  * Custom leaf PSI element for T_IDENT tokens.
- * Overrides getReferences() to support partial path resolution.
+ * Overrides getReferences() to support partial path resolution and go-to-definition.
  */
 class AntlersIdentLeaf(type: IElementType, text: CharSequence) : LeafPsiElement(type, text) {
-    override fun getReferences(): Array<PsiReference> {
-        return AntlersPartialReferenceHelper.refsForIdent(this)
-    }
+    override fun getReferences(): Array<PsiReference> =
+        AntlersPartialReferenceHelper.refsForIdent(this) + AntlersDefinitionReferenceHelper.refsForIdent(this)
 
     override fun getReference(): PsiReference? = references.firstOrNull()
 }
