@@ -5,9 +5,6 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface AntlersTagStatement extends PsiElement {
-
-  @NotNull
-  AntlersTagContent getTagContent();
+public interface AntlersStatement extends PsiElement {
 
 }

@@ -13,31 +13,50 @@
 
   tokens = [
     T_OUTER_HTML="T_OUTER_HTML"
-    T_OPEN_BRACE="{{"
-    T_CLOSE_BRACE="}}"
-    T_COMMENT_START="{{#"
-    T_COMMENT_END="#}}"
+    T_LDOUBLE="{{"
+    T_RDOUBLE="}}"
+    T_COMMENT_OPEN="{{#"
+    T_COMMENT_CLOSE="#}}"
     T_COMMENT_TEXT="T_COMMENT_TEXT"
-    T_IDENTIFIER="regexp:[a-zA-Z_0-9\-:]+"
-    T_STRING="regexp:\"[^\"]*\"|'[^']*'"
-    T_NUMBER="regexp:\d+"
-    T_MODIFIER_PIPE="|"
-    T_EQUALS="="
+    T_PHP_RAW_OPEN="{{?"
+    T_PHP_RAW_CLOSE="?}}"
+    T_PHP_ECHO_OPEN="{{$"
+    T_PHP_ECHO_CLOSE="$}}"
+    T_PHP_TEXT="T_PHP_TEXT"
+    T_NOPARSE_OPEN="T_NOPARSE_OPEN"
+    T_NOPARSE_CLOSE="T_NOPARSE_CLOSE"
+    T_NOPARSE_TEXT="T_NOPARSE_TEXT"
+    T_IDENT="T_IDENT"
+    T_STRING="T_STRING"
+    T_NUMBER="T_NUMBER"
+    T_OP="T_OP"
+    T_PIPE="|"
     T_SLASH="/"
     T_COLON=":"
+    T_DOT="."
+    T_COMMA=","
+    T_SEMICOLON=";"
+    T_EQUALS="="
+    T_ARROW="=>"
+    T_LPAREN="("
+    T_RPAREN=")"
+    T_LBRACKET="["
+    T_RBRACKET="]"
+    T_LBRACE="{"
+    T_RBRACE="}"
     T_AT="@"
-    T_OPERATOR="regexp:[!<>]=?|==|&&|\|\||\+|-|\*|%|\?"
-    T_WHITE_SPACE="regexp:\s+"
+    T_DOLLAR="$"
+    T_WS="T_WS"
   ]
 }
 
 antlersFile ::= item_*
 
-private item_ ::= outerHtml | tag_statement | comment_block
+private item_ ::= outerHtml | statement | comment
 
 outerHtml ::= T_OUTER_HTML
 
-tag_statement ::= T_OPEN_BRACE tag_content T_CLOSE_BRACE
-tag_content ::= (T_IDENTIFIER | T_STRING | T_NUMBER | T_MODIFIER_PIPE | T_EQUALS | T_SLASH | T_COLON | T_AT | T_OPERATOR)*
+statement ::= T_LDOUBLE statement_body* T_RDOUBLE
+private statement_body ::= T_IDENT | T_STRING | T_NUMBER | T_OP | T_PIPE | T_SLASH | T_COLON | T_DOT | T_COMMA | T_SEMICOLON | T_EQUALS | T_ARROW | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET | T_LBRACE | T_RBRACE | T_AT | T_DOLLAR | T_WS
 
-comment_block ::= T_COMMENT_START T_COMMENT_TEXT? T_COMMENT_END
+comment ::= T_COMMENT_OPEN T_COMMENT_TEXT? T_COMMENT_CLOSE

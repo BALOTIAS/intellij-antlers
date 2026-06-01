@@ -29,12 +29,12 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
 
     override fun getTokenHighlights(tokenType: IElementType): Array<TextAttributesKey> {
         return when (tokenType) {
-            AntlersTypes.T_OPEN_BRACE, AntlersTypes.T_CLOSE_BRACE -> BRACES_KEYS
-            AntlersTypes.T_IDENTIFIER -> IDENTIFIER_KEYS
+            AntlersTypes.T_LDOUBLE, AntlersTypes.T_RDOUBLE -> BRACES_KEYS
+            AntlersTypes.T_IDENT -> IDENTIFIER_KEYS
             AntlersTypes.T_STRING -> STRING_KEYS
             AntlersTypes.T_NUMBER -> NUMBER_KEYS
-            AntlersTypes.T_COMMENT_START, AntlersTypes.T_COMMENT_END, AntlersTypes.T_COMMENT_TEXT -> COMMENT_KEYS
-            AntlersTypes.T_OPERATOR, AntlersTypes.T_EQUALS, AntlersTypes.T_MODIFIER_PIPE, AntlersTypes.T_SLASH, AntlersTypes.T_AT, AntlersTypes.T_COLON -> IDENTIFIER_KEYS
+            AntlersTypes.T_COMMENT_OPEN, AntlersTypes.T_COMMENT_CLOSE, AntlersTypes.T_COMMENT_TEXT -> COMMENT_KEYS
+            AntlersTypes.T_OP, AntlersTypes.T_EQUALS, AntlersTypes.T_PIPE, AntlersTypes.T_SLASH, AntlersTypes.T_AT, AntlersTypes.T_COLON -> IDENTIFIER_KEYS
             else -> EMPTY_KEYS
         }
     }

@@ -11,26 +11,20 @@ import static com.github.balotias.intellijantlers.psi.AntlersTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.github.balotias.intellijantlers.psi.*;
 
-public class AntlersTagStatementImpl extends ASTWrapperPsiElement implements AntlersTagStatement {
+public class AntlersStatementImpl extends ASTWrapperPsiElement implements AntlersStatement {
 
-  public AntlersTagStatementImpl(@NotNull ASTNode node) {
+  public AntlersStatementImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AntlersVisitor visitor) {
-    visitor.visitTagStatement(this);
+    visitor.visitStatement(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof AntlersVisitor) accept((AntlersVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public AntlersTagContent getTagContent() {
-    return findNotNullChildByClass(AntlersTagContent.class);
   }
 
 }

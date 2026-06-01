@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public class AntlersVisitor extends PsiElementVisitor {
 
-  public void visitCommentBlock(@NotNull AntlersCommentBlock o) {
+  public void visitComment(@NotNull AntlersComment o) {
     visitPsiElement(o);
   }
 
@@ -15,11 +15,7 @@ public class AntlersVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitTagContent(@NotNull AntlersTagContent o) {
-    visitPsiElement(o);
-  }
-
-  public void visitTagStatement(@NotNull AntlersTagStatement o) {
+  public void visitStatement(@NotNull AntlersStatement o) {
     visitPsiElement(o);
   }
 

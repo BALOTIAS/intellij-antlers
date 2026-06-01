@@ -27,7 +27,7 @@ class AntlersParserDefinition : ParserDefinition {
 
     override fun getFileNodeType(): IFileElementType = FILE
 
-    override fun getCommentTokens(): TokenSet = TokenSet.create(AntlersTypes.T_COMMENT_START, AntlersTypes.T_COMMENT_TEXT, AntlersTypes.T_COMMENT_END)
+    override fun getCommentTokens(): TokenSet = TokenSet.create(AntlersTypes.T_COMMENT_OPEN, AntlersTypes.T_COMMENT_TEXT, AntlersTypes.T_COMMENT_CLOSE)
 
     override fun getWhitespaceTokens(): TokenSet = TokenSet.create(com.intellij.psi.TokenType.WHITE_SPACE)
 

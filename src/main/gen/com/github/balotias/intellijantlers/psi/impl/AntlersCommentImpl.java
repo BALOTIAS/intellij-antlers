@@ -11,14 +11,14 @@ import static com.github.balotias.intellijantlers.psi.AntlersTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.github.balotias.intellijantlers.psi.*;
 
-public class AntlersCommentBlockImpl extends ASTWrapperPsiElement implements AntlersCommentBlock {
+public class AntlersCommentImpl extends ASTWrapperPsiElement implements AntlersComment {
 
-  public AntlersCommentBlockImpl(@NotNull ASTNode node) {
+  public AntlersCommentImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AntlersVisitor visitor) {
-    visitor.visitCommentBlock(this);
+    visitor.visitComment(this);
   }
 
   @Override

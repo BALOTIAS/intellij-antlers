@@ -48,34 +48,34 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_COMMENT_START T_COMMENT_TEXT? T_COMMENT_END
-  public static boolean comment_block(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "comment_block")) return false;
-    if (!nextTokenIs(builder_, T_COMMENT_START)) return false;
+  // T_COMMENT_OPEN T_COMMENT_TEXT? T_COMMENT_CLOSE
+  public static boolean comment(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "comment")) return false;
+    if (!nextTokenIs(builder_, T_COMMENT_OPEN)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, T_COMMENT_START);
-    result_ = result_ && comment_block_1(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, T_COMMENT_END);
-    exit_section_(builder_, marker_, COMMENT_BLOCK, result_);
+    result_ = consumeToken(builder_, T_COMMENT_OPEN);
+    result_ = result_ && comment_1(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, T_COMMENT_CLOSE);
+    exit_section_(builder_, marker_, COMMENT, result_);
     return result_;
   }
 
   // T_COMMENT_TEXT?
-  private static boolean comment_block_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "comment_block_1")) return false;
+  private static boolean comment_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "comment_1")) return false;
     consumeToken(builder_, T_COMMENT_TEXT);
     return true;
   }
 
   /* ********************************************************** */
-  // outerHtml | tag_statement | comment_block
+  // outerHtml | statement | comment
   static boolean item_(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "item_")) return false;
     boolean result_;
     result_ = outerHtml(builder_, level_ + 1);
-    if (!result_) result_ = tag_statement(builder_, level_ + 1);
-    if (!result_) result_ = comment_block(builder_, level_ + 1);
+    if (!result_) result_ = statement(builder_, level_ + 1);
+    if (!result_) result_ = comment(builder_, level_ + 1);
     return result_;
   }
 
@@ -92,46 +92,56 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (T_IDENTIFIER | T_STRING | T_NUMBER | T_MODIFIER_PIPE | T_EQUALS | T_SLASH | T_COLON | T_AT | T_OPERATOR)*
-  public static boolean tag_content(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "tag_content")) return false;
-    Marker marker_ = enter_section_(builder_, level_, _NONE_, TAG_CONTENT, "<tag content>");
-    while (true) {
-      int pos_ = current_position_(builder_);
-      if (!tag_content_0(builder_, level_ + 1)) break;
-      if (!empty_element_parsed_guard_(builder_, "tag_content", pos_)) break;
-    }
-    exit_section_(builder_, level_, marker_, true, false, null);
-    return true;
-  }
-
-  // T_IDENTIFIER | T_STRING | T_NUMBER | T_MODIFIER_PIPE | T_EQUALS | T_SLASH | T_COLON | T_AT | T_OPERATOR
-  private static boolean tag_content_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "tag_content_0")) return false;
+  // T_LDOUBLE statement_body* T_RDOUBLE
+  public static boolean statement(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement")) return false;
+    if (!nextTokenIs(builder_, T_LDOUBLE)) return false;
     boolean result_;
-    result_ = consumeToken(builder_, T_IDENTIFIER);
-    if (!result_) result_ = consumeToken(builder_, T_STRING);
-    if (!result_) result_ = consumeToken(builder_, T_NUMBER);
-    if (!result_) result_ = consumeToken(builder_, T_MODIFIER_PIPE);
-    if (!result_) result_ = consumeToken(builder_, T_EQUALS);
-    if (!result_) result_ = consumeToken(builder_, T_SLASH);
-    if (!result_) result_ = consumeToken(builder_, T_COLON);
-    if (!result_) result_ = consumeToken(builder_, T_AT);
-    if (!result_) result_ = consumeToken(builder_, T_OPERATOR);
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_LDOUBLE);
+    result_ = result_ && statement_1(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, T_RDOUBLE);
+    exit_section_(builder_, marker_, STATEMENT, result_);
     return result_;
   }
 
+  // statement_body*
+  private static boolean statement_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_1")) return false;
+    while (true) {
+      int pos_ = current_position_(builder_);
+      if (!statement_body(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "statement_1", pos_)) break;
+    }
+    return true;
+  }
+
   /* ********************************************************** */
-  // T_OPEN_BRACE tag_content T_CLOSE_BRACE
-  public static boolean tag_statement(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "tag_statement")) return false;
-    if (!nextTokenIs(builder_, T_OPEN_BRACE)) return false;
+  // T_IDENT | T_STRING | T_NUMBER | T_OP | T_PIPE | T_SLASH | T_COLON | T_DOT | T_COMMA | T_SEMICOLON | T_EQUALS | T_ARROW | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET | T_LBRACE | T_RBRACE | T_AT | T_DOLLAR | T_WS
+  static boolean statement_body(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "statement_body")) return false;
     boolean result_;
-    Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, T_OPEN_BRACE);
-    result_ = result_ && tag_content(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, T_CLOSE_BRACE);
-    exit_section_(builder_, marker_, TAG_STATEMENT, result_);
+    result_ = consumeToken(builder_, T_IDENT);
+    if (!result_) result_ = consumeToken(builder_, T_STRING);
+    if (!result_) result_ = consumeToken(builder_, T_NUMBER);
+    if (!result_) result_ = consumeToken(builder_, T_OP);
+    if (!result_) result_ = consumeToken(builder_, T_PIPE);
+    if (!result_) result_ = consumeToken(builder_, T_SLASH);
+    if (!result_) result_ = consumeToken(builder_, T_COLON);
+    if (!result_) result_ = consumeToken(builder_, T_DOT);
+    if (!result_) result_ = consumeToken(builder_, T_COMMA);
+    if (!result_) result_ = consumeToken(builder_, T_SEMICOLON);
+    if (!result_) result_ = consumeToken(builder_, T_EQUALS);
+    if (!result_) result_ = consumeToken(builder_, T_ARROW);
+    if (!result_) result_ = consumeToken(builder_, T_LPAREN);
+    if (!result_) result_ = consumeToken(builder_, T_RPAREN);
+    if (!result_) result_ = consumeToken(builder_, T_LBRACKET);
+    if (!result_) result_ = consumeToken(builder_, T_RBRACKET);
+    if (!result_) result_ = consumeToken(builder_, T_LBRACE);
+    if (!result_) result_ = consumeToken(builder_, T_RBRACE);
+    if (!result_) result_ = consumeToken(builder_, T_AT);
+    if (!result_) result_ = consumeToken(builder_, T_DOLLAR);
+    if (!result_) result_ = consumeToken(builder_, T_WS);
     return result_;
   }
 

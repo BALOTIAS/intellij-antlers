@@ -10,7 +10,7 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         // If the user hovers over a T_IDENTIFIER inside an Antlers tag, we want to provide docs
         val targetElement = originalElement ?: element
         
-        if (targetElement is LeafPsiElement && targetElement.elementType == AntlersTypes.T_IDENTIFIER) {
+        if (targetElement is LeafPsiElement && targetElement.elementType == AntlersTypes.T_IDENT) {
             val tagName = targetElement.text
             return getTagDocumentation(tagName)
         }
