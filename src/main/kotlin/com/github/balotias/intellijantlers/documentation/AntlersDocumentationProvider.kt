@@ -1,5 +1,8 @@
 package com.github.balotias.intellijantlers.documentation
 
+import com.github.balotias.intellijantlers.blueprint.BlueprintField
+import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
+import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.catalog.ParamDef
 import com.github.balotias.intellijantlers.catalog.TagDef
@@ -8,6 +11,7 @@ import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.github.balotias.intellijantlers.scope.AntlersScopeResolver
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.lang.documentation.DocumentationMarkup
 import com.intellij.openapi.util.text.StringUtil
@@ -54,9 +58,13 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         PsiTreeUtil.getParentOfType(ident, AntlersNamePathMixin::class.java)?.let { path ->
             if (path.head == name) {
                 catalog.tag(name)?.let { return tagDoc(it) }
-                com.github.balotias.intellijantlers.blueprint.BlueprintService.getInstance(ident.project).field(name)?.let { f ->
+                val scoped = scopedField(ident, name)
+                val field = scoped ?: BlueprintService.getInstance(ident.project).field(name)
+                field?.let { f ->
                     val type = if (f.type.isNotBlank()) " (${esc(f.type)})" else ""
-                    val title = "Field <b>${esc(name)}</b>$type" + if (f.display.isNotBlank()) " — ${esc(f.display)}" else ""
+                    val ns = if (scoped != null) namespaceLabel(f.namespace) else ""
+                    val title = "Field <b>${esc(name)}</b>$type" +
+                        (if (f.display.isNotBlank()) " — ${esc(f.display)}" else "") + ns
                     return section(title, f.display, "")
                 }
                 com.github.balotias.intellijantlers.blueprint.SystemVariables.ALL.firstOrNull { it.name == name }?.let { sv ->
@@ -74,6 +82,21 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
             }
         }
         return null
+    }
+
+    /** The field for [name] within the caret's enclosing scopes (innermost first), or null. */
+    private fun scopedField(ident: PsiElement, name: String): BlueprintField? {
+        val scopes = AntlersScopeResolver.scopesAt(ident)
+        if (scopes.isEmpty()) return null
+        val svc = BlueprintService.getInstance(ident.project)
+        return scopes.firstNotNullOfOrNull { s -> svc.fieldsFor(s.namespace).firstOrNull { it.handle == name } }
+    }
+
+    /** " · collection: blog" style suffix; empty for the UNKNOWN namespace. */
+    private fun namespaceLabel(ns: BlueprintNamespace): String {
+        if (ns.kind == BlueprintNamespace.Kind.UNKNOWN) return ""
+        val kind = ns.kind.name.lowercase()
+        return " · ${esc(kind)}: ${esc(ns.handle)}"
     }
 
     private fun enclosingTag(ident: PsiElement, catalog: AntlersCatalogService): TagDef? {
