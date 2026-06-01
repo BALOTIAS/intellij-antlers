@@ -53,8 +53,16 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         // Tag head or method.
         PsiTreeUtil.getParentOfType(ident, AntlersNamePathMixin::class.java)?.let { path ->
             if (path.head == name) {
-                val tag = catalog.tag(name) ?: return null
-                return tagDoc(tag)
+                catalog.tag(name)?.let { return tagDoc(it) }
+                com.github.balotias.intellijantlers.blueprint.BlueprintService.getInstance(ident.project).field(name)?.let { f ->
+                    val type = if (f.type.isNotBlank()) " (${esc(f.type)})" else ""
+                    val title = "Field <b>${esc(name)}</b>$type" + if (f.display.isNotBlank()) " — ${esc(f.display)}" else ""
+                    return section(title, f.display, "")
+                }
+                com.github.balotias.intellijantlers.blueprint.SystemVariables.ALL.firstOrNull { it.name == name }?.let { sv ->
+                    return section("Variable <b>${esc(name)}</b>", sv.description, "")
+                }
+                return null
             }
             if (path.method == name) {
                 val tag = catalog.tag(path.head) ?: return null

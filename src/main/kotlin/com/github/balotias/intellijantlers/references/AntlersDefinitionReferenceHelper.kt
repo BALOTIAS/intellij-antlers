@@ -30,7 +30,10 @@ object AntlersDefinitionReferenceHelper {
 
         if (path.head == name &&
             path.node.findChildByType(AntlersTypes.T_IDENT)?.psi == element) {
-            return arrayOf(AntlersPhpClassReference(element, name, isModifier = false))
+            return arrayOf(
+                AntlersPhpClassReference(element, name, isModifier = false),
+                AntlersBlueprintFieldReference(element, name)
+            )
         }
 
         return emptyArray()
