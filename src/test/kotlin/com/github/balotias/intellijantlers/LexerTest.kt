@@ -60,7 +60,7 @@ class LexerTest {
         )
         assertEquals(
             listOf(AntlersTypes.T_PHP_ECHO_OPEN, AntlersTypes.T_PHP_TEXT, AntlersTypes.T_PHP_ECHO_CLOSE),
-            types("{{\$ \$x \$}}")
+            types("{{\$ value \$}}")
         )
     }
 

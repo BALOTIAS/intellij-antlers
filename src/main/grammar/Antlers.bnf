@@ -52,7 +52,7 @@
 
 antlersFile ::= item_*
 
-private item_ ::= outerHtml | statement | comment
+private item_ ::= outerHtml | statement | comment | phpBlock | noparseBlock
 
 outerHtml ::= T_OUTER_HTML
 
@@ -60,3 +60,8 @@ statement ::= T_LDOUBLE statement_body* T_RDOUBLE
 private statement_body ::= T_IDENT | T_STRING | T_NUMBER | T_OP | T_PIPE | T_SLASH | T_COLON | T_DOT | T_COMMA | T_SEMICOLON | T_EQUALS | T_ARROW | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET | T_LBRACE | T_RBRACE | T_AT | T_DOLLAR | T_WS
 
 comment ::= T_COMMENT_OPEN T_COMMENT_TEXT? T_COMMENT_CLOSE
+
+phpBlock ::= T_PHP_RAW_OPEN T_PHP_TEXT? T_PHP_RAW_CLOSE
+           | T_PHP_ECHO_OPEN T_PHP_TEXT? T_PHP_ECHO_CLOSE
+
+noparseBlock ::= T_NOPARSE_OPEN T_NOPARSE_TEXT* T_NOPARSE_CLOSE

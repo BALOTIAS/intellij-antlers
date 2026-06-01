@@ -29,7 +29,10 @@ class AntlersParserDefinition : ParserDefinition {
 
     override fun getCommentTokens(): TokenSet = TokenSet.create(AntlersTypes.T_COMMENT_OPEN, AntlersTypes.T_COMMENT_TEXT, AntlersTypes.T_COMMENT_CLOSE)
 
-    override fun getWhitespaceTokens(): TokenSet = TokenSet.create(com.intellij.psi.TokenType.WHITE_SPACE)
+    override fun getWhitespaceTokens(): TokenSet = TokenSet.create(
+        com.intellij.psi.TokenType.WHITE_SPACE,
+        AntlersTypes.T_WS
+    )
 
     override fun getStringLiteralElements(): TokenSet = TokenSet.create(AntlersTypes.T_STRING)
 

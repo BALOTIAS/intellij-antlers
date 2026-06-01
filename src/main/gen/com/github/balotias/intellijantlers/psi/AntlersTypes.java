@@ -9,7 +9,9 @@ import com.github.balotias.intellijantlers.psi.impl.*;
 public interface AntlersTypes {
 
   IElementType COMMENT = new AntlersElementType("COMMENT");
+  IElementType NOPARSE_BLOCK = new AntlersElementType("NOPARSE_BLOCK");
   IElementType OUTER_HTML = new AntlersElementType("OUTER_HTML");
+  IElementType PHP_BLOCK = new AntlersElementType("PHP_BLOCK");
   IElementType STATEMENT = new AntlersElementType("STATEMENT");
 
   IElementType T_ARROW = new AntlersTokenType("=>");
@@ -54,8 +56,14 @@ public interface AntlersTypes {
       if (type == COMMENT) {
         return new AntlersCommentImpl(node);
       }
+      else if (type == NOPARSE_BLOCK) {
+        return new AntlersNoparseBlockImpl(node);
+      }
       else if (type == OUTER_HTML) {
         return new AntlersOuterHtmlImpl(node);
+      }
+      else if (type == PHP_BLOCK) {
+        return new AntlersPhpBlockImpl(node);
       }
       else if (type == STATEMENT) {
         return new AntlersStatementImpl(node);

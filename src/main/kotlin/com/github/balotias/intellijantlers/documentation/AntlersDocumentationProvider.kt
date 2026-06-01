@@ -7,7 +7,7 @@ import com.github.balotias.intellijantlers.psi.AntlersTypes
 
 class AntlersDocumentationProvider : AbstractDocumentationProvider() {
     override fun generateDoc(element: PsiElement, originalElement: PsiElement?): String? {
-        // If the user hovers over a T_IDENTIFIER inside an Antlers tag, we want to provide docs
+        // If the user hovers over a T_IDENT inside an Antlers tag, we want to provide docs
         val targetElement = originalElement ?: element
         
         if (targetElement is LeafPsiElement && targetElement.elementType == AntlersTypes.T_IDENT) {

@@ -11,7 +11,15 @@ public class AntlersVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitNoparseBlock(@NotNull AntlersNoparseBlock o) {
+    visitPsiElement(o);
+  }
+
   public void visitOuterHtml(@NotNull AntlersOuterHtml o) {
+    visitPsiElement(o);
+  }
+
+  public void visitPhpBlock(@NotNull AntlersPhpBlock o) {
     visitPsiElement(o);
   }
 
