@@ -27,5 +27,7 @@
 
         <lang.braceMatcher language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersBraceMatcher"/>
         <lang.commenter language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersCommenter"/>
+
+        <typedHandler implementation="com.github.balotias.intellijantlers.editor.AntlersTypedHandler"/>
     </extensions>
 </idea-plugin>
