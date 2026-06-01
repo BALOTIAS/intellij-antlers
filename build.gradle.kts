@@ -7,9 +7,11 @@ plugins {
     id("org.jetbrains.grammarkit")
 }
 
-repositories {
-    mavenCentral()
-}
+// NOTE: do NOT declare a project-level `repositories { }` block. Repositories are configured in
+// settings.gradle.kts via dependencyResolutionManagement (mavenCentral + intellijPlatform
+// defaultRepositories). A project-level block runs in PREFER_PROJECT mode and would make Gradle
+// ignore the settings repositories — including IPGP's IDE-installer repo (download.jetbrains.com),
+// which breaks installer/test-runtime resolution.
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
