@@ -4,6 +4,7 @@ import com.github.balotias.intellijantlers.psi.AntlersNoparseBlock
 import com.github.balotias.intellijantlers.psi.AntlersPhpBlock
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
+import com.github.balotias.intellijantlers.scope.NestingNode
 import com.intellij.lang.ASTNode
 import com.intellij.lang.folding.FoldingBuilderEx
 import com.intellij.lang.folding.FoldingDescriptor
@@ -35,7 +36,7 @@ class AntlersFoldingBuilder : FoldingBuilderEx(), DumbAware {
         return out.toTypedArray()
     }
 
-    private fun addPairFolds(nodes: List<com.github.balotias.intellijantlers.scope.NestingNode>, out: MutableList<FoldingDescriptor>) {
+    private fun addPairFolds(nodes: List<NestingNode>, out: MutableList<FoldingDescriptor>) {
         for (n in nodes) {
             val closer = n.closer
             if (closer != null) {
