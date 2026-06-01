@@ -83,6 +83,49 @@ class BlueprintScannerTest : BasePlatformTestCase() {
         assertFalse("news does not include blog-only body", news.any { it.handle == "body" })
     }
 
+    fun testImportInlinesFieldsetFields() {
+        myFixture.addFileToProject(
+            "resources/fieldsets/seo.yaml",
+            "fields:\n  - handle: meta_title\n    field:\n      type: text\n      display: Meta Title\n"
+        )
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            "tabs:\n  main:\n    sections:\n      - fields:\n          - import: seo\n          - handle: body\n            field: text\n"
+        )
+        val svc = BlueprintService.getInstance(project)
+        val top = svc.fieldsFor(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "blog"))
+        assertTrue("imported meta_title at top level", top.any { it.handle == "meta_title" })
+        assertTrue("own body field", top.any { it.handle == "body" })
+        assertEquals("go-to-def lands in the fieldset", "seo.yaml", top.first { it.handle == "meta_title" }.file.name)
+    }
+
+    fun testNestedImportUnderContainer() {
+        myFixture.addFileToProject(
+            "resources/fieldsets/seo.yaml",
+            "fields:\n  - handle: meta_title\n    field:\n      type: text\n"
+        )
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            "tabs:\n  main:\n    sections:\n      - fields:\n          - handle: rows\n            field:\n              type: grid\n              fields:\n                - import: seo\n"
+        )
+        val svc = BlueprintService.getInstance(project)
+        val grid = svc.fieldsFor(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "blog", listOf("rows")))
+        assertTrue("imported field nested under the container", grid.any { it.handle == "meta_title" })
+    }
+
+    fun testCyclicImportDoesNotHang() {
+        myFixture.addFileToProject("resources/fieldsets/a.yaml", "fields:\n  - import: b\n  - handle: a_field\n    field: text\n")
+        myFixture.addFileToProject("resources/fieldsets/b.yaml", "fields:\n  - import: a\n  - handle: b_field\n    field: text\n")
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            "tabs:\n  main:\n    sections:\n      - fields:\n          - import: a\n"
+        )
+        val svc = BlueprintService.getInstance(project)
+        val top = svc.fieldsFor(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "blog"))
+        assertTrue("a's own field inlined", top.any { it.handle == "a_field" })
+        assertTrue("b's field inlined via a", top.any { it.handle == "b_field" })
+    }
+
     fun testNestedFieldCarriesContainerPath() {
         myFixture.addFileToProject("resources/blueprints/collections/blog/blog.yaml", gridBlueprint)
         val fields = BlueprintScanner.scan(project)
