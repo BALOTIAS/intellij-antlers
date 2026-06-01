@@ -206,4 +206,27 @@ class BlueprintScannerTest : BasePlatformTestCase() {
             BlueprintScanner.scan(project).first { it.handle == "related" }.linkedNamespaces
         )
     }
+
+    fun testInlineCollectionsLinkCapture() {
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            """
+            tabs:
+              main:
+                sections:
+                  - fields:
+                      - handle: related
+                        field:
+                          type: entries
+                          collections: [team, news]
+            """.trimIndent()
+        )
+        assertEquals(
+            listOf(
+                BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "team"),
+                BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "news")
+            ),
+            BlueprintScanner.scan(project).first { it.handle == "related" }.linkedNamespaces
+        )
+    }
 }
