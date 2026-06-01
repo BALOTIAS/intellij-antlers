@@ -42,7 +42,9 @@ object BlueprintScanner {
             val m = HANDLE_RE.find(line)
             if (m != null) {
                 val handle = m.groupValues[1]
-                val handleOffset = pos + line.indexOf(handle, line.indexOf("handle"))
+                // Offset of the captured handle *value* (not the `handle:` key), so nav lands on
+                // the value even when the value itself is literally "handle".
+                val handleOffset = pos + (m.groups[1]?.range?.first ?: 0)
                 var display = ""
                 var type = ""
                 var j = i + 1

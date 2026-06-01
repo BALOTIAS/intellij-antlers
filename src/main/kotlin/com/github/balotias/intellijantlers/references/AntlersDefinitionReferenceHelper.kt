@@ -30,6 +30,10 @@ object AntlersDefinitionReferenceHelper {
 
         if (path.head == name &&
             path.node.findChildByType(AntlersTypes.T_IDENT)?.psi == element) {
+            // Both refs are soft and coexist on the same range. Go-to-def/Ctrl-click go through
+            // SharedPsiElementImplUtil.findReferenceAt, which wraps them in a PsiMultiReference and
+            // picks the one that resolves non-null (PHP class for custom tags, YAML field for
+            // blueprint variables). Single-ref consumers see only the first (PHP) ref.
             return arrayOf(
                 AntlersPhpClassReference(element, name, isModifier = false),
                 AntlersBlueprintFieldReference(element, name)
