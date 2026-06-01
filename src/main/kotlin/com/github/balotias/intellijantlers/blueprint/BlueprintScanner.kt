@@ -35,16 +35,18 @@ object BlueprintScanner {
 
     private fun extract(file: VirtualFile, out: MutableList<BlueprintField>) {
         val text = VfsUtilCore.loadText(file)
-        val ns = BlueprintNamespace.fromPath(file.path)
+        val base = BlueprintNamespace.fromPath(file.path)
         val lines = text.split("\n")
+        val stack = ArrayDeque<Pair<Int, String>>()   // (indent, handle), deepest last
         var pos = 0
         for (i in lines.indices) {
             val line = lines[i]
             val m = HANDLE_RE.find(line)
             if (m != null) {
+                val indent = leadingWs(line)
+                while (stack.isNotEmpty() && stack.last().first >= indent) stack.removeLast()
                 val handle = m.groupValues[1]
-                // Offset of the captured handle *value* (not the `handle:` key), so nav lands on
-                // the value even when the value itself is literally "handle".
+                val path = stack.map { it.second }
                 val handleOffset = pos + (m.groups[1]?.range?.first ?: 0)
                 var display = ""
                 var type = ""
@@ -55,9 +57,17 @@ object BlueprintScanner {
                     if (type.isEmpty()) TYPE_RE.find(lines[j])?.let { type = it.groupValues[1] }
                     j++
                 }
-                out.add(BlueprintField(handle, display, type, file, handleOffset, ns))
+                out.add(BlueprintField(handle, display, type, file, handleOffset, base.copy(path = path)))
+                stack.addLast(indent to handle)
             }
             pos += line.length + 1
         }
+    }
+
+    /** Number of leading space/tab characters on [line] (the indentation column). */
+    private fun leadingWs(line: String): Int {
+        var n = 0
+        while (n < line.length && (line[n] == ' ' || line[n] == '\t')) n++
+        return n
     }
 }

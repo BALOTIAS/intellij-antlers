@@ -4,7 +4,7 @@ package com.github.balotias.intellijantlers.blueprint
  * Which Statamic data namespace a blueprint/fieldset belongs to, derived from its file path.
  * The handle is the collection/taxonomy/form/etc. handle (or "user" for the user singleton).
  */
-data class BlueprintNamespace(val kind: Kind, val handle: String) {
+data class BlueprintNamespace(val kind: Kind, val handle: String, val path: List<String> = emptyList()) {
     enum class Kind { COLLECTION, TAXONOMY, USER, FORM, ASSET, GLOBAL, FIELDSET, UNKNOWN }
 
     companion object {
