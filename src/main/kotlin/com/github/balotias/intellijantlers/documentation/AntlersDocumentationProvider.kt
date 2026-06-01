@@ -70,7 +70,7 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
 
     private fun enclosingTag(ident: PsiElement, catalog: AntlersCatalogService): TagDef? {
         val statement = PsiTreeUtil.getParentOfType(ident, AntlersStatement::class.java) ?: return null
-        val head = PsiTreeUtil.findChildOfType(statement, AntlersNamePathMixin::class.java)?.head ?: return null
+        val head = PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)?.head ?: return null
         return catalog.tag(head)
     }
 
@@ -106,7 +106,11 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
     private fun appendDocUrl(sb: StringBuilder, docUrl: String) {
         if (docUrl.isNotBlank()) {
             sb.append(DocumentationMarkup.SECTIONS_START)
-            sb.append("<a href=\"${esc(docUrl)}\">${esc(docUrl)}</a>")
+            sb.append(DocumentationMarkup.SECTION_HEADER_START)
+            sb.append("Docs")
+            sb.append(DocumentationMarkup.SECTION_SEPARATOR)
+            sb.append("<a href=\"").append(esc(docUrl)).append("\">").append(esc(docUrl)).append("</a>")
+            sb.append(DocumentationMarkup.SECTION_END)
             sb.append(DocumentationMarkup.SECTIONS_END)
         }
     }
