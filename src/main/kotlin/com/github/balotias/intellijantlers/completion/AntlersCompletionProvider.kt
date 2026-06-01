@@ -1,63 +1,69 @@
 package com.github.balotias.intellijantlers.completion
 
 import com.github.balotias.intellijantlers.AntlersIcons
+import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.util.ProcessingContext
 
+/** Classifies the caret context and offers the matching Antlers completions. */
 class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
+
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
-        // Only contribute Antlers tags when the caret is inside an Antlers `{{ ... }}` expression.
-        // Outside braces this leaves the field clear for HTML/CSS completion.
-        if (!isInsideAntlersTag(parameters)) {
-            return
-        }
+        val info = AntlersCompletionContext.classify(parameters.position)
+        if (info.kind == AntlersCompletionKind.NONE) return
 
-        // Native Tags
-        for (tag in StatamicNativeTags.TAGS) {
-            val isPair = tag in StatamicNativeTags.PAIR_TAGS
-            result.addElement(
-                LookupElementBuilder.create(tag)
-                    .withIcon(AntlersIcons.FILE)
-                    .withTypeText(if (isPair) "Native Block Tag" else "Native Tag")
-                    .withInsertHandler(AntlersTagInsertHandler(isPair))
-            )
-        }
+        val project = parameters.editor.project ?: return
+        val catalog = AntlersCatalogService.getInstance(project)
 
-        // Custom Tags (discovered from the project's PHP Tags classes)
-        val project = parameters.editor.project
-        if (project != null) {
-            val customTags = com.github.balotias.intellijantlers.catalog.scan.TagScanner.scan(project)
-            for (customTag in customTags) {
-                result.addElement(
-                    LookupElementBuilder.create(customTag)
-                        .withIcon(AntlersIcons.FILE)
-                        .withTypeText("Custom Tag")
-                        .withBoldness(true)
-                        .withInsertHandler(AntlersTagInsertHandler(isPair = false))
-                )
-            }
-        }
-    }
+        when (info.kind) {
+            AntlersCompletionKind.TAG_NAME ->
+                for (tag in catalog.tags()) {
+                    result.addElement(
+                        LookupElementBuilder.create(tag.name)
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText(if (tag.isPair) "Tag (block)" else "Tag")
+                            .withTailText(if (tag.description.isNotBlank()) "  ${tag.description}" else null, true)
+                            .withInsertHandler(AntlersTagInsertHandler(tag.isPair))
+                    )
+                }
 
-    /**
-     * True when [offset][CompletionParameters.getOffset] sits inside an unclosed `{{ ... }}` —
-     * i.e. the nearest `{{` before the caret is closer than the nearest `}}`.
-     */
-    private fun isInsideAntlersTag(parameters: CompletionParameters): Boolean {
-        val offset = parameters.offset
-        val text = parameters.editor.document.charsSequence
-        val before = text.subSequence(0, offset.coerceIn(0, text.length)).toString()
-        val lastOpen = before.lastIndexOf("{{")
-        val lastClose = before.lastIndexOf("}}")
-        // Exclude Antlers comments `{{# ... #}}`.
-        val isComment = lastOpen >= 0 && before.startsWith("{{#", lastOpen)
-        return lastOpen > lastClose && !isComment
+            AntlersCompletionKind.TAG_METHOD ->
+                catalog.tag(info.tagHead ?: "")?.methods?.forEach { m ->
+                    result.addElement(
+                        LookupElementBuilder.create(m).withIcon(AntlersIcons.FILE).withTypeText("Method")
+                    )
+                }
+
+            AntlersCompletionKind.PARAMETER ->
+                catalog.tag(info.tagHead ?: "")?.parameters?.forEach { p ->
+                    result.addElement(
+                        LookupElementBuilder.create(p.name)
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText(if (p.required) "Param*" else "Param")
+                            .withTailText(if (p.description.isNotBlank()) "  ${p.description}" else null, true)
+                            .withInsertHandler(ParameterInsertHandler)
+                    )
+                }
+
+            AntlersCompletionKind.MODIFIER ->
+                for (mod in catalog.modifiers()) {
+                    result.addElement(
+                        LookupElementBuilder.create(mod.name)
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText("Modifier")
+                            .withTailText(if (mod.description.isNotBlank()) "  ${mod.description}" else null, true)
+                            .withInsertHandler(ModifierInsertHandler(mod.takesArguments))
+                    )
+                }
+
+            AntlersCompletionKind.NONE -> {}
+        }
     }
 }
