@@ -12,3 +12,6 @@ data class BlueprintField(
     val namespace: BlueprintNamespace,
     val linkedNamespaces: List<BlueprintNamespace> = emptyList()
 )
+
+/** Fieldtypes that nest sub-fields (Grid / Group / Replicator / Bard). Shared by the scope + member resolvers. */
+val CONTAINER_FIELD_TYPES = setOf("grid", "group", "replicator", "bard")

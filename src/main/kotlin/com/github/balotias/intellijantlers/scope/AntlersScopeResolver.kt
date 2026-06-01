@@ -2,6 +2,7 @@ package com.github.balotias.intellijantlers.scope
 
 import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
+import com.github.balotias.intellijantlers.blueprint.CONTAINER_FIELD_TYPES
 import com.github.balotias.intellijantlers.blueprint.PageBlueprintResolver
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin
@@ -21,7 +22,6 @@ import com.intellij.psi.util.PsiTreeUtil
 object AntlersScopeResolver {
 
     private val ITERATING = setOf("collection", "taxonomy", "users", "user", "form", "assets")
-    private val CONTAINER_TYPES = setOf("grid", "group", "replicator", "bard")
     private val CONDITION_OPENERS = setOf("if", "unless")
     private val CONDITION_CLOSERS = mapOf("endif" to "if", "endunless" to "unless")
 
@@ -148,7 +148,7 @@ object AntlersScopeResolver {
         val svc = BlueprintService.getInstance(project)
         val field = current.firstNotNullOfOrNull { ns -> svc.fieldsFor(ns).firstOrNull { it.handle == head } }
             ?: return null
-        if (field.type.lowercase() !in CONTAINER_TYPES) return null
+        if (field.type.lowercase() !in CONTAINER_FIELD_TYPES) return null
         return field.namespace.copy(path = field.namespace.path + head)
     }
 
