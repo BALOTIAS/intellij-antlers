@@ -1,6 +1,8 @@
 package com.github.balotias.intellijantlers.scope
 
 import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
+import com.github.balotias.intellijantlers.blueprint.BlueprintService
+import com.github.balotias.intellijantlers.blueprint.PageBlueprintResolver
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin
 import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
@@ -19,6 +21,7 @@ import com.intellij.psi.util.PsiTreeUtil
 object AntlersScopeResolver {
 
     private val ITERATING = setOf("collection", "taxonomy", "users", "user", "form", "assets")
+    private val CONTAINER_TYPES = setOf("grid", "group", "replicator", "bard")
     private val CONDITION_OPENERS = setOf("if", "unless")
     private val CONDITION_CLOSERS = mapOf("endif" to "if", "endunless" to "unless")
 
@@ -83,6 +86,19 @@ object AntlersScopeResolver {
                 }
             }
 
+            // Container-typed blueprint field (grid/group/replicator/bard) used as a pair tag
+            // → open a sub-field scope. Resolve the field against the namespaces active so far
+            // (or the E2 page mapping at top level), NEVER via AntlersFieldContext (which calls us).
+            val containerNs = containerScope(head, stack, stmt, project)
+            if (containerNs != null) {
+                val alias = paramValue(stmt, setOf("as"))
+                stack.addLast(
+                    if (alias != null) Frame(head, containerNs, false, alias)
+                    else Frame(head, containerNs, true, null)
+                )
+                continue
+            }
+
             // Any other catalog pair tag (cache, section, or an iterating tag with no handle):
             // push a transparent frame so its closer balances. Non-pair tags / plain variables
             // have no closer, so we must NOT push them.
@@ -97,6 +113,29 @@ object AntlersScopeResolver {
     private fun popTo(stack: ArrayDeque<Frame>, name: String) {
         val idx = stack.indexOfLast { it.name == name }
         if (idx >= 0) while (stack.size > idx) stack.removeLast()
+    }
+
+    /** The namespace a container-typed field [head] opens, or null if [head] isn't a container here. */
+    private fun containerScope(
+        head: String,
+        stack: ArrayDeque<Frame>,
+        stmt: AntlersStatement,
+        project: com.intellij.openapi.project.Project
+    ): BlueprintNamespace? {
+        val current = currentNamespaces(stack, stmt)
+        if (current.isEmpty()) return null
+        val svc = BlueprintService.getInstance(project)
+        val field = current.firstNotNullOfOrNull { ns -> svc.fieldsFor(ns).firstOrNull { it.handle == head } }
+            ?: return null
+        if (field.type.lowercase() !in CONTAINER_TYPES) return null
+        return field.namespace.copy(path = field.namespace.path + head)
+    }
+
+    /** Namespaces valid at this point in the walk: active frames (innermost first), else E2 page mapping. */
+    private fun currentNamespaces(stack: ArrayDeque<Frame>, stmt: AntlersStatement): List<BlueprintNamespace> {
+        val active = stack.filter { it.active && it.namespace != null }.reversed().map { it.namespace!! }
+        if (active.isNotEmpty()) return active
+        return PageBlueprintResolver.namespacesFor(stmt)
     }
 
     private fun resolveNamespace(head: String, namePath: AntlersNamePathMixin, stmt: AntlersStatement): BlueprintNamespace? {

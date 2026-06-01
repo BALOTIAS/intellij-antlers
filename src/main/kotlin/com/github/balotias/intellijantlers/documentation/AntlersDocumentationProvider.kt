@@ -82,11 +82,12 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         return null
     }
 
-    /** " · collection: blog" style suffix; empty for the UNKNOWN namespace. */
+    /** " · collection: blog › rows" style suffix; empty for the UNKNOWN namespace. */
     private fun namespaceLabel(ns: BlueprintNamespace): String {
         if (ns.kind == BlueprintNamespace.Kind.UNKNOWN) return ""
         val kind = ns.kind.name.lowercase()
-        return " · ${esc(kind)}: ${esc(ns.handle)}"
+        val pathSuffix = if (ns.path.isEmpty()) "" else " › " + ns.path.joinToString(" › ") { esc(it) }
+        return " · ${esc(kind)}: ${esc(ns.handle)}$pathSuffix"
     }
 
     private fun enclosingTag(ident: PsiElement, catalog: AntlersCatalogService): TagDef? {
