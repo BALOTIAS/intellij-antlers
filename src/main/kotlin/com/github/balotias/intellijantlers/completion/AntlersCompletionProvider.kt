@@ -141,14 +141,17 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
     private fun offerMembers(field: BlueprintField, project: com.intellij.openapi.project.Project, result: CompletionResultSet) {
         val seen = mutableSetOf<String>()
-        for (sub in BlueprintService.getInstance(project).fieldsFor(AntlersMemberResolver.childNamespace(field))) {
-            if (seen.add(sub.handle)) {
-                result.addElement(
-                    LookupElementBuilder.create(sub.handle)
-                        .withIcon(AntlersIcons.FILE)
-                        .withTypeText("Field")
-                        .withTailText(if (sub.display.isNotBlank()) "  ${sub.display}" else null, true)
-                )
+        val svc = BlueprintService.getInstance(project)
+        for (ns in AntlersMemberResolver.childNamespaces(field)) {
+            for (sub in svc.fieldsFor(ns)) {
+                if (seen.add(sub.handle)) {
+                    result.addElement(
+                        LookupElementBuilder.create(sub.handle)
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText("Field")
+                            .withTailText(if (sub.display.isNotBlank()) "  ${sub.display}" else null, true)
+                    )
+                }
             }
         }
         for (p in FieldtypeProperties.forType(field.type)) {

@@ -79,14 +79,15 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
                 val prefix = idents.take(index).map { it.text }
                 val parent = AntlersMemberResolver.resolveField(ident, prefix, ident.project)
                 if (parent != null) {
-                    val childNs = AntlersMemberResolver.childNamespace(parent)
-                    BlueprintService.getInstance(ident.project).fieldsFor(childNs)
-                        .firstOrNull { it.handle == name }?.let { f ->
+                    val svc = BlueprintService.getInstance(ident.project)
+                    for (childNs in AntlersMemberResolver.childNamespaces(parent)) {
+                        svc.fieldsFor(childNs).firstOrNull { it.handle == name }?.let { f ->
                             val type = if (f.type.isNotBlank()) " (${esc(f.type)})" else ""
                             val title = "Field <b>${esc(name)}</b>$type" +
                                 (if (f.display.isNotBlank()) " — ${esc(f.display)}" else "") + namespaceLabel(f.namespace)
                             return section(title, f.display, "")
                         }
+                    }
                     FieldtypeProperties.forType(parent.type).firstOrNull { it.name == name }?.let { p ->
                         return section("Property <b>${esc(name)}</b> · ${esc(parent.type)}", p.description, "")
                     }

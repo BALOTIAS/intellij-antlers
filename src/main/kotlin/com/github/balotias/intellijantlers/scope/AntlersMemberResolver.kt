@@ -10,10 +10,6 @@ import com.intellij.psi.PsiElement
 /** Resolves a dotted/colon path to the field it names, following container sub-fields and relationships. */
 object AntlersMemberResolver {
 
-    /** The single sub-namespace of a container field (kept for callers migrating to childNamespaces). */
-    fun childNamespace(field: BlueprintField): BlueprintNamespace =
-        field.namespace.copy(path = field.namespace.path + field.handle)
-
     /** The namespace(s) whose fields are [field]'s members: container sub-fields OR linked blueprint(s). */
     fun childNamespaces(field: BlueprintField): List<BlueprintNamespace> = when {
         field.type.lowercase() in CONTAINER_FIELD_TYPES ->

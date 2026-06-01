@@ -41,16 +41,18 @@ object AntlersDefinitionReferenceHelper {
 
         if (index > 0) {
             // Non-head dotted/colon segment: resolve the prefix to a field; if this segment is one of
-            // its blueprint sub-fields, point at that sub-field's declaration. (Augmentation properties
-            // have no declaration, so they get no reference.)
+            // its sub-fields / linked-blueprint fields, point at that declaration. (Augmentation
+            // properties have no declaration, so they get no reference.)
             val prefix = idents.take(index).map { it.text }
-            val parent = com.github.balotias.intellijantlers.scope.AntlersMemberResolver
-                .resolveField(element, prefix, element.project)
+            val resolver = com.github.balotias.intellijantlers.scope.AntlersMemberResolver
+            val parent = resolver.resolveField(element, prefix, element.project)
             if (parent != null) {
-                val childNs = com.github.balotias.intellijantlers.scope.AntlersMemberResolver.childNamespace(parent)
-                val hasMember = com.github.balotias.intellijantlers.blueprint.BlueprintService
-                    .getInstance(element.project).fieldsFor(childNs).any { it.handle == name }
-                if (hasMember) return arrayOf(AntlersBlueprintMemberReference(element, childNs, name))
+                val svc = com.github.balotias.intellijantlers.blueprint.BlueprintService.getInstance(element.project)
+                for (childNs in resolver.childNamespaces(parent)) {
+                    if (svc.fieldsFor(childNs).any { it.handle == name }) {
+                        return arrayOf(AntlersBlueprintMemberReference(element, childNs, name))
+                    }
+                }
             }
         }
 
