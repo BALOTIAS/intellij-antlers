@@ -8,9 +8,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 
-enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, PARAMETER, MODIFIER, NONE }
+enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, PARAMETER, MODIFIER, FIELD_PATH, NONE }
 
-data class AntlersCompletionInfo(val kind: AntlersCompletionKind, val tagHead: String? = null)
+data class AntlersCompletionInfo(
+    val kind: AntlersCompletionKind,
+    val tagHead: String? = null,
+    val pathPrefix: List<String> = emptyList()
+)
 
 object AntlersCompletionContext {
 
@@ -31,9 +35,13 @@ object AntlersCompletionContext {
                     AntlersCompletionInfo(AntlersCompletionKind.TAG_NAME)
                 else AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
+            AntlersTypes.T_DOT ->
+                AntlersCompletionInfo(AntlersCompletionKind.FIELD_PATH, pathPrefix = segmentsBeforeCaret(statement, position))
+
             AntlersTypes.T_COLON ->
-                headOf(statement)?.let { AntlersCompletionInfo(AntlersCompletionKind.TAG_METHOD, it) }
-                    ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
+                headOf(statement)?.let {
+                    AntlersCompletionInfo(AntlersCompletionKind.TAG_METHOD, it, segmentsBeforeCaret(statement, position))
+                } ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
             AntlersTypes.T_EQUALS -> AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
@@ -51,6 +59,11 @@ object AntlersCompletionContext {
     private fun headOf(statement: AntlersStatement): String? {
         val namePath = PsiTreeUtil.findChildOfType(statement, AntlersNamePathMixin::class.java) ?: return null
         return namePath.head.ifBlank { null }
+    }
+
+    private fun segmentsBeforeCaret(statement: AntlersStatement, position: PsiElement): List<String> {
+        val namePath = PsiTreeUtil.findChildOfType(statement, AntlersNamePathMixin::class.java) ?: return emptyList()
+        return namePath.segmentsBefore(position.textRange.startOffset)
     }
 
     /** Nearest preceding leaf within [statement] that is not whitespace (and not in another statement). */

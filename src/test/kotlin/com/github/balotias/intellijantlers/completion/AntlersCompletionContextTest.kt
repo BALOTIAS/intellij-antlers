@@ -4,6 +4,25 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 class AntlersCompletionContextTest : BasePlatformTestCase() {
 
+    private fun classifyAt(text: String): AntlersCompletionInfo {
+        val caret = text.indexOf("<caret>")
+        myFixture.configureByText("p.antlers.html", text.replace("<caret>", ""))
+        val el = myFixture.file.findElementAt(caret) ?: error("no element at caret")
+        return AntlersCompletionContext.classify(el)
+    }
+
+    fun testDotProducesFieldPath() {
+        val info = classifyAt("{{ a.b.<caret> }}")
+        assertEquals(AntlersCompletionKind.FIELD_PATH, info.kind)
+        assertEquals(listOf("a", "b"), info.pathPrefix)
+    }
+
+    fun testColonCarriesPathPrefix() {
+        val info = classifyAt("{{ group:<caret> }}")
+        assertEquals(AntlersCompletionKind.TAG_METHOD, info.kind)
+        assertEquals(listOf("group"), info.pathPrefix)
+    }
+
     private fun kindAt(text: String): AntlersCompletionKind {
         val caret = text.indexOf("<caret>")
         // Simulate the dummy identifier the platform inserts at the caret during real completion,

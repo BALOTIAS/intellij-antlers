@@ -31,6 +31,16 @@ open class AntlersNamePathMixin(node: ASTNode) : ASTWrapperPsiElement(node) {
 
     /** Whole path text, e.g. "collection:blog". */
     val pathText: String get() = text
+
+    /** All identifier segments in order, e.g. ["a","b","c"] for `a.b.c`. */
+    val segments: List<String>
+        get() = node.getChildren(null).filter { it.elementType == AntlersTypes.T_IDENT }.map { it.text }
+
+    /** Identifier segment texts whose token starts before [offset] (the segments preceding the caret). */
+    fun segmentsBefore(offset: Int): List<String> =
+        node.getChildren(null)
+            .filter { it.elementType == AntlersTypes.T_IDENT && it.startOffset < offset }
+            .map { it.text }
 }
 
 open class AntlersParameterMixin(node: ASTNode) : ASTWrapperPsiElement(node) {

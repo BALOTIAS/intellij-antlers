@@ -105,6 +105,8 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     )
                 }
 
+            AntlersCompletionKind.FIELD_PATH -> {} // implemented in Task 3
+
             AntlersCompletionKind.NONE -> {}
         }
     }
