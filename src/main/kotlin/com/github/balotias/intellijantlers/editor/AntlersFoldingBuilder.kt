@@ -1,13 +1,9 @@
 package com.github.balotias.intellijantlers.editor
 
-import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
-import com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin
-import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
-import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersNoparseBlock
 import com.github.balotias.intellijantlers.psi.AntlersPhpBlock
-import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
 import com.intellij.lang.ASTNode
 import com.intellij.lang.folding.FoldingBuilderEx
 import com.intellij.lang.folding.FoldingDescriptor
@@ -18,9 +14,6 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
-
-private val CONDITION_OPENERS = setOf("if", "unless")
-private val CONDITION_CLOSERS = mapOf("endif" to "if", "endunless" to "unless")
 
 class AntlersFoldingBuilder : FoldingBuilderEx(), DumbAware {
 
@@ -36,49 +29,21 @@ class AntlersFoldingBuilder : FoldingBuilderEx(), DumbAware {
         // T_COMMENT_OPEN leaves and pair each with its T_COMMENT_CLOSE sibling.
         addCommentFoldsFromTokens(root, out)
 
-        // Paired tag / condition folds via a name stack over statements in document order.
-        val catalog = if (root.project.isDefault) null else AntlersCatalogService.getInstance(root.project)
-        val stack = ArrayDeque<Pair<String, AntlersStatement>>()
-        val statements = PsiTreeUtil.findChildrenOfType(root, AntlersStatement::class.java)
-            .sortedBy { it.textRange.startOffset }
-        for (stmt in statements) {
-            val closing = stmt.closingTag
-            val condition = stmt.condition
-            if (closing != null) {
-                // {{ /tag }} or {{ /if }}: match against opener on the stack
-                val name = (closing as? AntlersClosingTagMixin)?.closedName?.substringBefore(':') ?: continue
-                val idx = stack.indexOfLast { it.first == name }
-                if (idx >= 0) {
-                    val (_, open) = stack.removeAt(idx)
-                    while (stack.size > idx) stack.removeLast() // drop unmatched inner opens
-                    val range = TextRange(open.textRange.startOffset, stmt.textRange.endOffset)
-                    if (range.length > 0) out.add(FoldingDescriptor(open.node, range))
-                }
-            } else if (condition != null) {
-                val keyword = (condition as? AntlersConditionMixin)?.keyword ?: continue
-                val openerName = CONDITION_CLOSERS[keyword]
-                if (openerName != null) {
-                    // {{ endif }} / {{ endunless }}: pop the matching opener and emit a fold
-                    val idx = stack.indexOfLast { it.first == openerName }
-                    if (idx >= 0) {
-                        val (_, open) = stack.removeAt(idx)
-                        while (stack.size > idx) stack.removeLast()
-                        val range = TextRange(open.textRange.startOffset, stmt.textRange.endOffset)
-                        if (range.length > 0) out.add(FoldingDescriptor(open.node, range))
-                    }
-                } else if (keyword in CONDITION_OPENERS) {
-                    // {{ if ... }} or {{ unless ... }}: push openers onto the stack
-                    stack.addLast(keyword to stmt)
-                }
-            } else {
-                // {{ tag }} or {{ tag:method }}: push paired catalog tags onto stack
-                val namePath = stmt.namePath
-                val head = (namePath as? AntlersNamePathMixin)?.head ?: continue
-                val isPair = catalog?.tag(head)?.isPair == true
-                if (isPair) stack.addLast(head to stmt)
-            }
-        }
+        // Paired tag / condition folds via the shared nesting builder.
+        addPairFolds(AntlersNestingTreeBuilder.build(root, root.project).roots, out)
+
         return out.toTypedArray()
+    }
+
+    private fun addPairFolds(nodes: List<com.github.balotias.intellijantlers.scope.NestingNode>, out: MutableList<FoldingDescriptor>) {
+        for (n in nodes) {
+            val closer = n.closer
+            if (closer != null) {
+                val range = TextRange(n.opener.textRange.startOffset, closer.textRange.endOffset)
+                if (range.length > 0) out.add(FoldingDescriptor(n.opener.node, range))
+            }
+            addPairFolds(n.children, out)
+        }
     }
 
     /**
