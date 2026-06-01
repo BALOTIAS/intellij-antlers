@@ -1,6 +1,8 @@
 package com.github.balotias.intellijantlers.completion
 
 import com.github.balotias.intellijantlers.AntlersIcons
+import com.github.balotias.intellijantlers.blueprint.BlueprintService
+import com.github.balotias.intellijantlers.blueprint.SystemVariables
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
@@ -23,7 +25,7 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
         val catalog = AntlersCatalogService.getInstance(project)
 
         when (info.kind) {
-            AntlersCompletionKind.TAG_NAME ->
+            AntlersCompletionKind.TAG_NAME -> {
                 for (tag in catalog.tags()) {
                     result.addElement(
                         LookupElementBuilder.create(tag.name)
@@ -33,6 +35,28 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                             .withInsertHandler(AntlersTagInsertHandler(tag.isPair))
                     )
                 }
+                val seen = catalog.tags().mapTo(mutableSetOf()) { it.name }
+                for (field in BlueprintService.getInstance(project).fields()) {
+                    if (seen.add(field.handle)) {
+                        result.addElement(
+                            LookupElementBuilder.create(field.handle)
+                                .withIcon(AntlersIcons.FILE)
+                                .withTypeText("Field")
+                                .withTailText(if (field.display.isNotBlank()) "  ${field.display}" else null, true)
+                        )
+                    }
+                }
+                for (sv in SystemVariables.ALL) {
+                    if (seen.add(sv.name)) {
+                        result.addElement(
+                            LookupElementBuilder.create(sv.name)
+                                .withIcon(AntlersIcons.FILE)
+                                .withTypeText("Variable")
+                                .withTailText("  ${sv.description}", true)
+                        )
+                    }
+                }
+            }
 
             AntlersCompletionKind.TAG_METHOD ->
                 catalog.tag(info.tagHead ?: "")?.methods?.forEach { m ->
