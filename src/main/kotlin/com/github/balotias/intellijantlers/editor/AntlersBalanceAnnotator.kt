@@ -4,13 +4,12 @@ import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.parser.AntlersFile
 import com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin
 import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
-import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
-import com.github.balotias.intellijantlers.psi.AntlersStatement
+import com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
+import com.github.balotias.intellijantlers.scope.NestingNode
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiTreeUtil
 
 /**
  * Flags unbalanced paired tags / conditions by replaying the file's statements through a name stack
@@ -24,47 +23,35 @@ class AntlersBalanceAnnotator : Annotator {
         if (element.project.isDefault) return
         val catalog = AntlersCatalogService.getInstance(element.project)
 
-        val stack = ArrayDeque<Pair<String, AntlersStatement>>()
-        val statements = PsiTreeUtil.findChildrenOfType(element, AntlersStatement::class.java)
-            .sortedBy { it.textRange.startOffset }
-        for (stmt in statements) {
+        val tree = AntlersNestingTreeBuilder.build(element, element.project)
+
+        // Closers with no opener — flag only known constructs (conditions or catalog-isPair tags).
+        for (stmt in tree.unmatchedClosers) {
             val closing = stmt.closingTag
             if (closing != null) {
                 val name = (closing as? AntlersClosingTagMixin)?.closedName?.substringBefore(':') ?: continue
-                val idx = stack.indexOfLast { it.first == name }
-                if (idx >= 0) {
-                    while (stack.size > idx) stack.removeLast()
-                } else if (name in CONDITION_OPENERS || catalog.tag(name)?.isPair == true) {
+                if (name in CONDITION_OPENERS || catalog.tag(name)?.isPair == true) {
                     holder.newAnnotation(HighlightSeverity.ERROR, "Closing '/$name' has no matching opening tag.")
                         .range(stmt).create()
                 }
-                continue
+            } else {
+                val kw = (stmt.condition as? AntlersConditionMixin)?.keyword ?: continue
+                holder.newAnnotation(HighlightSeverity.ERROR, "Closing '$kw' has no matching opening tag.")
+                    .range(stmt).create()
             }
-            val condition = stmt.condition
-            if (condition != null) {
-                val kw = (condition as? AntlersConditionMixin)?.keyword ?: continue
-                val openerName = CONDITION_CLOSERS[kw]
-                if (openerName != null) {
-                    val idx = stack.indexOfLast { it.first == openerName }
-                    if (idx >= 0) {
-                        while (stack.size > idx) stack.removeLast()
-                    } else {
-                        holder.newAnnotation(HighlightSeverity.ERROR, "Closing '$kw' has no matching opening tag.")
-                            .range(stmt).create()
-                    }
-                } else if (kw in CONDITION_OPENERS) {
-                    stack.addLast(kw to stmt)
-                }
-                continue
-            }
-            val namePath = stmt.namePath as? AntlersNamePathMixin ?: continue
-            val head = namePath.head
-            if (head.isBlank()) continue
-            if (catalog.tag(head)?.isPair == true) stack.addLast(head to stmt)
         }
-        for ((name, open) in stack) {
-            holder.newAnnotation(HighlightSeverity.WARNING, "'{{ $name }}' is never closed.")
-                .range(open).create()
+
+        // Openers never closed (every node in the tree is already a known construct by construction).
+        reportUnclosed(tree.roots, holder)
+    }
+
+    private fun reportUnclosed(nodes: List<NestingNode>, holder: AnnotationHolder) {
+        for (n in nodes) {
+            if (n.closer == null) {
+                holder.newAnnotation(HighlightSeverity.WARNING, "'{{ ${n.name} }}' is never closed.")
+                    .range(n.opener).create()
+            }
+            reportUnclosed(n.children, holder)
         }
     }
 
