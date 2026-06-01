@@ -61,4 +61,11 @@ class BlueprintNamespaceTest {
             BlueprintNamespace.fromPath("/proj/resources/blueprints/something_else/x.yaml")
         )
     }
+
+    @Test fun navigationFromFile() {
+        assertEquals(
+            BlueprintNamespace(Kind.NAVIGATION, "main"),
+            BlueprintNamespace.fromPath("/proj/resources/blueprints/navigation/main.yaml")
+        )
+    }
 }

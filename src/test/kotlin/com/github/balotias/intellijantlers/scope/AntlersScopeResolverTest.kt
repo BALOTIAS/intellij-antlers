@@ -70,4 +70,42 @@ class AntlersScopeResolverTest : BasePlatformTestCase() {
         // collection with no handle and no from/in → cannot scope → empty (global fallback)
         assertEquals(emptyList<BlueprintNamespace>(), scopesAt("{{ collection }}{{ <caret> }}{{ /collection }}"))
     }
+
+    private fun rawScopesAt(text: String): List<BlueprintScope> {
+        val caret = text.indexOf("<caret>")
+        myFixture.configureByText("page.antlers.html", text.replace("<caret>", ""))
+        val el = myFixture.file.findElementAt(caret) ?: error("no element at caret")
+        return AntlersScopeResolver.scopesAt(el)
+    }
+
+    fun testNavShorthandScope() {
+        val s = rawScopesAt("{{ nav:main }}{{ <caret> }}{{ /nav }}")
+        assertEquals(1, s.size)
+        assertEquals(BlueprintNamespace(Kind.NAVIGATION, "main"), s[0].namespace)
+        assertTrue("navMeta flagged", s[0].navMeta)
+    }
+
+    fun testNavCollectionScope() {
+        val s = rawScopesAt("{{ nav:collection:blog }}{{ <caret> }}{{ /nav }}")
+        assertEquals(BlueprintNamespace(Kind.COLLECTION, "blog"), s[0].namespace)
+        assertTrue(s[0].navMeta)
+    }
+
+    fun testNavHandleParam() {
+        val s = rawScopesAt("{{ nav handle=\"main\" }}{{ <caret> }}{{ /nav }}")
+        assertEquals(BlueprintNamespace(Kind.NAVIGATION, "main"), s[0].namespace)
+    }
+
+    fun testNavBareDefaultsToPages() {
+        val s = rawScopesAt("{{ nav }}{{ <caret> }}{{ /nav }}")
+        assertEquals(BlueprintNamespace(Kind.COLLECTION, "pages"), s[0].namespace)
+        assertTrue(s[0].navMeta)
+    }
+
+    fun testNavChildrenRecursiveReentry() {
+        val s = rawScopesAt("{{ nav:main }}{{ children }}{{ <caret> }}{{ /children }}{{ /nav }}")
+        assertTrue(s.isNotEmpty())
+        assertEquals(BlueprintNamespace(Kind.NAVIGATION, "main"), s[0].namespace)
+        assertTrue("children re-entry keeps navMeta", s[0].navMeta)
+    }
 }

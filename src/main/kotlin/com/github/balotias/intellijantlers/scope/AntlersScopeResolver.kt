@@ -30,7 +30,8 @@ object AntlersScopeResolver {
         val name: String,                 // matched against the closer (tag head or alias)
         val namespace: BlueprintNamespace?,
         val active: Boolean,              // namespace contributes to this frame's body
-        val alias: String?                // if set, namespace activates only inside a child {{ alias }}
+        val alias: String?,               // if set, namespace activates only inside a child {{ alias }}
+        val navMeta: Boolean = false      // true for nav scopes (offer nav-tree variables)
     )
 
     /** BlueprintScopes enclosing [element], innermost first. Empty = top level (global fallback). */
@@ -69,7 +70,27 @@ object AntlersScopeResolver {
             // Alias activation: this tag's name matches an enclosing aliased frame's alias.
             val aliased = stack.lastOrNull { it.alias == head }
             if (aliased != null) {
-                stack.addLast(Frame(head, aliased.namespace, true, null))
+                stack.addLast(Frame(head, aliased.namespace, true, null, aliased.navMeta))
+                continue
+            }
+
+            // Recursive nav: {{ children }} re-enters the enclosing nav scope.
+            if (head == "children") {
+                val navFrame = stack.lastOrNull { it.navMeta && it.active && it.namespace != null }
+                if (navFrame != null) {
+                    stack.addLast(Frame("children", navFrame.namespace, true, null, navMeta = true))
+                    continue
+                }
+            }
+
+            // Nav tag: opens a scope over the nav/collection namespace, flagged for nav-meta variables.
+            if (head == "nav") {
+                val ns = navNamespace(namePath, stmt)
+                val alias = paramValue(stmt, setOf("as"))
+                stack.addLast(
+                    if (alias != null) Frame("nav", ns, false, alias, navMeta = true)
+                    else Frame("nav", ns, true, null, navMeta = true)
+                )
                 continue
             }
 
@@ -107,7 +128,7 @@ object AntlersScopeResolver {
 
         return stack.filter { it.active && it.namespace != null }
             .reversed()
-            .map { BlueprintScope(it.namespace!!) }
+            .map { BlueprintScope(it.namespace!!, it.navMeta) }
     }
 
     private fun popTo(stack: ArrayDeque<Frame>, name: String) {
@@ -136,6 +157,20 @@ object AntlersScopeResolver {
         val active = stack.filter { it.active && it.namespace != null }.reversed().map { it.namespace!! }
         if (active.isNotEmpty()) return active
         return PageBlueprintResolver.namespacesFor(stmt)
+    }
+
+    /** The namespace a `{{ nav … }}` tag iterates. Never null (defaults to the `pages` collection). */
+    private fun navNamespace(namePath: AntlersNamePathMixin, stmt: AntlersStatement): BlueprintNamespace {
+        val segs = namePath.segments  // segs[0] == "nav"
+        if (segs.size >= 3 && segs[1] == "collection") {
+            return BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, segs[2])
+        }
+        if (segs.size >= 2) {
+            return BlueprintNamespace(BlueprintNamespace.Kind.NAVIGATION, segs[1])
+        }
+        val param = paramValue(stmt, setOf("handle", "from"))
+        return if (param != null) BlueprintNamespace(BlueprintNamespace.Kind.NAVIGATION, param)
+        else BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "pages")
     }
 
     private fun resolveNamespace(head: String, namePath: AntlersNamePathMixin, stmt: AntlersStatement): BlueprintNamespace? {

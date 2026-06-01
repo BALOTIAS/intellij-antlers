@@ -5,7 +5,7 @@ package com.github.balotias.intellijantlers.blueprint
  * The handle is the collection/taxonomy/form/etc. handle (or "user" for the user singleton).
  */
 data class BlueprintNamespace(val kind: Kind, val handle: String, val path: List<String> = emptyList()) {
-    enum class Kind { COLLECTION, TAXONOMY, USER, FORM, ASSET, GLOBAL, FIELDSET, UNKNOWN }
+    enum class Kind { COLLECTION, TAXONOMY, USER, FORM, ASSET, GLOBAL, FIELDSET, NAVIGATION, UNKNOWN }
 
     companion object {
         val UNKNOWN = BlueprintNamespace(Kind.UNKNOWN, "")
@@ -20,6 +20,7 @@ data class BlueprintNamespace(val kind: Kind, val handle: String, val path: List
             fileAfter(p, "/resources/blueprints/forms/")?.let { return BlueprintNamespace(Kind.FORM, it) }
             fileAfter(p, "/resources/blueprints/assets/")?.let { return BlueprintNamespace(Kind.ASSET, it) }
             fileAfter(p, "/resources/blueprints/globals/")?.let { return BlueprintNamespace(Kind.GLOBAL, it) }
+            fileAfter(p, "/resources/blueprints/navigation/")?.let { return BlueprintNamespace(Kind.NAVIGATION, it) }
             if (p.endsWith("/resources/blueprints/user.yaml")) return BlueprintNamespace(Kind.USER, "user")
             fileAfter(p, "/resources/fieldsets/")?.let { return BlueprintNamespace(Kind.FIELDSET, it) }
             return UNKNOWN

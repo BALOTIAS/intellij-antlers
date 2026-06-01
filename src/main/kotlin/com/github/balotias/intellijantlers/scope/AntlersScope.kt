@@ -6,4 +6,5 @@ import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 sealed interface AntlersScope
 
 /** The caret is inside an iterating tag whose entries/terms are described by [namespace]. */
-data class BlueprintScope(val namespace: BlueprintNamespace) : AntlersScope
+/** [navMeta] is true for nav scopes, which additionally offer nav-tree variables. */
+data class BlueprintScope(val namespace: BlueprintNamespace, val navMeta: Boolean = false) : AntlersScope
