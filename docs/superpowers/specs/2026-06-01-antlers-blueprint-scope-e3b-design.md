@@ -48,9 +48,12 @@ data class AntlersCompletionInfo(
 )
 ```
 
-`pathPrefix` is the namePath's identifier segments **before** the caret segment. Because completion
-inserts a dummy identifier at the caret (the partial being typed is always the last segment),
-`pathPrefix` = the namePath's ordered `T_IDENT` segment texts with the last one dropped.
+`pathPrefix` is the namePath's identifier segments **before** the caret segment — computed by offset:
+the namePath's ordered `T_IDENT` segments whose `startOffset < caretOffset` (the caret being the
+position element's start). This is robust whether or not completion has inserted a dummy identifier at
+the caret (so it works for both live completion and static analysis); the partial/dummy segment at the
+caret is naturally excluded. The same offset rule (relative to the segment under inspection) gives the
+prefix for nav and docs (§3.5, §3.6).
 
 Branches:
 - `T_DOT` → `AntlersCompletionInfo(FIELD_PATH, pathPrefix = segmentsBeforeCaret(statement))`.
@@ -58,8 +61,9 @@ Branches:
   `pathPrefix = segmentsBeforeCaret(statement)` (the head for `group:‹caret›` is `pathPrefix.last()`,
   i.e. the single segment `[group]`). The existing `tagHead` is still set.
 
-`segmentsBeforeCaret(statement)` = the statement's namePath `T_IDENT` segment texts, `dropLast(1)`.
-(Returns `[]` when there are 0–1 segments, which can't happen after a `.`/`:`.)
+`segmentsBeforeCaret(statement, position)` = the statement's namePath `T_IDENT` segments whose
+`startOffset < position.startOffset`, mapped to text. A shared `AntlersNamePathMixin.segmentsBefore(offset)`
+helper (plus `segments` for the full list) backs both this and the nav/docs prefixes.
 
 ### 3.2 Member resolver (`scope/AntlersMemberResolver.kt`, new)
 
