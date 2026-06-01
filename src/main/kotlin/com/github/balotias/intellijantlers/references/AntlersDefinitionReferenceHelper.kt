@@ -28,16 +28,30 @@ object AntlersDefinitionReferenceHelper {
         if (PsiTreeUtil.getParentOfType(path, com.github.balotias.intellijantlers.psi.AntlersParameterMixin::class.java) != null) return emptyArray()
         if (PsiTreeUtil.getParentOfType(path, com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin::class.java) != null) return emptyArray()
 
-        if (path.head == name &&
-            path.node.findChildByType(AntlersTypes.T_IDENT)?.psi == element) {
-            // Both refs are soft and coexist on the same range. Go-to-def/Ctrl-click go through
-            // SharedPsiElementImplUtil.findReferenceAt, which wraps them in a PsiMultiReference and
-            // picks the one that resolves non-null (PHP class for custom tags, YAML field for
-            // blueprint variables). Single-ref consumers see only the first (PHP) ref.
+        val idents = path.node.getChildren(null).filter { it.elementType == AntlersTypes.T_IDENT }
+        val index = idents.indexOfFirst { it.psi == element }
+
+        if (index == 0) {
+            // Head segment: PHP class ref + blueprint field ref (PsiMultiReference picks the resolver).
             return arrayOf(
                 AntlersPhpClassReference(element, name, isModifier = false),
                 AntlersBlueprintFieldReference(element, name)
             )
+        }
+
+        if (index > 0) {
+            // Non-head dotted/colon segment: resolve the prefix to a field; if this segment is one of
+            // its blueprint sub-fields, point at that sub-field's declaration. (Augmentation properties
+            // have no declaration, so they get no reference.)
+            val prefix = idents.take(index).map { it.text }
+            val parent = com.github.balotias.intellijantlers.scope.AntlersMemberResolver
+                .resolveField(element, prefix, element.project)
+            if (parent != null) {
+                val childNs = com.github.balotias.intellijantlers.scope.AntlersMemberResolver.childNamespace(parent)
+                val hasMember = com.github.balotias.intellijantlers.blueprint.BlueprintService
+                    .getInstance(element.project).fieldsFor(childNs).any { it.handle == name }
+                if (hasMember) return arrayOf(AntlersBlueprintMemberReference(element, childNs, name))
+            }
         }
 
         return emptyArray()
