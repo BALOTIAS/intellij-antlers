@@ -1,7 +1,9 @@
 package com.github.balotias.intellijantlers.documentation
 
 import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
+import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
+import com.github.balotias.intellijantlers.catalog.FieldtypeProperties
 import com.github.balotias.intellijantlers.catalog.ParamDef
 import com.github.balotias.intellijantlers.catalog.TagDef
 import com.github.balotias.intellijantlers.psi.AntlersModifierMixin
@@ -10,6 +12,7 @@ import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.github.balotias.intellijantlers.scope.AntlersFieldContext
+import com.github.balotias.intellijantlers.scope.AntlersMemberResolver
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.lang.documentation.DocumentationMarkup
 import com.intellij.openapi.util.text.StringUtil
@@ -70,7 +73,25 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
                 }
                 return null
             }
-            if (path.method == name) {
+            val idents = path.node.getChildren(null).filter { it.elementType == AntlersTypes.T_IDENT }
+            val index = idents.indexOfFirst { it.psi == ident }
+            if (index > 0) {
+                val prefix = idents.take(index).map { it.text }
+                val parent = AntlersMemberResolver.resolveField(ident, prefix, ident.project)
+                if (parent != null) {
+                    val childNs = AntlersMemberResolver.childNamespace(parent)
+                    BlueprintService.getInstance(ident.project).fieldsFor(childNs)
+                        .firstOrNull { it.handle == name }?.let { f ->
+                            val type = if (f.type.isNotBlank()) " (${esc(f.type)})" else ""
+                            val title = "Field <b>${esc(name)}</b>$type" +
+                                (if (f.display.isNotBlank()) " — ${esc(f.display)}" else "") + namespaceLabel(f.namespace)
+                            return section(title, f.display, "")
+                        }
+                    FieldtypeProperties.forType(parent.type).firstOrNull { it.name == name }?.let { p ->
+                        return section("Property <b>${esc(name)}</b> · ${esc(parent.type)}", p.description, "")
+                    }
+                }
+                // Fall back to the catalog tag-method doc (e.g. collection:count).
                 val tag = catalog.tag(path.head) ?: return null
                 return section(
                     "Method <b>${esc(name)}</b> of tag <code>${esc(tag.name)}</code>",
