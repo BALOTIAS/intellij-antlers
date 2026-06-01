@@ -18,6 +18,18 @@ class AntlersFoldingTest : BasePlatformTestCase() {
         assertTrue(foldCount("{{ if x }}\n  hi\n{{ /if }}") >= 1)
     }
 
+    fun testEndifFolds() {
+        assertTrue(foldCount("{{ if x }}\n  hi\n{{ endif }}") >= 1)
+    }
+
+    fun testCommentFoldsExactlyOnce() {
+        assertEquals(1, foldCount("{{# a long hidden comment here #}}"))
+    }
+
+    fun testPairedTagPlusCommentYieldsTwoFolds() {
+        assertEquals(2, foldCount("{{ collection }}\n  hi\n{{ /collection }}\n{{# a long hidden comment here #}}"))
+    }
+
     fun testCommentFolds() {
         assertTrue(foldCount("{{# a long hidden comment here #}}") >= 1)
     }

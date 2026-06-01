@@ -21,4 +21,16 @@ class AntlersTypedHandlerTest : BasePlatformTestCase() {
         myFixture.type("{")
         myFixture.checkResult("{{{<caret>")
     }
+
+    /**
+     * Regression: stray-"}" replacement must not eat a double-close "}}" that was legitimately present.
+     * This covers the "already closed" case where the cursor is placed BEFORE an existing "}}".
+     */
+    fun testDoesNotEatExistingBrace() {
+        // File already contains "}}" — typing "{{" before it must not delete either brace.
+        // The "don't double if }}" guard fires first, so we get {{<caret>}} (no extra insertion).
+        myFixture.configureByText("t.antlers.html", "<caret>}}")
+        myFixture.type("{{")
+        myFixture.checkResult("{{<caret>}}")
+    }
 }

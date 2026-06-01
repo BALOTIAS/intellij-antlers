@@ -2,7 +2,6 @@ package com.github.balotias.intellijantlers.editor
 
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin
-import com.github.balotias.intellijantlers.psi.AntlersComment
 import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersNoparseBlock
@@ -21,6 +20,7 @@ import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 
 private val CONDITION_OPENERS = setOf("if", "unless")
+private val CONDITION_CLOSERS = mapOf("endif" to "if", "endunless" to "unless")
 
 class AntlersFoldingBuilder : FoldingBuilderEx(), DumbAware {
 
@@ -31,12 +31,9 @@ class AntlersFoldingBuilder : FoldingBuilderEx(), DumbAware {
         PsiTreeUtil.findChildrenOfType(root, AntlersNoparseBlock::class.java).forEach { addNode(out, it) }
         PsiTreeUtil.findChildrenOfType(root, AntlersPhpBlock::class.java).forEach { addNode(out, it) }
 
-        // AntlersComment composite nodes (when comment tokens are NOT in getCommentTokens).
-        PsiTreeUtil.findChildrenOfType(root, AntlersComment::class.java).forEach { addNode(out, it) }
-
-        // Comment folds via token-level scan: handles the case where T_COMMENT_OPEN/CLOSE are
-        // registered as comment tokens and therefore appear as PsiComment leaves rather than
-        // AntlersComment composite nodes.
+        // Comment folds: T_COMMENT_OPEN/TEXT/CLOSE are registered as comment tokens, so they
+        // appear as PsiComment leaf nodes (not AntlersComment composite nodes). Scan for
+        // T_COMMENT_OPEN leaves and pair each with its T_COMMENT_CLOSE sibling.
         addCommentFoldsFromTokens(root, out)
 
         // Paired tag / condition folds via a name stack over statements in document order.
@@ -58,9 +55,19 @@ class AntlersFoldingBuilder : FoldingBuilderEx(), DumbAware {
                     if (range.length > 0) out.add(FoldingDescriptor(open.node, range))
                 }
             } else if (condition != null) {
-                // {{ if ... }} or {{ unless ... }}: push openers onto the stack
                 val keyword = (condition as? AntlersConditionMixin)?.keyword ?: continue
-                if (keyword in CONDITION_OPENERS) {
+                val openerName = CONDITION_CLOSERS[keyword]
+                if (openerName != null) {
+                    // {{ endif }} / {{ endunless }}: pop the matching opener and emit a fold
+                    val idx = stack.indexOfLast { it.first == openerName }
+                    if (idx >= 0) {
+                        val (_, open) = stack.removeAt(idx)
+                        while (stack.size > idx) stack.removeLast()
+                        val range = TextRange(open.textRange.startOffset, stmt.textRange.endOffset)
+                        if (range.length > 0) out.add(FoldingDescriptor(open.node, range))
+                    }
+                } else if (keyword in CONDITION_OPENERS) {
+                    // {{ if ... }} or {{ unless ... }}: push openers onto the stack
                     stack.addLast(keyword to stmt)
                 }
             } else {
@@ -116,7 +123,6 @@ class AntlersFoldingBuilder : FoldingBuilderEx(), DumbAware {
         return when (node.elementType) {
             AntlersTypes.T_COMMENT_OPEN -> "{{# … #}}"
             else -> when (node.psi) {
-                is AntlersComment -> "{{# … #}}"
                 is AntlersNoparseBlock -> "{{ noparse … }}"
                 is AntlersPhpBlock -> "{{ php … }}"
                 else -> "…"

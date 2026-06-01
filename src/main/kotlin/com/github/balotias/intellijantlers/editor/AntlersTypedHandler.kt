@@ -25,6 +25,8 @@ class AntlersTypedHandler : TypedHandlerDelegate() {
         if (after.startsWith("}}")) return Result.CONTINUE
 
         // If a stray single "}" was auto-inserted (e.g. by the HTML brace handler), replace it.
+        // We only replace when there is exactly one "}" at the caret position (not "}}"), keeping
+        // the replacement tight to avoid eating a legitimately-authored brace.
         if (offset < text.length && text[offset] == '}' && (offset + 1 >= text.length || text[offset + 1] != '}')) {
             doc.replaceString(offset, offset + 1, "  }}")
         } else {
