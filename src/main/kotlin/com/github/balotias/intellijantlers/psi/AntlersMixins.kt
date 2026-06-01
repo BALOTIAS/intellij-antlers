@@ -22,7 +22,7 @@ open class AntlersNamePathMixin(node: ASTNode) : ASTWrapperPsiElement(node) {
     val head: String
         get() = node.findChildByType(AntlersTypes.T_IDENT)?.text ?: ""
 
-    /** Method segment after the first colon, e.g. "blog" in "collection:blog" (null if none). */
+    /** Second path segment (after the first ':' or '.'), e.g. "blog" in "collection:blog" or "name" in "user.name"; null if none. */
     val method: String?
         get() {
             val idents = node.getChildren(null).filter { it.elementType == AntlersTypes.T_IDENT }
@@ -38,9 +38,10 @@ open class AntlersParameterMixin(node: ASTNode) : ASTWrapperPsiElement(node) {
     val parameterName: String
         get() = node.findChildByType(AntlersTypes.T_IDENT)?.text ?: ""
 
-    /** True for bound parameters written as ':name' or ':$name'. */
+    /** True for bound parameters written as ':name', ':$name', or '$name'. */
     val isBound: Boolean
         get() = node.findChildByType(AntlersTypes.T_COLON) != null
+            || node.firstChildNode?.elementType == AntlersTypes.T_DOLLAR
 
     /** The value PSI (string/number/namePath/braced expr), or null for a bare flag. */
     val valueElement: PsiElement?
