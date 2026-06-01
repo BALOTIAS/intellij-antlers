@@ -36,5 +36,7 @@
                          implementationClass="com.github.balotias.intellijantlers.inspection.AntlersUnknownModifierInspection"
                          shortName="AntlersUnknownModifier" displayName="Unknown Antlers modifier"
                          groupName="Antlers" enabledByDefault="true" level="WARNING"/>
+        <lang.psiStructureViewFactory language="Antlers"
+            implementationClass="com.github.balotias.intellijantlers.structure.AntlersStructureViewFactory"/>
     </extensions>
 </idea-plugin>
