@@ -35,6 +35,7 @@ object BlueprintScanner {
 
     private fun extract(file: VirtualFile, out: MutableList<BlueprintField>) {
         val text = VfsUtilCore.loadText(file)
+        val ns = BlueprintNamespace.fromPath(file.path)
         val lines = text.split("\n")
         var pos = 0
         for (i in lines.indices) {
@@ -54,7 +55,7 @@ object BlueprintScanner {
                     if (type.isEmpty()) TYPE_RE.find(lines[j])?.let { type = it.groupValues[1] }
                     j++
                 }
-                out.add(BlueprintField(handle, display, type, file, handleOffset))
+                out.add(BlueprintField(handle, display, type, file, handleOffset, ns))
             }
             pos += line.length + 1
         }

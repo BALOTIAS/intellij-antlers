@@ -37,4 +37,25 @@ class BlueprintScannerTest : BasePlatformTestCase() {
         assertNotNull(svc.field("body"))
         assertNull(svc.field("does_not_exist"))
     }
+
+    fun testFieldsCarryCollectionNamespace() {
+        myFixture.addFileToProject("resources/blueprints/collections/blog/blog.yaml", blueprint)
+        val hero = BlueprintScanner.scan(project).first { it.handle == "hero_title" }
+        assertEquals(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "blog"), hero.namespace)
+    }
+
+    fun testFieldsForFiltersByNamespace() {
+        myFixture.addFileToProject("resources/blueprints/collections/blog/blog.yaml", blueprint)
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/news/news.yaml",
+            "fields:\n  - handle: hero_title\n    field:\n      type: text\n      display: News Hero\n"
+        )
+        val svc = BlueprintService.getInstance(project)
+        val blog = svc.fieldsFor(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "blog"))
+        assertTrue("blog has hero_title", blog.any { it.handle == "hero_title" })
+        assertTrue("blog has body", blog.any { it.handle == "body" })
+        val news = svc.fieldsFor(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "news"))
+        assertEquals("news hero_title display", "News Hero", news.first { it.handle == "hero_title" }.display)
+        assertFalse("news does not include blog-only body", news.any { it.handle == "body" })
+    }
 }

@@ -8,5 +8,6 @@ data class BlueprintField(
     val display: String,
     val type: String,
     val file: VirtualFile,
-    val offset: Int
+    val offset: Int,
+    val namespace: BlueprintNamespace
 )

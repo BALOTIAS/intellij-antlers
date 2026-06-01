@@ -17,6 +17,10 @@ class BlueprintService(private val project: Project) {
 
     fun field(handle: String): BlueprintField? = scanned().firstOrNull { it.handle == handle }
 
+    /** All fields in a given namespace (union across its blueprints), deduped by handle (first wins). */
+    fun fieldsFor(ns: BlueprintNamespace): List<BlueprintField> =
+        scanned().filter { it.namespace == ns }.distinctBy { it.handle }
+
     private fun scanned(): List<BlueprintField> =
         CachedValuesManager.getManager(project).getCachedValue(project, KEY, {
             CachedValueProvider.Result.create(BlueprintScanner.scan(project), PsiModificationTracker.MODIFICATION_COUNT)
