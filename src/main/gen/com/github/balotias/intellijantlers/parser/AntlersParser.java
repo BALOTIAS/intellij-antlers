@@ -459,13 +459,14 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   public static boolean noparseBlock(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "noparseBlock")) return false;
     if (!nextTokenIs(builder_, T_NOPARSE_OPEN)) return false;
-    boolean result_;
-    Marker marker_ = enter_section_(builder_);
+    boolean result_, pinned_;
+    Marker marker_ = enter_section_(builder_, level_, _NONE_, NOPARSE_BLOCK, null);
     result_ = consumeToken(builder_, T_NOPARSE_OPEN);
-    result_ = result_ && noparseBlock_1(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, T_NOPARSE_CLOSE);
-    exit_section_(builder_, marker_, NOPARSE_BLOCK, result_);
-    return result_;
+    pinned_ = result_; // pin = 1
+    result_ = result_ && report_error_(builder_, noparseBlock_1(builder_, level_ + 1));
+    result_ = pinned_ && consumeToken(builder_, T_NOPARSE_CLOSE) && result_;
+    exit_section_(builder_, level_, marker_, result_, pinned_, null);
+    return result_ || pinned_;
   }
 
   // T_NOPARSE_TEXT*
