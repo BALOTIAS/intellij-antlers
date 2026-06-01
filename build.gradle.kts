@@ -16,9 +16,7 @@ dependencies {
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        intellijIdeaCommunity("2025.2.3") {
-            useInstaller = false
-        }
+        intellijIdea("2025.3")
         testFramework(TestFrameworkType.Platform)
     }
 }
@@ -39,7 +37,9 @@ tasks.named<org.jetbrains.grammarkit.tasks.GenerateParserTask>("generateParser")
     purgeOldFiles.set(true)
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    dependsOn("generateLexer", "generateParser")
-}
+// The generated lexer/parser/PSI is committed under src/main/gen and compiled directly.
+// Code generation is NOT wired into compilation: the grammarkit plugin (2022.3.2.2) is
+// incompatible with the 2025.3+ repackaged platform (NoClassDefFoundError on fastutil).
+// Regenerate manually after editing the grammar with: ./gradlew generateLexer generateParser
+// (on a setup where grammarkit works), then commit the updated src/main/gen output.
 
