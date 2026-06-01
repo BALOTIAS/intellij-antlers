@@ -20,4 +20,5 @@ class AntlersCompletionContextTest : BasePlatformTestCase() {
     fun testModifier() = assertEquals(AntlersCompletionKind.MODIFIER, kindAt("{{ title | <caret> }}"))
     fun testNoneInHtml() = assertEquals(AntlersCompletionKind.NONE, kindAt("<div <caret>></div>"))
     fun testNoneInValue() = assertEquals(AntlersCompletionKind.NONE, kindAt("{{ collection limit=\"<caret>\" }}"))
+    fun testClosingTagNoParameter() = assertEquals(AntlersCompletionKind.NONE, kindAt("{{ /collection <caret> }}"))
 }

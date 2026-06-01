@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.completion
 
+import com.github.balotias.intellijantlers.psi.AntlersClosingTag
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
@@ -38,7 +39,9 @@ object AntlersCompletionContext {
 
             AntlersTypes.T_IDENT, AntlersTypes.T_STRING, AntlersTypes.T_NUMBER,
             AntlersTypes.T_RBRACE, AntlersTypes.T_RBRACKET, AntlersTypes.T_RPAREN ->
-                headOf(statement)?.let { AntlersCompletionInfo(AntlersCompletionKind.PARAMETER, it) }
+                if (PsiTreeUtil.findChildOfType(statement, AntlersClosingTag::class.java) != null)
+                    AntlersCompletionInfo(AntlersCompletionKind.NONE)
+                else headOf(statement)?.let { AntlersCompletionInfo(AntlersCompletionKind.PARAMETER, it) }
                     ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
             else -> AntlersCompletionInfo(AntlersCompletionKind.NONE)
@@ -54,9 +57,9 @@ object AntlersCompletionContext {
     private fun prevSignificantLeaf(from: PsiElement, statement: AntlersStatement): PsiElement? {
         var e: PsiElement? = PsiTreeUtil.prevLeaf(from)
         while (e != null) {
-            if (!PsiTreeUtil.isAncestor(statement, e, false)) return null  // left the statement
-            if (e is PsiWhiteSpace) { e = PsiTreeUtil.prevLeaf(e); continue }
-            if (e.node.elementType != AntlersTypes.T_WS && e.textLength > 0) return e
+            if (!PsiTreeUtil.isAncestor(statement, e, false)) return null
+            val isWhitespace = e is com.intellij.psi.PsiWhiteSpace || e.node.elementType == AntlersTypes.T_WS
+            if (!isWhitespace) return e
             e = PsiTreeUtil.prevLeaf(e)
         }
         return null
