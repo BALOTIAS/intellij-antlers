@@ -10,10 +10,14 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
-
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.balotias.intellijantlers.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.balotias.intellijantlers.startup.MyProjectActivity" />
+        <fileType name="Antlers" implementationClass="com.github.balotias.intellijantlers.AntlersFileType" fieldName="INSTANCE" language="Antlers" patterns="*.antlers.html"/>
+        
+        <lang.parserDefinition language="Antlers" implementationClass="com.github.balotias.intellijantlers.parser.AntlersParserDefinition"/>
+        <lang.documentationProvider language="Antlers" implementationClass="com.github.balotias.intellijantlers.documentation.AntlersDocumentationProvider"/>
+        <lang.syntaxHighlighterFactory language="Antlers" implementationClass="com.github.balotias.intellijantlers.highlighting.AntlersSyntaxHighlighterFactory"/>
+        <editorHighlighterProvider filetype="Antlers" implementationClass="com.github.balotias.intellijantlers.highlighting.AntlersEditorHighlighterProvider"/>
+        <fileViewProviderFactory filetype="Antlers" implementationClass="com.github.balotias.intellijantlers.template.AntlersFileViewProviderFactory"/>
+        <completion.contributor language="Antlers" implementationClass="com.github.balotias.intellijantlers.completion.AntlersCompletionContributor"/>
     </extensions>
 </idea-plugin>

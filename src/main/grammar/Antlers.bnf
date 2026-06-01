@@ -1,0 +1,43 @@
+{
+  parserClass="com.github.balotias.intellijantlers.parser.AntlersParser"
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Antlers"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.github.balotias.intellijantlers.psi"
+  psiImplPackage="com.github.balotias.intellijantlers.psi.impl"
+
+  elementTypeHolderClass="com.github.balotias.intellijantlers.psi.AntlersTypes"
+  elementTypeClass="com.github.balotias.intellijantlers.psi.AntlersElementType"
+  tokenTypeClass="com.github.balotias.intellijantlers.psi.AntlersTokenType"
+
+  tokens = [
+    T_OUTER_HTML="T_OUTER_HTML"
+    T_OPEN_BRACE="{{"
+    T_CLOSE_BRACE="}}"
+    T_COMMENT_START="{{#"
+    T_COMMENT_END="#}}"
+    T_COMMENT_TEXT="T_COMMENT_TEXT"
+    T_IDENTIFIER="regexp:[a-zA-Z_0-9\-:]+"
+    T_STRING="regexp:\"[^\"]*\"|'[^']*'"
+    T_NUMBER="regexp:\d+"
+    T_MODIFIER_PIPE="|"
+    T_EQUALS="="
+    T_SLASH="/"
+    T_COLON=":"
+    T_AT="@"
+    T_OPERATOR="regexp:[!<>]=?|==|&&|\|\||\+|-|\*|%|\?"
+    T_WHITE_SPACE="regexp:\s+"
+  ]
+}
+
+antlersFile ::= item_*
+
+private item_ ::= outerHtml | tag_statement | comment_block
+
+outerHtml ::= T_OUTER_HTML
+
+tag_statement ::= T_OPEN_BRACE tag_content T_CLOSE_BRACE
+tag_content ::= (T_IDENTIFIER | T_STRING | T_NUMBER | T_MODIFIER_PIPE | T_EQUALS | T_SLASH | T_COLON | T_AT | T_OPERATOR)*
+
+comment_block ::= T_COMMENT_START T_COMMENT_TEXT? T_COMMENT_END
