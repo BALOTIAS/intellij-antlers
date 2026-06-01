@@ -4,7 +4,8 @@ import com.github.balotias.intellijantlers.AntlersIcons
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.blueprint.SystemVariables
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
-import com.github.balotias.intellijantlers.scope.AntlersScopeFields
+import com.github.balotias.intellijantlers.scope.AntlersFieldContext
+import com.github.balotias.intellijantlers.scope.AntlersScopeResolver
 import com.github.balotias.intellijantlers.scope.LoopVariables
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
@@ -38,8 +39,8 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     )
                 }
                 val seen = catalog.tags().mapTo(mutableSetOf()) { it.name }
-                val scoped = AntlersScopeFields.fieldsInScope(parameters.position, project)
-                val fields = scoped ?: BlueprintService.getInstance(project).fields()
+                val scopedFields = AntlersFieldContext.fieldsInScope(parameters.position, project)
+                val fields = scopedFields ?: BlueprintService.getInstance(project).fields()
                 for (field in fields) {
                     if (seen.add(field.handle)) {
                         result.addElement(
@@ -50,7 +51,8 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                         )
                     }
                 }
-                if (scoped != null) {
+                // Loop-meta vars only inside an actual iterating tag (E1) — NOT for a page match.
+                if (AntlersScopeResolver.scopesAt(parameters.position).isNotEmpty()) {
                     for (lv in LoopVariables.ALL) {
                         if (seen.add(lv.name)) {
                             result.addElement(
