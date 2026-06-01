@@ -10,6 +10,7 @@
   elementTypeHolderClass="com.github.balotias.intellijantlers.psi.AntlersTypes"
   elementTypeClass="com.github.balotias.intellijantlers.psi.AntlersElementType"
   tokenTypeClass="com.github.balotias.intellijantlers.psi.AntlersTokenType"
+  parserUtilClass="com.github.balotias.intellijantlers.parser.AntlersParserUtil"
 
   tokens = [
     T_OUTER_HTML="T_OUTER_HTML"
@@ -50,18 +51,57 @@
   ]
 }
 
-antlersFile ::= item_*
+antlersFile ::= node_*
 
-private item_ ::= outerHtml | statement | comment | phpBlock | noparseBlock
+private node_ ::= comment | phpBlock | noparseBlock | statement | outerHtml
 
 outerHtml ::= T_OUTER_HTML
 
-statement ::= T_LDOUBLE statement_body* T_RDOUBLE
-private statement_body ::= T_IDENT | T_STRING | T_NUMBER | T_OP | T_PIPE | T_SLASH | T_COLON | T_DOT | T_COMMA | T_SEMICOLON | T_EQUALS | T_ARROW | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET | T_LBRACE | T_RBRACE | T_AT | T_DOLLAR | T_WS
-
-comment ::= T_COMMENT_OPEN T_COMMENT_TEXT? T_COMMENT_CLOSE
+comment ::= T_COMMENT_OPEN T_COMMENT_TEXT? T_COMMENT_CLOSE { pin=1 }
 
 phpBlock ::= T_PHP_RAW_OPEN T_PHP_TEXT? T_PHP_RAW_CLOSE
            | T_PHP_ECHO_OPEN T_PHP_TEXT? T_PHP_ECHO_CLOSE
 
 noparseBlock ::= T_NOPARSE_OPEN T_NOPARSE_TEXT* T_NOPARSE_CLOSE
+
+statement ::= T_LDOUBLE body? T_RDOUBLE {
+  pin=1
+  recoverWhile=statement_recover
+}
+private statement_recover ::= !(T_RDOUBLE | T_LDOUBLE | T_OUTER_HTML | T_COMMENT_OPEN | T_NOPARSE_OPEN | T_PHP_RAW_OPEN | T_PHP_ECHO_OPEN)
+
+private body ::= closingTag | condition | expr_
+
+closingTag ::= T_SLASH namePath? {
+  mixin="com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin"
+}
+
+condition ::= <<atConditionKeyword>> conditionKeyword exprToken_* {
+  mixin="com.github.balotias.intellijantlers.psi.AntlersConditionMixin"
+}
+private conditionKeyword ::= T_IDENT
+
+private expr_ ::= namePath tail_* | tail_+
+
+private tail_ ::= parameter | modifier | exprToken_
+
+namePath ::= pathSegment ((T_COLON | T_DOT) pathSegment | bracketAccess)* {
+  mixin="com.github.balotias.intellijantlers.psi.AntlersNamePathMixin"
+}
+private pathSegment ::= T_DOLLAR? (T_IDENT | T_NUMBER)
+bracketAccess ::= T_LBRACKET exprToken_* T_RBRACKET
+
+parameter ::= T_COLON? T_DOLLAR? T_IDENT (T_EQUALS paramValue)? {
+  mixin="com.github.balotias.intellijantlers.psi.AntlersParameterMixin"
+}
+private paramValue ::= T_STRING | (T_LBRACE exprToken_* T_RBRACE) | T_NUMBER | namePath
+
+modifier ::= T_PIPE T_IDENT (T_LPAREN argList? T_RPAREN)? {
+  mixin="com.github.balotias.intellijantlers.psi.AntlersModifierMixin"
+}
+private argList ::= exprToken_ (T_COMMA exprToken_)*
+
+private exprToken_ ::=
+    T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
+  | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET
+  | T_LBRACE | T_RBRACE | T_IDENT | T_SLASH

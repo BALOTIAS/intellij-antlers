@@ -8,17 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.github.balotias.intellijantlers.psi.AntlersTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
+import com.github.balotias.intellijantlers.psi.AntlersParameterMixin;
 import com.github.balotias.intellijantlers.psi.*;
 
-public class AntlersStatementImpl extends ASTWrapperPsiElement implements AntlersStatement {
+public class AntlersParameterImpl extends AntlersParameterMixin implements AntlersParameter {
 
-  public AntlersStatementImpl(@NotNull ASTNode node) {
+  public AntlersParameterImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AntlersVisitor visitor) {
-    visitor.visitStatement(this);
+    visitor.visitParameter(this);
   }
 
   @Override
@@ -29,32 +29,8 @@ public class AntlersStatementImpl extends ASTWrapperPsiElement implements Antler
 
   @Override
   @Nullable
-  public AntlersClosingTag getClosingTag() {
-    return findChildByClass(AntlersClosingTag.class);
-  }
-
-  @Override
-  @Nullable
-  public AntlersCondition getCondition() {
-    return findChildByClass(AntlersCondition.class);
-  }
-
-  @Override
-  @NotNull
-  public List<AntlersModifier> getModifierList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AntlersModifier.class);
-  }
-
-  @Override
-  @Nullable
   public AntlersNamePath getNamePath() {
     return findChildByClass(AntlersNamePath.class);
-  }
-
-  @Override
-  @NotNull
-  public List<AntlersParameter> getParameterList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AntlersParameter.class);
   }
 
 }

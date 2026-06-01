@@ -7,7 +7,27 @@ import com.intellij.psi.PsiElement;
 
 public class AntlersVisitor extends PsiElementVisitor {
 
+  public void visitBracketAccess(@NotNull AntlersBracketAccess o) {
+    visitPsiElement(o);
+  }
+
+  public void visitClosingTag(@NotNull AntlersClosingTag o) {
+    visitPsiElement(o);
+  }
+
   public void visitComment(@NotNull AntlersComment o) {
+    visitPsiElement(o);
+  }
+
+  public void visitCondition(@NotNull AntlersCondition o) {
+    visitPsiElement(o);
+  }
+
+  public void visitModifier(@NotNull AntlersModifier o) {
+    visitPsiElement(o);
+  }
+
+  public void visitNamePath(@NotNull AntlersNamePath o) {
     visitPsiElement(o);
   }
 
@@ -16,6 +36,10 @@ public class AntlersVisitor extends PsiElementVisitor {
   }
 
   public void visitOuterHtml(@NotNull AntlersOuterHtml o) {
+    visitPsiElement(o);
+  }
+
+  public void visitParameter(@NotNull AntlersParameter o) {
     visitPsiElement(o);
   }
 

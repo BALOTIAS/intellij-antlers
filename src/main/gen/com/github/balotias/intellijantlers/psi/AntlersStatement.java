@@ -7,4 +7,19 @@ import com.intellij.psi.PsiElement;
 
 public interface AntlersStatement extends PsiElement {
 
+  @Nullable
+  AntlersClosingTag getClosingTag();
+
+  @Nullable
+  AntlersCondition getCondition();
+
+  @NotNull
+  List<AntlersModifier> getModifierList();
+
+  @Nullable
+  AntlersNamePath getNamePath();
+
+  @NotNull
+  List<AntlersParameter> getParameterList();
+
 }

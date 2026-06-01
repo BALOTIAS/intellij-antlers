@@ -8,9 +8,15 @@ import com.github.balotias.intellijantlers.psi.impl.*;
 
 public interface AntlersTypes {
 
+  IElementType BRACKET_ACCESS = new AntlersElementType("BRACKET_ACCESS");
+  IElementType CLOSING_TAG = new AntlersElementType("CLOSING_TAG");
   IElementType COMMENT = new AntlersElementType("COMMENT");
+  IElementType CONDITION = new AntlersElementType("CONDITION");
+  IElementType MODIFIER = new AntlersElementType("MODIFIER");
+  IElementType NAME_PATH = new AntlersElementType("NAME_PATH");
   IElementType NOPARSE_BLOCK = new AntlersElementType("NOPARSE_BLOCK");
   IElementType OUTER_HTML = new AntlersElementType("OUTER_HTML");
+  IElementType PARAMETER = new AntlersElementType("PARAMETER");
   IElementType PHP_BLOCK = new AntlersElementType("PHP_BLOCK");
   IElementType STATEMENT = new AntlersElementType("STATEMENT");
 
@@ -53,14 +59,32 @@ public interface AntlersTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == COMMENT) {
+      if (type == BRACKET_ACCESS) {
+        return new AntlersBracketAccessImpl(node);
+      }
+      else if (type == CLOSING_TAG) {
+        return new AntlersClosingTagImpl(node);
+      }
+      else if (type == COMMENT) {
         return new AntlersCommentImpl(node);
+      }
+      else if (type == CONDITION) {
+        return new AntlersConditionImpl(node);
+      }
+      else if (type == MODIFIER) {
+        return new AntlersModifierImpl(node);
+      }
+      else if (type == NAME_PATH) {
+        return new AntlersNamePathImpl(node);
       }
       else if (type == NOPARSE_BLOCK) {
         return new AntlersNoparseBlockImpl(node);
       }
       else if (type == OUTER_HTML) {
         return new AntlersOuterHtmlImpl(node);
+      }
+      else if (type == PARAMETER) {
+        return new AntlersParameterImpl(node);
       }
       else if (type == PHP_BLOCK) {
         return new AntlersPhpBlockImpl(node);
