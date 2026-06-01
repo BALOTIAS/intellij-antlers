@@ -4,6 +4,8 @@ import com.github.balotias.intellijantlers.AntlersIcons
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.blueprint.SystemVariables
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
+import com.github.balotias.intellijantlers.scope.AntlersScopeFields
+import com.github.balotias.intellijantlers.scope.LoopVariables
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
@@ -36,7 +38,9 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     )
                 }
                 val seen = catalog.tags().mapTo(mutableSetOf()) { it.name }
-                for (field in BlueprintService.getInstance(project).fields()) {
+                val scoped = AntlersScopeFields.fieldsInScope(parameters.position, project)
+                val fields = scoped ?: BlueprintService.getInstance(project).fields()
+                for (field in fields) {
                     if (seen.add(field.handle)) {
                         result.addElement(
                             LookupElementBuilder.create(field.handle)
@@ -44,6 +48,18 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                                 .withTypeText("Field")
                                 .withTailText(if (field.display.isNotBlank()) "  ${field.display}" else null, true)
                         )
+                    }
+                }
+                if (scoped != null) {
+                    for (lv in LoopVariables.ALL) {
+                        if (seen.add(lv.name)) {
+                            result.addElement(
+                                LookupElementBuilder.create(lv.name)
+                                    .withIcon(AntlersIcons.FILE)
+                                    .withTypeText("Loop")
+                                    .withTailText("  ${lv.description}", true)
+                            )
+                        }
                     }
                 }
                 for (sv in SystemVariables.ALL) {
