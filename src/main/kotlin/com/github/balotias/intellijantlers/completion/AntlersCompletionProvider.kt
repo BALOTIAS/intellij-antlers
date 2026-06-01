@@ -33,7 +33,7 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
         // Custom Tags (discovered from the project's PHP Tags classes)
         val project = parameters.editor.project
         if (project != null) {
-            val customTags = AntlersCustomTagFinder.findCustomTags(project)
+            val customTags = com.github.balotias.intellijantlers.catalog.scan.TagScanner.scan(project)
             for (customTag in customTags) {
                 result.addElement(
                     LookupElementBuilder.create(customTag)
