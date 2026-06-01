@@ -1,0 +1,72 @@
+[
+  { "name": "collection", "description": "Fetch and loop over entries in a collection.", "docUrl": "https://statamic.dev/tags/collection", "isPair": true,
+    "methods": ["count", "next", "previous", "older", "newer"],
+    "parameters": [
+      { "name": "from", "description": "Collection handle(s) to fetch from." },
+      { "name": "limit", "description": "Maximum number of entries.", "type": "integer" },
+      { "name": "sort", "description": "Field and direction, e.g. date:desc." },
+      { "name": "filter", "description": "A custom query filter." },
+      { "name": "paginate", "description": "Entries per page.", "type": "integer" },
+      { "name": "as", "description": "Alias the results into a named loop." },
+      { "name": "scope", "description": "Scope each item under a variable." }
+    ] },
+  { "name": "nav", "description": "Build navigation / structure trees.", "docUrl": "https://statamic.dev/tags/nav", "isPair": true,
+    "methods": ["breadcrumbs"],
+    "parameters": [
+      { "name": "handle", "description": "The navigation handle." },
+      { "name": "from", "description": "Start the tree from a URI." },
+      { "name": "include_home", "description": "Include the home page.", "type": "boolean" },
+      { "name": "max_depth", "description": "Maximum nesting depth.", "type": "integer" }
+    ] },
+  { "name": "partial", "description": "Include another template.", "docUrl": "https://statamic.dev/tags/partial", "isPair": false,
+    "methods": ["if_exists", "exists"],
+    "parameters": [
+      { "name": "src", "description": "Path to the partial.", "required": true }
+    ] },
+  { "name": "asset", "description": "Fetch a single asset.", "docUrl": "https://statamic.dev/tags/asset", "isPair": false,
+    "parameters": [
+      { "name": "id", "description": "The asset id (container::path)." },
+      { "name": "src", "description": "The asset path." }
+    ] },
+  { "name": "assets", "description": "Loop over multiple assets.", "docUrl": "https://statamic.dev/tags/assets", "isPair": true,
+    "parameters": [
+      { "name": "handle", "description": "The field/variable holding assets." },
+      { "name": "limit", "description": "Maximum number of assets.", "type": "integer" }
+    ] },
+  { "name": "glide", "description": "Manipulate images.", "docUrl": "https://statamic.dev/tags/glide", "isPair": false,
+    "parameters": [
+      { "name": "src", "description": "Source image path/url." },
+      { "name": "width", "description": "Target width.", "type": "integer" },
+      { "name": "height", "description": "Target height.", "type": "integer" },
+      { "name": "fit", "description": "Fit mode (crop, contain, max...)." },
+      { "name": "format", "description": "Output format." }
+    ] },
+  { "name": "form", "description": "Render and handle forms.", "docUrl": "https://statamic.dev/tags/form", "isPair": true,
+    "methods": ["create", "errors", "success", "set", "submission", "submissions"],
+    "parameters": [
+      { "name": "in", "description": "The form handle." },
+      { "name": "redirect", "description": "Where to redirect on success." }
+    ] },
+  { "name": "user", "description": "Authenticated user / user data.", "docUrl": "https://statamic.dev/tags/user", "isPair": true,
+    "methods": ["profile", "logout", "can", "is", "in"] },
+  { "name": "taxonomy", "description": "Loop over taxonomy terms.", "docUrl": "https://statamic.dev/tags/taxonomy", "isPair": true,
+    "parameters": [ { "name": "from", "description": "Taxonomy handle." }, { "name": "sort", "description": "Sort field/direction." } ] },
+  { "name": "cache", "description": "Cache a portion of a template.", "docUrl": "https://statamic.dev/tags/cache", "isPair": true,
+    "parameters": [ { "name": "for", "description": "Duration, e.g. 60 minutes." }, { "name": "key", "description": "A custom cache key." } ] },
+  { "name": "section", "description": "Define a template section.", "isPair": true },
+  { "name": "yield", "description": "Output a named section.", "isPair": false },
+  { "name": "redirect", "description": "Redirect the response.", "isPair": false },
+  { "name": "increment", "description": "An auto-incrementing counter.", "isPair": false },
+  { "name": "markdown", "description": "Render markdown.", "isPair": true },
+  { "name": "obfuscate", "description": "Obfuscate text from bots.", "isPair": true },
+  { "name": "session", "description": "Read/flash session data.", "isPair": true },
+  { "name": "mix", "description": "Laravel Mix asset url.", "isPair": false },
+  { "name": "vite", "description": "Vite asset tags.", "isPair": false },
+  { "name": "svg", "description": "Inline an SVG.", "isPair": false },
+  { "name": "trans", "description": "Translate a string.", "isPair": false },
+  { "name": "link", "description": "Generate a URL.", "isPair": false },
+  { "name": "dump", "description": "Dump variables for debugging.", "isPair": false },
+  { "name": "get_content", "description": "Fetch content by id/url.", "isPair": true },
+  { "name": "search", "description": "Query a search index.", "isPair": true,
+    "parameters": [ { "name": "index", "description": "The search index handle." }, { "name": "query", "description": "The search query variable." } ] }
+]
