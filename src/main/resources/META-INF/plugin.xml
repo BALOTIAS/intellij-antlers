@@ -18,10 +18,11 @@
         <fileType name="Antlers" implementationClass="com.github.balotias.intellijantlers.AntlersFileType" fieldName="INSTANCE" language="Antlers" patterns="*.antlers.html"/>
         
         <lang.parserDefinition language="Antlers" implementationClass="com.github.balotias.intellijantlers.parser.AntlersParserDefinition"/>
+        <lang.ast.factory language="Antlers" implementationClass="com.github.balotias.intellijantlers.parser.AntlersASTFactory"/>
         <lang.documentationProvider language="Antlers" implementationClass="com.github.balotias.intellijantlers.documentation.AntlersDocumentationProvider"/>
         <lang.syntaxHighlighterFactory language="Antlers" implementationClass="com.github.balotias.intellijantlers.highlighting.AntlersSyntaxHighlighterFactory"/>
         <editorHighlighterProvider filetype="Antlers" implementationClass="com.github.balotias.intellijantlers.highlighting.AntlersEditorHighlighterProvider"/>
-        <fileViewProviderFactory filetype="Antlers" implementationClass="com.github.balotias.intellijantlers.template.AntlersFileViewProviderFactory"/>
+        <lang.fileViewProviderFactory language="Antlers" implementationClass="com.github.balotias.intellijantlers.template.AntlersFileViewProviderFactory"/>
         <completion.contributor language="Antlers" implementationClass="com.github.balotias.intellijantlers.completion.AntlersCompletionContributor"/>
     </extensions>
 </idea-plugin>

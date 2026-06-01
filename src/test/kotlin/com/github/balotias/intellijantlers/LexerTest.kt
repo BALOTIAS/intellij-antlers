@@ -2,25 +2,24 @@ package com.github.balotias.intellijantlers
 
 import com.github.balotias.intellijantlers.lexer._AntlersLexer
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.intellij.lexer.FlexAdapter
 import com.intellij.psi.tree.IElementType
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.io.StringReader
 
 class LexerTest {
 
-    private fun lex(input: String): List<Pair<IElementType, String>> {
-        val lexer = _AntlersLexer(StringReader(input))
-        val out = mutableListOf<Pair<IElementType, String>>()
-        var t = lexer.advance()
-        while (t != null) {
-            out.add(t to lexer.yytext().toString())
-            t = lexer.advance()
+    /** Drive the lexer the same way the platform does, via FlexAdapter. */
+    private fun types(input: String): List<IElementType> {
+        val lexer = FlexAdapter(_AntlersLexer(null))
+        lexer.start(input)
+        val out = mutableListOf<IElementType>()
+        while (lexer.tokenType != null) {
+            out.add(lexer.tokenType!!)
+            lexer.advance()
         }
         return out
     }
-
-    private fun types(input: String) = lex(input).map { it.first }
 
     @Test
     fun outerHtmlAndTag() {

@@ -6,7 +6,10 @@ class AntlersCompletionContextTest : BasePlatformTestCase() {
 
     private fun kindAt(text: String): AntlersCompletionKind {
         val caret = text.indexOf("<caret>")
-        myFixture.configureByText("t.antlers.html", text)
+        // Simulate the dummy identifier the platform inserts at the caret during real completion,
+        // so a caret right after a partial name parses as part of that token (not as whitespace).
+        val withDummy = text.replace("<caret>", "IntellijIdeaRulezzz")
+        myFixture.configureByText("t.antlers.html", withDummy)
         val element = myFixture.file.findElementAt(caret) ?: myFixture.file.findElementAt(caret - 1)!!
         return AntlersCompletionContext.classify(element).kind
     }

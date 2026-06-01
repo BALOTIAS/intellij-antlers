@@ -24,6 +24,13 @@ dependencies {
 
 sourceSets["main"].java.srcDirs("src/main/gen")
 
+// Run each test in its own JVM. ParsingTestCase (lightweight, registers only the parser) and
+// BasePlatformTestCase (loads the full plugin.xml incl. the multi-root file view provider) otherwise
+// pollute each other's application-level registrations, making the view provider engage flakily.
+tasks.withType<Test>().configureEach {
+    forkEvery = 1
+}
+
 // The generated lexer/parser/PSI is committed under src/main/gen and compiled directly. The
 // grammarkit plugin is intentionally NOT applied: it forced an early resolution of the
 // `intellijPlatformDependency` configuration, which made IPGP skip registering its IDE-resolution
