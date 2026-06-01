@@ -16,12 +16,14 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         val STRING = TextAttributesKey.createTextAttributesKey("ANTLERS_STRING", DefaultLanguageHighlighterColors.STRING)
         val NUMBER = TextAttributesKey.createTextAttributesKey("ANTLERS_NUMBER", DefaultLanguageHighlighterColors.NUMBER)
         val COMMENT = TextAttributesKey.createTextAttributesKey("ANTLERS_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT)
+        val OPERATOR = TextAttributesKey.createTextAttributesKey("ANTLERS_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN)
 
         private val BRACES_KEYS = arrayOf(BRACES)
         private val IDENTIFIER_KEYS = arrayOf(IDENTIFIER)
         private val STRING_KEYS = arrayOf(STRING)
         private val NUMBER_KEYS = arrayOf(NUMBER)
         private val COMMENT_KEYS = arrayOf(COMMENT)
+        private val OPERATOR_KEYS = arrayOf(OPERATOR)
         private val EMPTY_KEYS = arrayOf<TextAttributesKey>()
     }
 
@@ -29,12 +31,19 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
 
     override fun getTokenHighlights(tokenType: IElementType): Array<TextAttributesKey> {
         return when (tokenType) {
-            AntlersTypes.T_LDOUBLE, AntlersTypes.T_RDOUBLE -> BRACES_KEYS
-            AntlersTypes.T_IDENT -> IDENTIFIER_KEYS
+            AntlersTypes.T_LDOUBLE, AntlersTypes.T_RDOUBLE,
+            AntlersTypes.T_PHP_RAW_OPEN, AntlersTypes.T_PHP_RAW_CLOSE,
+            AntlersTypes.T_PHP_ECHO_OPEN, AntlersTypes.T_PHP_ECHO_CLOSE,
+            AntlersTypes.T_NOPARSE_OPEN, AntlersTypes.T_NOPARSE_CLOSE -> BRACES_KEYS
+
+            AntlersTypes.T_IDENT, AntlersTypes.T_DOLLAR -> IDENTIFIER_KEYS
             AntlersTypes.T_STRING -> STRING_KEYS
             AntlersTypes.T_NUMBER -> NUMBER_KEYS
             AntlersTypes.T_COMMENT_OPEN, AntlersTypes.T_COMMENT_CLOSE, AntlersTypes.T_COMMENT_TEXT -> COMMENT_KEYS
-            AntlersTypes.T_OP, AntlersTypes.T_EQUALS, AntlersTypes.T_PIPE, AntlersTypes.T_SLASH, AntlersTypes.T_AT, AntlersTypes.T_COLON -> IDENTIFIER_KEYS
+
+            AntlersTypes.T_OP, AntlersTypes.T_PIPE, AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW,
+            AntlersTypes.T_COLON, AntlersTypes.T_SLASH, AntlersTypes.T_DOT -> OPERATOR_KEYS
+
             else -> EMPTY_KEYS
         }
     }
