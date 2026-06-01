@@ -32,9 +32,9 @@ class CatalogTagCoverageTest {
 
     @Test fun pairFlagsForStructuralTags() {
         listOf("collection", "nav", "taxonomy", "form", "assets", "cache", "section", "loop", "foreach",
-            "switch", "users", "nocache").forEach { assertTrue("$it should be a pair", tag(it).isPair) }
-        listOf("partial", "glide", "link", "svg", "redirect", "yield", "404", "asset", "mix", "trans")
-            .forEach { assertTrue("$it should be single", !tag(it).isPair) }
+            "users", "nocache").forEach { assertTrue("$it should be a pair", tag(it).isPair) }
+        listOf("partial", "glide", "link", "svg", "redirect", "yield", "404", "asset", "mix", "trans",
+            "switch").forEach { assertTrue("$it should be single", !tag(it).isPair) }
     }
 
     @Test fun subTagsPresent() {

@@ -388,7 +388,7 @@ object CatalogTags {
             name = "switch",
             description = "Alternate between values on each iteration.",
             docUrl = "https://statamic.dev/tags/switch",
-            isPair = true,
+            isPair = false,
             parameters = listOf(
                 ParamDef(name = "between", description = "Pipe-delimited list of values to cycle through.", required = true)
             )

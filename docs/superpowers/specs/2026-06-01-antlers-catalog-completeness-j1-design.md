@@ -171,7 +171,7 @@ Source: `statamic.dev/tags` and `statamic.dev/reference/tags`. `P`=pair/block, `
 | section | P | — |
 | session | S | set, get, has, forget, flush, flash, dump |
 | svg | S | — |
-| switch | P | — |
+| switch | S | — |
 | taxonomy | P | count |
 | trans | S | — |
 | user | S | login_form, logout, logout_url, register_form, profile, profile_form, password_form, forgot_password_form, reset_password_form, can, is, in, passkey_form, passkeys, delete_passkey_form, elevated_session_form, two_factor_challenge_form, two_factor_enable_form, two_factor_setup_form, two_factor_enabled, two_factor_recovery_codes, reset_two_factor_recovery_codes_form, disable_two_factor_form |
