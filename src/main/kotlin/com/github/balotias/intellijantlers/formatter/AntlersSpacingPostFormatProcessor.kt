@@ -80,7 +80,9 @@ class AntlersSpacingPostFormatProcessor : PostFormatProcessor {
         }
 
         var delta = 0
-        for ((range, replacement) in edits.sortedByDescending { it.first.startOffset }) {
+        // distinct(): a `| }}` boundary makes the pipe's after-gap and the }}'s before-gap reference the
+        // same offset pair — dedupe so they aren't double-applied (which would double-insert a space).
+        for ((range, replacement) in edits.distinct().sortedByDescending { it.first.startOffset }) {
             document.replaceString(range.startOffset, range.endOffset, replacement)
             delta += replacement.length - range.length
         }
