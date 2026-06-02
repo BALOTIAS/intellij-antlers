@@ -9,11 +9,19 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement
 
 private val PARTIAL_EXTENSIONS = listOf("antlers.html", "html")
 
-/** Resolves a partial path (e.g. "blog/card") to its template file under `resources/views`. */
+/**
+ * Resolves a partial path (e.g. "blog/card") to its template file under `resources/views`.
+ *
+ * [isPathTail] is true only for the reference covering the LAST path segment (the `src="…"` string, or
+ * `card` in `partial:blog/card`). Only the tail participates in rename / find-usages — the directory-part
+ * references (`blog`) navigate but don't rewrite, so renaming never double-writes (even when the dir name
+ * equals the basename, e.g. `partial:card/card`).
+ */
 class AntlersPartialReference(
     element: PsiElement,
     range: TextRange,
-    private val path: String
+    private val path: String,
+    val isPathTail: Boolean = true
 ) : PsiReferenceBase<PsiElement>(element, range) {
 
     override fun resolve(): PsiElement? {
@@ -26,20 +34,19 @@ class AntlersPartialReference(
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
+        if (!isPathTail) return element   // dir-part references navigate but don't rewrite
         val newSegment = stripPartialExtensions(newElementName)
         val rangeText = rangeInElement.substring(element.text)
         // String form: rangeText holds the full path (e.g. "blog/card") — splice in the new last segment.
-        // Colon form: rangeText holds one path segment. Only rename if it IS the last segment (skip dir parts).
-        val lastSegment = path.substringAfterLast('/')
-        val newRangeText = when {
-            rangeText.contains('/') -> rangeText.substringBeforeLast('/') + "/" + newSegment
-            rangeText == lastSegment -> newSegment
-            else -> return element  // not the last segment (e.g. "blog" in partial:blog/card) — skip
-        }
+        // Colon tail form: rangeText holds just the last segment — replace it.
+        val newRangeText =
+            if (rangeText.contains('/')) rangeText.substringBeforeLast('/') + "/" + newSegment
+            else newSegment
         return rewrite(newRangeText)
     }
 
     override fun bindToElement(targetElement: PsiElement): PsiElement {
+        if (!isPathTail) return element   // dir-part references aren't rewritten on move
         val file = targetElement as? PsiFile ?: return element
         val root = StatamicProject.viewsRoot(element) ?: return element
         val newFullPath = relativePathMinusExt(root, file.virtualFile ?: return element) ?: return element

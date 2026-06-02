@@ -68,8 +68,27 @@ object AntlersPartialReferenceHelper {
 
         val fullPath = extractPartialPath(statement) ?: return emptyArray()
         return arrayOf(
-            AntlersPartialReference(element, TextRange(0, element.textLength), fullPath)
+            AntlersPartialReference(element, TextRange(0, element.textLength), fullPath, isTailPathIdent(element, namePath))
         )
+    }
+
+    /** True when [element] is the LAST identifier of a colon-form partial path (the renamable segment). */
+    private fun isTailPathIdent(element: PsiElement, namePath: AntlersNamePathMixin): Boolean {
+        // The path's last ident is the last loose T_IDENT after the namePath, or (if none) the method ident.
+        var last: PsiElement? = namePath.node.getChildren(null)
+            .filter { it.elementType == AntlersTypes.T_IDENT }.getOrNull(1)?.psi
+        var sib: PsiElement? = namePath.nextSibling
+        while (sib != null) {
+            val t = sib.node?.elementType
+            when {
+                t == AntlersTypes.T_WS || t == com.intellij.psi.TokenType.WHITE_SPACE -> {}
+                t == AntlersTypes.T_SLASH -> {}
+                t == AntlersTypes.T_IDENT -> last = sib
+                else -> return element == last
+            }
+            sib = sib.nextSibling
+        }
+        return element == last
     }
 
     private fun isHeadIdent(element: PsiElement, namePath: AntlersNamePathMixin): Boolean {

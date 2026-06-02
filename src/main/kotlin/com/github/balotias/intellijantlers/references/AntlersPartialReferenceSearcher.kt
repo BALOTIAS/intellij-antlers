@@ -37,7 +37,8 @@ class AntlersPartialReferenceSearcher : QueryExecutorBase<PsiReference, Referenc
             override fun visitElement(element: com.intellij.psi.PsiElement) {
                 super.visitElement(element)
                 for (ref in element.references) {
-                    if (ref is AntlersPartialReference && ref.isReferenceTo(target)) {
+                    // Only the tail reference (one per include) — avoids reporting `blog` AND `card` for `partial:blog/card`.
+                    if (ref is AntlersPartialReference && ref.isPathTail && ref.isReferenceTo(target)) {
                         consumer.process(ref)
                     }
                 }

@@ -24,6 +24,14 @@ class AntlersPartialRefactoringTest : BasePlatformTestCase() {
         assertEquals("{{ partial:blog/tile }}", tmpl.text)
     }
 
+    fun testRenameColonFormDirEqualsBasename() {
+        // dir name == file basename: only the LAST segment (the tail ident) must rename.
+        val partial = addPartial("resources/views/card/card.antlers.html")
+        val tmpl = addTemplate("{{ partial:card/card }}")
+        myFixture.renameElement(partial, "tile.antlers.html")
+        assertEquals("{{ partial:card/tile }}", tmpl.text)
+    }
+
     fun testBindToElementMove() {
         addPartial("resources/views/blog/card.antlers.html")
         val text = "{{ partial:src=\"blog/card\" }}"
