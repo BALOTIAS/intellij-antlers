@@ -12,7 +12,12 @@ class AntlersColorSettingsPage : ColorSettingsPage {
     override fun getIcon(): Icon = AntlersIcons.FILE
     override fun getHighlighter(): SyntaxHighlighter = AntlersSyntaxHighlighter()
     override fun getDemoText(): String = DEMO
-    override fun getAdditionalHighlightingTagToDescriptorMap(): MutableMap<String, TextAttributesKey>? = null
+    override fun getAdditionalHighlightingTagToDescriptorMap(): MutableMap<String, TextAttributesKey> =
+        mutableMapOf(
+            "tag" to AntlersSyntaxHighlighter.TAG,
+            "kw" to AntlersSyntaxHighlighter.KEYWORD,
+            "mod" to AntlersSyntaxHighlighter.MODIFIER,
+        )
     override fun getAttributeDescriptors(): Array<AttributesDescriptor> = DESCRIPTORS
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
     override fun getDisplayName(): String = "Antlers"
@@ -20,6 +25,9 @@ class AntlersColorSettingsPage : ColorSettingsPage {
     companion object {
         private val DESCRIPTORS = arrayOf(
             AttributesDescriptor("Braces & delimiters", AntlersSyntaxHighlighter.BRACES),
+            AttributesDescriptor("Tag name", AntlersSyntaxHighlighter.TAG),
+            AttributesDescriptor("Condition keyword", AntlersSyntaxHighlighter.KEYWORD),
+            AttributesDescriptor("Modifier", AntlersSyntaxHighlighter.MODIFIER),
             AttributesDescriptor("Identifier", AntlersSyntaxHighlighter.IDENTIFIER),
             AttributesDescriptor("String", AntlersSyntaxHighlighter.STRING),
             AttributesDescriptor("Number", AntlersSyntaxHighlighter.NUMBER),
@@ -29,10 +37,9 @@ class AntlersColorSettingsPage : ColorSettingsPage {
 
         private val DEMO = """
             {{# Featured posts #}}
-            {{ collection:blog limit="3" as="posts" }}
-              {{ title | upper }}
-              {{ if count > 0 }}{{ price }}{{ /if }}
-            {{ /collection }}
+            {{ <tag>collection</tag>:blog limit="3" as="posts" }}
+              {{ title | <mod>upper</mod> }}
+              {{ <kw>if</kw> count > 0 }}{{ price }}{{ /collection }}
         """.trimIndent()
     }
 }

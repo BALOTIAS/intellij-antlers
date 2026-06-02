@@ -18,6 +18,10 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         val COMMENT = TextAttributesKey.createTextAttributesKey("ANTLERS_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT)
         val OPERATOR = TextAttributesKey.createTextAttributesKey("ANTLERS_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN)
 
+        val TAG = TextAttributesKey.createTextAttributesKey("ANTLERS_TAG", DefaultLanguageHighlighterColors.KEYWORD)
+        val KEYWORD = TextAttributesKey.createTextAttributesKey("ANTLERS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD)
+        val MODIFIER = TextAttributesKey.createTextAttributesKey("ANTLERS_MODIFIER", DefaultLanguageHighlighterColors.INSTANCE_METHOD)
+
         private val BRACES_KEYS = arrayOf(BRACES)
         private val IDENTIFIER_KEYS = arrayOf(IDENTIFIER)
         private val STRING_KEYS = arrayOf(STRING)

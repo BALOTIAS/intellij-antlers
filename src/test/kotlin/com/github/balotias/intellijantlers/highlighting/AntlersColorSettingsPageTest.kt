@@ -4,16 +4,12 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 class AntlersColorSettingsPageTest : BasePlatformTestCase() {
 
-    fun testDescriptorsCoverExactlyTheSixKeys() {
-        val page = AntlersColorSettingsPage()
-        val keys = page.attributeDescriptors.map { it.key }.toSet()
+    fun testDescriptorsCoverAllKeys() {
+        val keys = AntlersColorSettingsPage().attributeDescriptors.map { it.key }.toSet()
         val expected = setOf(
-            AntlersSyntaxHighlighter.BRACES,
-            AntlersSyntaxHighlighter.IDENTIFIER,
-            AntlersSyntaxHighlighter.STRING,
-            AntlersSyntaxHighlighter.NUMBER,
-            AntlersSyntaxHighlighter.COMMENT,
-            AntlersSyntaxHighlighter.OPERATOR,
+            AntlersSyntaxHighlighter.BRACES, AntlersSyntaxHighlighter.TAG, AntlersSyntaxHighlighter.KEYWORD,
+            AntlersSyntaxHighlighter.MODIFIER, AntlersSyntaxHighlighter.IDENTIFIER, AntlersSyntaxHighlighter.STRING,
+            AntlersSyntaxHighlighter.NUMBER, AntlersSyntaxHighlighter.COMMENT, AntlersSyntaxHighlighter.OPERATOR,
         )
         assertEquals(expected, keys)
     }
@@ -23,6 +19,7 @@ class AntlersColorSettingsPageTest : BasePlatformTestCase() {
         assertEquals("Antlers", page.displayName)
         assertTrue("demo text present", page.demoText.isNotBlank())
         assertTrue("reuses the Antlers highlighter", page.highlighter is AntlersSyntaxHighlighter)
-        assertNull("no additional highlighting tags", page.additionalHighlightingTagToDescriptorMap)
+        assertEquals("preview maps the 3 semantic tags", setOf("tag", "kw", "mod"),
+            page.additionalHighlightingTagToDescriptorMap!!.keys)
     }
 }
