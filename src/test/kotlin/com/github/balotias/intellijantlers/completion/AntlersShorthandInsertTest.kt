@@ -21,16 +21,24 @@ class AntlersShorthandInsertTest : BasePlatformTestCase() {
         }
     }
 
-    // Asserts the live-template skeleton right after finishLookup. The synced mirror of a repeated
-    // $HANDLE$ variable (empty until the user types) is a platform guarantee; the test harness does
-    // not route subsequent typing into the template field, so we assert the inserted template text.
+    /** Type the handle into the live-template field and confirm it mirrors into the closer. */
+    private fun typeHandle(handle: String) {
+        TemplateManagerImpl.getTemplateState(myFixture.editor)!!.let { state ->
+            myFixture.type(handle)
+            state.nextTab()
+        }
+    }
+
     fun testCollectionShorthandMirrorsCloser() {
         completeShorthand("{{ :coll<caret> }}", "collection")
-        assertEquals("{{ collection: }}{{ /collection: }}", myFixture.file.text)
+        typeHandle("blog")
+        // the handle typed once fills the opener AND the mirrored closer
+        assertEquals("{{ collection:blog }}{{ /collection:blog }}", myFixture.file.text)
     }
 
     fun testPartialShorthandSingleNoCloser() {
         completeShorthand("{{ :part<caret> }}", "partial")
-        assertEquals("{{ partial: }}", myFixture.file.text)
+        typeHandle("cards")
+        assertEquals("{{ partial:cards }}", myFixture.file.text)
     }
 }
