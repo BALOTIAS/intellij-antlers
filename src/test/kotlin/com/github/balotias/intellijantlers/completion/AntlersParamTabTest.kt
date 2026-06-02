@@ -60,6 +60,40 @@ class AntlersParamTabTest : BasePlatformTestCase() {
         assertEquals("{{ collection from=\"blog\" }}".length, myFixture.caretOffset)
     }
 
+    fun testMultipleParamsAccumulate() {
+        // The headline behavior: type a param, Tab to a fresh slot, type another, repeat.
+        complete("{{ collection<caret> }}", "collection")
+        myFixture.type("a=\"1\"")
+        tab()                  // new slot after a="1"
+        myFixture.type("b=\"2\"")
+        tab()                  // new (third) empty slot after b="2"
+        assertEquals("{{ collection a=\"1\" b=\"2\"  }}{{ /collection }}", docText())
+        assertEquals("{{ collection a=\"1\" b=\"2\" ".length, myFixture.caretOffset)
+        tab()                  // empty slot → collapse + jump into the block
+        assertEquals("{{ collection a=\"1\" b=\"2\" }}{{ /collection }}", docText())
+        assertEquals("{{ collection a=\"1\" b=\"2\" }}".length, myFixture.caretOffset)
+    }
+
+    fun testBareFlagTokenOpensSlot() {
+        // Slot detection is purely positional: a bare token (no '='/quotes) still opens a new slot.
+        complete("{{ collection<caret> }}", "collection")
+        myFixture.type("scope")
+        tab()
+        assertEquals("{{ collection scope  }}{{ /collection }}", docText())
+        assertEquals("{{ collection scope ".length, myFixture.caretOffset)
+    }
+
+    fun testMultiCaretFallsBackToNormalTab() {
+        complete("{{ collection<caret> }}", "collection")
+        val caretModel = myFixture.editor.caretModel
+        // Add a second caret → the param session must NOT engage (caretCount != 1).
+        caretModel.addCaret(myFixture.editor.offsetToVisualPosition(caretModel.offset + 1))
+        assertEquals(2, caretModel.caretCount)
+        tab()
+        assertNull("multi-caret clears the session", AntlersParamSession.of(myFixture.editor))
+        assertTrue("tag name intact", docText().contains("{{ collection"))
+    }
+
     fun testTerminalTabEndsSession() {
         complete("{{ collection<caret> }}", "collection")
         myFixture.type("from=\"blog\"")
