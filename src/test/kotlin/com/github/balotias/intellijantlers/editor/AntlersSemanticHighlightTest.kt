@@ -24,4 +24,22 @@ class AntlersSemanticHighlightTest : BasePlatformTestCase() {
 
     fun testPlainVariableNotColored() =
         assertNull(keyOver("{{ title }}", "title"))
+
+    /** Count keyword/tag-colored highlights over [token] — used to assert the closer is painted too. */
+    private fun coloredCount(text: String, token: String, key: TextAttributesKey): Int {
+        myFixture.configureByText("p.antlers.html", text)
+        return myFixture.doHighlighting().count { it.text == token && it.forcedTextAttributesKey == key }
+    }
+
+    fun testClosingConditionKeywordColored() =
+        assertEquals("both the opening and closing 'if' are keyword-colored",
+            2, coloredCount("{{ if x }}{{ /if }}", "if", AntlersSyntaxHighlighter.KEYWORD))
+
+    fun testClosingUnlessKeywordColored() =
+        assertEquals("both the opening and closing 'unless' are keyword-colored",
+            2, coloredCount("{{ unless x }}{{ /unless }}", "unless", AntlersSyntaxHighlighter.KEYWORD))
+
+    fun testClosingTagColored() =
+        assertEquals("both the opening and closing 'collection' are tag-colored",
+            2, coloredCount("{{ collection }}{{ /collection }}", "collection", AntlersSyntaxHighlighter.TAG))
 }

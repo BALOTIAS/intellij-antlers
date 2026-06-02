@@ -9,7 +9,8 @@ import com.intellij.lang.parser.GeneratedParserUtilBase
  */
 object AntlersParserUtil : GeneratedParserUtilBase() {
 
-    private val CONDITION_KEYWORDS = setOf("if", "elseif", "else", "unless", "endif", "endunless")
+    /** The condition keywords the grammar recognizes; also reused for semantic highlighting. */
+    val CONDITION_KEYWORDS = setOf("if", "elseif", "else", "unless", "endif", "endunless")
 
     /**
      * Non-consuming predicate: true when the current token is a T_IDENT whose text is a

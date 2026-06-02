@@ -6,6 +6,7 @@ import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
 import com.github.balotias.intellijantlers.psi.AntlersModifierMixin
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.github.balotias.intellijantlers.parser.AntlersParserUtil
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
@@ -26,9 +27,15 @@ class AntlersSemanticHighlightAnnotator : Annotator {
                 firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.MODIFIER) }
 
             is AntlersNamePathMixin -> {
-                if (AntlersCatalogService.getInstance(element.project).isTag(element.head)) {
-                    firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.TAG) }
+                // Also paints the keyword/tag in a closer's name-path (`{{ /if }}`, `{{ /collection }}`)
+                // so a closer matches its opener. A bare `{{ if }}` is a condition, handled above; the
+                // only name-path whose head is a condition keyword is a slash-closer.
+                val key = when {
+                    element.head in AntlersParserUtil.CONDITION_KEYWORDS -> AntlersSyntaxHighlighter.KEYWORD
+                    AntlersCatalogService.getInstance(element.project).isTag(element.head) -> AntlersSyntaxHighlighter.TAG
+                    else -> null
                 }
+                key?.let { k -> firstIdent(element)?.let { paint(holder, it, k) } }
             }
         }
     }
