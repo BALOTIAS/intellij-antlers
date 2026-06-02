@@ -17,10 +17,10 @@ class AntlersTagInsertTest : BasePlatformTestCase() {
         }
     }
 
-    fun testSingleTagUnchanged() {
+    fun testSingleTagStartsInParamSlot() {
         completeTag("{{ yield<caret> }}", "yield")
-        assertEquals("{{ yield }}", myFixture.file.text)
-        assertEquals("{{ yield".length, myFixture.caretOffset)
+        assertEquals("{{ yield  }}", myFixture.file.text)
+        assertEquals("{{ yield ".length, myFixture.caretOffset)
     }
 
     fun testCollectionDefaultIsParamSlot() {
@@ -29,10 +29,10 @@ class AntlersTagInsertTest : BasePlatformTestCase() {
         assertEquals("{{ collection ".length, myFixture.caretOffset)
     }
 
-    fun testPartialDefaultSingle() {
+    fun testPartialStartsInParamSlot() {
         completeTag("{{ partial<caret> }}", "partial")
-        assertEquals("{{ partial }}", myFixture.file.text)
-        assertEquals("{{ partial".length, myFixture.caretOffset)
+        assertEquals("{{ partial  }}", myFixture.file.text)
+        assertEquals("{{ partial ".length, myFixture.caretOffset)
     }
 
     fun testNonHandleTagKeepsParamSlot() {

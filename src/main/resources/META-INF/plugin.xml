@@ -29,6 +29,8 @@
         <lang.commenter language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersCommenter"/>
 
         <typedHandler implementation="com.github.balotias.intellijantlers.editor.AntlersTypedHandler"/>
+        <editorActionHandler action="EditorTab"
+            implementationClass="com.github.balotias.intellijantlers.editor.AntlersParamTabHandler"/>
 
         <lang.foldingBuilder language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersFoldingBuilder"/>
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersBalanceAnnotator"/>
