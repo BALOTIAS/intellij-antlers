@@ -16,7 +16,8 @@ class AntlersParamModifierInsertTest : BasePlatformTestCase() {
     }
 
     fun testParameterCaretInsideQuotes() {
-        assertTrue("a parameter should be offered", completeItem("{{ collection <caret> }}") { true })
+        // pin to a known collection parameter so the test exercises ParameterInsertHandler, not whatever sorts first
+        assertTrue("the 'from' parameter should be offered", completeItem("{{ collection <caret> }}") { it == "from" })
         val text = myFixture.file.text
         val caret = myFixture.caretOffset
         assertTrue("inserted name=\"\": $text", text.contains("=\"\""))
