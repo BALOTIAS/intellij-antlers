@@ -23,20 +23,20 @@ class AntlersTagInsertTest : BasePlatformTestCase() {
         assertEquals("{{ yield".length, myFixture.caretOffset)
     }
 
-    fun testCollectionPrefillsColonForm() {
+    fun testCollectionDefaultIsParamSlot() {
         completeTag("{{ collection<caret> }}", "collection")
-        assertEquals("{{ collection: }}{{ /collection }}", myFixture.file.text)
-        assertEquals("{{ collection:".length, myFixture.caretOffset)   // caret right after the colon
+        assertEquals("{{ collection  }}{{ /collection }}", myFixture.file.text)
+        assertEquals("{{ collection ".length, myFixture.caretOffset)
     }
 
-    fun testPartialPrefillsColonForm() {
+    fun testPartialDefaultSingle() {
         completeTag("{{ partial<caret> }}", "partial")
-        assertEquals("{{ partial: }}", myFixture.file.text)
-        assertEquals("{{ partial:".length, myFixture.caretOffset)
+        assertEquals("{{ partial }}", myFixture.file.text)
+        assertEquals("{{ partial".length, myFixture.caretOffset)
     }
 
     fun testNonHandleTagKeepsParamSlot() {
-        // 'cache' is a pair tag NOT in the colon-handle set → param-slot behavior (no colon).
+        // 'cache' is a pair tag → param-slot behavior (no colon).
         completeTag("{{ cache<caret> }}", "cache")
         assertEquals("{{ cache  }}{{ /cache }}", myFixture.file.text)
         assertEquals("{{ cache ".length, myFixture.caretOffset)
