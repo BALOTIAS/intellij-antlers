@@ -41,6 +41,7 @@
         <lang.findUsagesProvider language="Antlers"
             implementationClass="com.github.balotias.intellijantlers.references.AntlersFindUsagesProvider"/>
         <referencesSearch implementation="com.github.balotias.intellijantlers.references.AntlersPartialReferenceSearcher"/>
+        <referencesSearch implementation="com.github.balotias.intellijantlers.references.AntlersFieldReferenceSearcher"/>
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersSpacingPostFormatProcessor"/>
     </extensions>
 </idea-plugin>

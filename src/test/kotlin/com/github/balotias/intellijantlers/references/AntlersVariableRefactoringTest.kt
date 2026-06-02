@@ -40,4 +40,25 @@ class AntlersVariableRefactoringTest : BasePlatformTestCase() {
         val file = addTemplate("c", "{{ totally_unknown }}")
         assertNull(file.findReferenceAt("{{ totally_unknown }}".indexOf("tot"))?.resolve())
     }
+
+    fun testFindUsagesTopLevelField() {
+        addBlueprint("hero_title")
+        val file = addTemplate("page", "{{ hero_title }}")
+        val decl = declAt(file, "{{ hero_title }}".indexOf("hero"))
+        val usages = myFixture.findUsages(decl)
+        assertTrue("expected a usage: ${usages.map { it.element?.text }}", usages.isNotEmpty())
+    }
+
+    fun testFindUsagesDistinctByHandle() {
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            "fields:\n  - handle: title\n    field:\n      type: text\n" +
+                "  - handle: subtitle\n    field:\n      type: text\n"
+        )
+        val file = addTemplate("page", "{{ title }} {{ subtitle }}")
+        val titleDecl = declAt(file, "{{ title }}".indexOf("title"))
+        val usages = myFixture.findUsages(titleDecl)
+        assertEquals("only the title usage, not subtitle: ${usages.map { it.element?.text }}",
+            1, usages.size)
+    }
 }

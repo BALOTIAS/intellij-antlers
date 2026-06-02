@@ -20,8 +20,9 @@ class AntlersFindUsagesProvider : FindUsagesProvider {
     )
 
     // We don't define custom find-usages target symbols (partials are file targets); only the scanner matters.
-    override fun canFindUsagesFor(element: PsiElement): Boolean = false
-    override fun getType(element: PsiElement): String = ""
+    override fun canFindUsagesFor(element: PsiElement): Boolean = element is AntlersFieldDeclaration
+    override fun getType(element: PsiElement): String =
+        if (element is AntlersFieldDeclaration) "blueprint field" else ""
     override fun getDescriptiveName(element: PsiElement): String = (element as? PsiNamedElement)?.name ?: ""
     override fun getNodeText(element: PsiElement, useFullName: Boolean): String = getDescriptiveName(element)
     override fun getHelpId(element: PsiElement): String? = null
