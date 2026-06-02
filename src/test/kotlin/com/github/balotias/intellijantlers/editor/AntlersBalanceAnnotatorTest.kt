@@ -63,4 +63,11 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
 
     fun testMatchingHandleNotFlagged() =
         assertTrue(mismatch("{{ collection:blog }}{{ /collection:blog }}").isEmpty())
+
+    fun testMultiSegmentMismatchWarns() =
+        assertTrue(mismatch("{{ nav:collection:blog }}{{ /nav:collection:news }}")
+            .any { it.severity == com.intellij.lang.annotation.HighlightSeverity.WARNING })
+
+    fun testMultiSegmentMatchNotFlagged() =
+        assertTrue(mismatch("{{ nav:collection:blog }}{{ /nav:collection:blog }}").isEmpty())
 }
