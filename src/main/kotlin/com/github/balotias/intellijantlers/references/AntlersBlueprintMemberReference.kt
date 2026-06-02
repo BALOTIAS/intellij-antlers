@@ -4,8 +4,8 @@ import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiReferenceBase
+import com.intellij.psi.impl.source.tree.LeafPsiElement
 
 /** Soft reference from a dotted/colon sub-field segment to its blueprint declaration. */
 class AntlersBlueprintMemberReference(
@@ -13,11 +13,20 @@ class AntlersBlueprintMemberReference(
     private val namespace: BlueprintNamespace,
     private val handle: String
 ) : PsiReferenceBase<PsiElement>(element, TextRange(0, element.textLength), true) {
+
     override fun resolve(): PsiElement? {
         val field = BlueprintService.getInstance(element.project).fieldsFor(namespace)
             .firstOrNull { it.handle == handle } ?: return null
-        val psiFile = PsiManager.getInstance(element.project).findFile(field.file) ?: return null
-        return psiFile.findElementAt(field.offset) ?: psiFile
+        return AntlersFieldDeclaration(element.project, field)
     }
+
+    override fun isReferenceTo(target: PsiElement): Boolean =
+        target is AntlersFieldDeclaration && handle == target.handle && namespace == target.namespace
+
+    override fun handleElementRename(newElementName: String): PsiElement {
+        val leaf = element as? LeafPsiElement ?: return element
+        return leaf.replaceWithText(newElementName).psi
+    }
+
     override fun getVariants(): Array<Any> = emptyArray()
 }
