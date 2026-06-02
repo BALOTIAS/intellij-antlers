@@ -14,6 +14,9 @@ import com.github.balotias.intellijantlers.scope.NavVariables
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
+import com.github.balotias.intellijantlers.psi.AntlersStatement
+import com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.util.ProcessingContext
 
@@ -33,13 +36,12 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
         when (info.kind) {
             AntlersCompletionKind.TAG_NAME -> {
+                val file = parameters.position.containingFile
+                val stmt = PsiTreeUtil.getParentOfType(parameters.position, AntlersStatement::class.java)
+                val stmtStart = stmt?.textRange?.startOffset ?: parameters.offset
                 var unclosed: String? = null
                 if (info.isClosing) {
-                    val stmt = com.intellij.psi.util.PsiTreeUtil.getParentOfType(
-                        parameters.position, com.github.balotias.intellijantlers.psi.AntlersStatement::class.java)
-                    val before = stmt?.textRange?.startOffset ?: parameters.offset
-                    unclosed = com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
-                        .nearestUnclosedAt(parameters.position.containingFile, before, project)
+                    unclosed = AntlersNestingTreeBuilder.nearestUnclosedAt(file, stmtStart, project)
                     if (unclosed != null) {
                         result.addElement(
                             com.intellij.codeInsight.completion.PrioritizedLookupElement.withPriority(
@@ -48,6 +50,13 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                                 Double.MAX_VALUE
                             )
                         )
+                    }
+                } else {
+                    // Logic keywords: openers always; followers scoped to the innermost open condition.
+                    LOGIC_OPENERS.forEach { addLogic(result, it) }
+                    when (AntlersNestingTreeBuilder.nearestUnclosedAt(file, stmtStart, project)) {
+                        "if" -> LOGIC_IF_FOLLOWERS.forEach { addLogic(result, it) }
+                        "unless" -> LOGIC_UNLESS_FOLLOWERS.forEach { addLogic(result, it) }
                     }
                 }
                 for (tag in catalog.tags()) {
@@ -194,6 +203,15 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
             .removePrefix("\"").removePrefix("'")
             .replace(com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED, "")
         return result.withPrefixMatcher(inner)
+    }
+
+    private fun addLogic(result: CompletionResultSet, kw: LogicKeyword) {
+        result.addElement(
+            LookupElementBuilder.create(kw.name)
+                .withIcon(AntlersIcons.FILE)
+                .withTypeText("Logic")
+                .withInsertHandler(AntlersKeywordInsertHandler(kw))
+        )
     }
 
     private fun offerMembers(field: BlueprintField, project: com.intellij.openapi.project.Project, result: CompletionResultSet) {
