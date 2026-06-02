@@ -30,7 +30,7 @@ class CatalogModifierCoverageTest {
         "studly", "substr", "subtract", "sum", "surround", "swap_case", "table", "tidy", "timezone",
         "title", "to_json", "to_qs", "to_spaces", "to_tabs", "trim", "truncate", "ucfirst", "ul",
         "underscored", "unique", "upper", "url", "urldecode", "urlencode", "urlencode_except_slashes",
-        "values", "weeks_ago", "where", "where-in", "widont", "word_count", "wrap", "years_ago"
+        "values", "weeks_ago", "where", "where_in", "widont", "word_count", "wrap", "years_ago"
     )
 
     @Test fun coversAllCoreModifiers() {

@@ -179,4 +179,19 @@ class AntlersVariableRefactoringTest : BasePlatformTestCase() {
         assertTrue("usage renamed at caret: ${myFixture.file.text}",
             myFixture.file.text.contains("{{ hero_subtitle }}"))
     }
+
+    /**
+     * A field whose handle equals a BUNDLED catalog tag name ("collection") still caret-renames
+     * correctly: the head ident exposes [PHP-class ref, blueprint-field ref], and the PHP-class ref
+     * resolves only PROJECT tag classes (none here) → the field reference wins. Pins the accepted
+     * KNOWN LIMITATION in AntlersDefinitionReferenceHelper as NOT biting the common case.
+     */
+    fun testRenameFieldNamedLikeBundledTagWorks() {
+        addBlueprint("collection")
+        myFixture.configureByText("page.antlers.html", "{{ collec<caret>tion }}")
+        myFixture.renameElementAtCaret("featured")
+        commit()
+        assertTrue("field named like a bundled tag still renames: ${myFixture.file.text}",
+            myFixture.file.text.contains("{{ featured }}"))
+    }
 }

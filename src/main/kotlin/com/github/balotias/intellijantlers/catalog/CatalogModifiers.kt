@@ -188,7 +188,7 @@ object CatalogModifiers {
         ModifierDef(name = "urlencode_except_slashes", description = "Encode except slashes.", docUrl = "https://statamic.dev/modifiers/urlencode_except_slashes"),
         ModifierDef(name = "values", description = "Array values.", docUrl = "https://statamic.dev/modifiers/values"),
         ModifierDef(name = "weeks_ago", description = "Weeks since.", docUrl = "https://statamic.dev/modifiers/weeks_ago"),
-        ModifierDef(name = "where-in", description = "Filter by value list.", takesArguments = true, docUrl = "https://statamic.dev/modifiers/where-in"),
+        ModifierDef(name = "where_in", description = "Filter an array to items whose key matches one of the given values.", takesArguments = true, docUrl = "https://statamic.dev/modifiers/where-in"),
         ModifierDef(name = "widont", description = "Prevent widows.", docUrl = "https://statamic.dev/modifiers/widont"),
         ModifierDef(name = "word_count", description = "Word count.", docUrl = "https://statamic.dev/modifiers/word_count"),
         ModifierDef(name = "wrap", description = "Wrap with HTML.", takesArguments = true, docUrl = "https://statamic.dev/modifiers/wrap"),

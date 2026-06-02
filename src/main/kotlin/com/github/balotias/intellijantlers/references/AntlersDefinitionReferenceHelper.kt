@@ -32,7 +32,17 @@ object AntlersDefinitionReferenceHelper {
         val index = idents.indexOfFirst { it.psi == element }
 
         if (index == 0) {
-            // Head segment: PHP class ref + blueprint field ref (PsiMultiReference picks the resolver).
+            // Head segment: PHP class ref + blueprint field ref (PsiMultiReference picks the
+            // first that resolves — PHP class first).
+            //
+            // KNOWN LIMITATION (caret-rename): when a blueprint field handle collides with a
+            // *project-defined* custom tag/modifier whose PHP class resolves (via TagScanner),
+            // the PHP-class reference wins, so invoking Rename on `{{ handle }}` renames the tag
+            // class, not the field. Narrow: it only bites when the project ALSO ships a custom
+            // tag/modifier of that exact name. A field named like a *bundled* catalog tag (no
+            // project PHP class) still renames correctly — see
+            // AntlersVariableRefactoringTest.testRenameFieldNamedLikeBundledTagWorks. PHP-first is
+            // the right default for genuine tags, so we keep this ordering.
             return arrayOf(
                 AntlersPhpClassReference(element, name, isModifier = false),
                 AntlersBlueprintFieldReference(element, name)
