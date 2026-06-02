@@ -48,8 +48,8 @@ object AntlersCompletionContext {
                 val nameLeaf = prevSignificantLeaf(prev, statement)
                 if (nameLeaf?.node?.elementType != AntlersTypes.T_IDENT) {
                     AntlersCompletionInfo(AntlersCompletionKind.NONE)
-                } else if (prevSignificantLeaf(nameLeaf, statement)?.node?.elementType == AntlersTypes.T_COLON) {
-                    // Bound param `:name="$var"` takes a variable expression, not a literal value.
+                } else if (isBoundParamName(nameLeaf, statement)) {
+                    // Bound param `:name=` / `:$name=` takes a variable expression, not a literal.
                     AntlersCompletionInfo(AntlersCompletionKind.NONE)
                 } else {
                     headOf(statement)?.let {
@@ -66,6 +66,16 @@ object AntlersCompletionContext {
                     ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
             else -> AntlersCompletionInfo(AntlersCompletionKind.NONE)
+        }
+    }
+
+    /** True when [nameLeaf] is a BOUND parameter name: `:name` or `:$name` (grammar `T_COLON T_DOLLAR? T_IDENT`). */
+    private fun isBoundParamName(nameLeaf: PsiElement, statement: AntlersStatement): Boolean {
+        val before = prevSignificantLeaf(nameLeaf, statement) ?: return false
+        return when (before.node.elementType) {
+            AntlersTypes.T_COLON -> true
+            AntlersTypes.T_DOLLAR -> prevSignificantLeaf(before, statement)?.node?.elementType == AntlersTypes.T_COLON
+            else -> false
         }
     }
 

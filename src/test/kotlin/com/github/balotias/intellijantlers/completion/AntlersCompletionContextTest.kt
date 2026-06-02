@@ -58,4 +58,7 @@ class AntlersCompletionContextTest : BasePlatformTestCase() {
 
     fun testBoundParamIsNone() =
         assertEquals(AntlersCompletionKind.NONE, kindAt("{{ collection :from=<caret> }}"))
+
+    fun testBoundParamWithDollarSigilIsNone() =
+        assertEquals(AntlersCompletionKind.NONE, kindAt("{{ collection :\$from=<caret> }}"))
 }
