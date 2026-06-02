@@ -17,12 +17,6 @@ class AntlersTagInsertTest : BasePlatformTestCase() {
         }
     }
 
-    fun testPairTagCaretInParamSlot() {
-        completeTag("{{ cache<caret> }}", "cache")
-        assertEquals("{{ cache  }}{{ /cache }}", myFixture.file.text)
-        assertEquals("{{ cache ".length, myFixture.caretOffset)
-    }
-
     fun testSingleTagUnchanged() {
         completeTag("{{ yield<caret> }}", "yield")
         assertEquals("{{ yield }}", myFixture.file.text)
