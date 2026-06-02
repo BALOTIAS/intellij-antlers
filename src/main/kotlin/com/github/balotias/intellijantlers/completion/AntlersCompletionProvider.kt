@@ -135,10 +135,34 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     )
                 }
 
-            AntlersCompletionKind.PARAMETER_VALUE -> { /* filled in by the provider-wiring task */ }
+            AntlersCompletionKind.PARAMETER_VALUE -> {
+                val matched = paramValueResultSet(parameters, result)
+                for (v in AntlersParamValueSource.valuesFor(info.tagHead, info.paramName, parameters.position, project)) {
+                    matched.addElement(
+                        LookupElementBuilder.create(v.text)
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText(v.typeText)
+                    )
+                }
+            }
 
             AntlersCompletionKind.NONE -> {}
         }
+    }
+
+    /** Inside a quoted value the default prefix includes the opening quote (matching nothing);
+     *  re-base the matcher on the string's inner text up to the caret. */
+    private fun paramValueResultSet(
+        parameters: CompletionParameters,
+        result: CompletionResultSet
+    ): CompletionResultSet {
+        val pos = parameters.position
+        if (pos.node.elementType != com.github.balotias.intellijantlers.psi.AntlersTypes.T_STRING) return result
+        val caretInStr = (parameters.offset - pos.textRange.startOffset).coerceIn(0, pos.text.length)
+        val inner = pos.text.substring(0, caretInStr)
+            .removePrefix("\"").removePrefix("'")
+            .replace(com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED, "")
+        return result.withPrefixMatcher(inner)
     }
 
     private fun offerMembers(field: BlueprintField, project: com.intellij.openapi.project.Project, result: CompletionResultSet) {
