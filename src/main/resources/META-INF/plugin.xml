@@ -42,6 +42,7 @@
             implementationClass="com.github.balotias.intellijantlers.references.AntlersFindUsagesProvider"/>
         <referencesSearch implementation="com.github.balotias.intellijantlers.references.AntlersPartialReferenceSearcher"/>
         <referencesSearch implementation="com.github.balotias.intellijantlers.references.AntlersFieldReferenceSearcher"/>
+        <renamePsiElementProcessor implementation="com.github.balotias.intellijantlers.references.AntlersFieldRenameProcessor"/>
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersSpacingPostFormatProcessor"/>
     </extensions>
 </idea-plugin>

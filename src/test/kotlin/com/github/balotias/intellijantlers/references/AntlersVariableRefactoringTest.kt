@@ -61,4 +61,89 @@ class AntlersVariableRefactoringTest : BasePlatformTestCase() {
         assertEquals("only the title usage, not subtitle: ${usages.map { it.element?.text }}",
             1, usages.size)
     }
+
+    private fun commit() =
+        com.intellij.psi.PsiDocumentManager.getInstance(project).commitAllDocuments()
+
+    fun testRenameFieldUpdatesUsagesAndYaml() {
+        val bp = addBlueprint("hero_title")
+        val tmpl = addTemplate("page", "{{ hero_title }}")
+        val decl = declAt(tmpl, "{{ hero_title }}".indexOf("hero"))
+        myFixture.renameElement(decl, "hero_subtitle")
+        commit()
+        assertEquals("{{ hero_subtitle }}", tmpl.text)
+        assertTrue("yaml updated: ${bp.text}", bp.text.contains("handle: hero_subtitle"))
+    }
+
+    fun testRenameNestedMember() {
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            """
+            fields:
+              - handle: hero
+                field:
+                  type: group
+                  fields:
+                    - handle: subhead
+                      field:
+                        type: text
+            """.trimIndent()
+        )
+        myFixture.addFileToProject("content/collections/blog.yaml", "template: blog/show\n")
+        val tmpl = myFixture.addFileToProject(
+            "resources/views/blog/show.antlers.html", "{{ hero.subhead }}"
+        )
+        myFixture.configureFromExistingVirtualFile(tmpl.virtualFile)
+        val decl = declAt(tmpl, "{{ hero.subhead }}".indexOf("subhead"))
+        myFixture.renameElement(decl, "subtitle")
+        commit()
+        assertEquals("{{ hero.subtitle }}", tmpl.text)
+    }
+
+    fun testRenameScopedFieldLeavesUnrelatedSameHandleAlone() {
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            "fields:\n  - handle: title\n    field:\n      type: text\n"
+        )
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/news/news.yaml",
+            "fields:\n  - handle: title\n    field:\n      type: text\n"
+        )
+        val tmpl = addTemplate(
+            "page",
+            "{{ collection:news }}{{ title }}{{ /collection }}" +
+                "{{ collection:blog }}{{ title }}{{ /collection }}"
+        )
+        myFixture.configureFromExistingVirtualFile(tmpl.virtualFile)
+        val newsTitleCaret = tmpl.text.indexOf("title")
+        val decl = declAt(tmpl, newsTitleCaret)
+        myFixture.renameElement(decl, "headline")
+        commit()
+        assertTrue("news usage renamed: ${tmpl.text}",
+            tmpl.text.contains("{{ collection:news }}{{ headline }}{{ /collection }}"))
+        assertTrue("blog usage untouched: ${tmpl.text}",
+            tmpl.text.contains("{{ collection:blog }}{{ title }}{{ /collection }}"))
+    }
+
+    fun testRenameFieldsetFieldUpdatesAllImportingTemplates() {
+        myFixture.addFileToProject(
+            "resources/fieldsets/seo.yaml",
+            "fields:\n  - handle: meta_title\n    field:\n      type: text\n"
+        )
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml",
+            "fields:\n  - import: seo\n"
+        )
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/news/news.yaml",
+            "fields:\n  - import: seo\n"
+        )
+        val t1 = addTemplate("a", "{{ meta_title }}")
+        val t2 = addTemplate("b", "{{ meta_title }}")
+        val decl = declAt(t1, "{{ meta_title }}".indexOf("meta"))
+        myFixture.renameElement(decl, "seo_title")
+        commit()
+        assertEquals("{{ seo_title }}", t1.text)
+        assertEquals("{{ seo_title }}", t2.text)
+    }
 }
