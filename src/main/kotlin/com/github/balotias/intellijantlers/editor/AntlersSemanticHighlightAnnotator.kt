@@ -26,7 +26,7 @@ class AntlersSemanticHighlightAnnotator : Annotator {
                 firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.MODIFIER) }
 
             is AntlersNamePathMixin -> {
-                if (AntlersCatalogService.getInstance(element.project).tag(element.head) != null) {
+                if (AntlersCatalogService.getInstance(element.project).isTag(element.head)) {
                     firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.TAG) }
                 }
             }

@@ -28,6 +28,14 @@ class AntlersCatalogService(private val project: Project) {
 
     fun tag(name: String): TagDef? = tags().firstOrNull { it.name == name }
 
+    /** O(1) membership test backed by a cached name set — for hot callers (e.g. the highlight pass). */
+    fun isTag(name: String): Boolean = tagNameSet().contains(name)
+
+    private fun tagNameSet(): Set<String> =
+        CachedValuesManager.getManager(project).getCachedValue(project, TAG_NAMES_KEY, {
+            CachedValueProvider.Result.create(tags().mapTo(HashSet()) { it.name }, PsiModificationTracker.MODIFICATION_COUNT)
+        }, false)
+
     fun modifiers(): List<ModifierDef> {
         val custom = scannedModifierNames().filter { name -> bundledModifiers.none { it.name == name } }
             .map { ModifierDef(name = it, description = "Custom modifier") }
@@ -47,6 +55,7 @@ class AntlersCatalogService(private val project: Project) {
     companion object {
         private val TAG_KEY = Key.create<CachedValue<List<String>>>("antlers.scannedTags")
         private val MOD_KEY = Key.create<CachedValue<List<String>>>("antlers.scannedModifiers")
+        private val TAG_NAMES_KEY = Key.create<CachedValue<Set<String>>>("antlers.tagNameSet")
         fun getInstance(project: Project): AntlersCatalogService = project.service()
     }
 }
