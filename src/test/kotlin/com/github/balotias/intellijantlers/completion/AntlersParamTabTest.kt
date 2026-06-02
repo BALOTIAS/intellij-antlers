@@ -74,6 +74,24 @@ class AntlersParamTabTest : BasePlatformTestCase() {
         assertEquals("{{ collection a=\"1\" b=\"2\" }}".length, myFixture.caretOffset)
     }
 
+    fun testTabInsideQuotedValueJumpsPastQuote() {
+        // Caret inside the quotes of a param value (as left by ParameterInsertHandler `name="<caret>"`,
+        // after typing the value). Tab must NOT insert a space inside the quotes — it must move past
+        // the closing quote and open a fresh slot.
+        complete("{{ collection<caret> }}", "collection")
+        myFixture.type("from=\"test\"")
+        val text = myFixture.editor.document.text
+        val open = text.indexOf("=\"") + 1
+        val close = text.indexOf("\"", open + 1)
+        myFixture.editor.caretModel.moveToOffset(close) // caret right before the closing quote
+        tab()
+        assertEquals("{{ collection from=\"test\"  }}{{ /collection }}", docText())
+        assertEquals("{{ collection from=\"test\" ".length, myFixture.caretOffset)
+        tab() // empty slot → into block, extra space collapsed
+        assertEquals("{{ collection from=\"test\" }}{{ /collection }}", docText())
+        assertEquals("{{ collection from=\"test\" }}".length, myFixture.caretOffset)
+    }
+
     fun testBareFlagTokenOpensSlot() {
         // Slot detection is purely positional: a bare token (no '='/quotes) still opens a new slot.
         complete("{{ collection<caret> }}", "collection")

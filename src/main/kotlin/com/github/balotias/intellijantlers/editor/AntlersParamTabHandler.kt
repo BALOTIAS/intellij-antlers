@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.editor
 
+import com.intellij.codeInsight.AutoPopupController
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
@@ -48,9 +49,14 @@ class AntlersParamTabHandler(private val original: EditorActionHandler) : Editor
         val slotEmpty = before.isEmpty() || before.last() == ' '
 
         if (!slotEmpty) {
-            // A param token ends at the caret → open a fresh slot after it.
-            document.insertString(offset, " ")
-            editor.caretModel.moveToOffset(offset + 1)
+            // A param ends at/after the caret → open a fresh slot past the end of the current param.
+            // If the caret sits inside a quoted value (`from="te|st"`), advance past the closing quote
+            // first so we never split the value with the inserted space.
+            val insertAt = endOfCurrentParam(chars, regionStart, offset, tagEnd)
+            document.insertString(insertAt, " ")
+            editor.caretModel.moveToOffset(insertAt + 1)
+            // Offer parameter-name suggestions in the fresh slot.
+            editor.project?.let { AutoPopupController.getInstance(it).scheduleAutoPopup(editor) }
         } else {
             // Empty slot → collapse dangling spaces to a single separator, jump to the terminal stop.
             var lastNonSpace = tagEnd - 1
@@ -62,5 +68,31 @@ class AntlersParamTabHandler(private val original: EditorActionHandler) : Editor
             editor.caretModel.moveToOffset(session.terminalOffset())
             session.reachedTerminal = true
         }
+    }
+
+    /**
+     * The offset just past the end of the param the caret is touching. Normally that is the caret
+     * itself, but when the caret is inside a quoted value the param ends after the matching closing
+     * quote, so we scan `[regionStart, offset)` for an open quote and, if found, advance to just past
+     * its closing quote (bounded by [tagEnd]). An unterminated quote falls back to the caret.
+     */
+    private fun endOfCurrentParam(chars: CharSequence, regionStart: Int, offset: Int, tagEnd: Int): Int {
+        var quote: Char? = null
+        var i = regionStart
+        while (i < offset) {
+            val c = chars[i]
+            when {
+                quote == null && (c == '"' || c == '\'') -> quote = c
+                quote == c -> quote = null
+            }
+            i++
+        }
+        val open = quote ?: return offset
+        var j = offset
+        while (j < tagEnd) {
+            if (chars[j] == open) return j + 1
+            j++
+        }
+        return offset
     }
 }
