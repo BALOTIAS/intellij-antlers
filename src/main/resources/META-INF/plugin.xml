@@ -38,6 +38,9 @@
                          groupName="Antlers" enabledByDefault="true" level="WARNING"/>
         <lang.psiStructureViewFactory language="Antlers"
             implementationClass="com.github.balotias.intellijantlers.structure.AntlersStructureViewFactory"/>
+        <lang.findUsagesProvider language="Antlers"
+            implementationClass="com.github.balotias.intellijantlers.references.AntlersFindUsagesProvider"/>
+        <referencesSearch implementation="com.github.balotias.intellijantlers.references.AntlersPartialReferenceSearcher"/>
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersSpacingPostFormatProcessor"/>
     </extensions>
 </idea-plugin>
