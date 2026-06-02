@@ -85,6 +85,27 @@ class AntlersHtmlFormatTest : BasePlatformTestCase() {
         assertEquals(canonical, reformat(garbage))
     }
 
+    /**
+     * Bare, attribute-less void HTML elements (`<br>`, `<hr>`) inside a `{{ }}` pair must indent to
+     * their normal sibling level — NOT to column 0. Both the bare `<br>` and the attributed
+     * `<img …>` get an identical `Indent.NORMAL` in the block tree, so they land at the same column.
+     */
+    fun testBareVoidElementIndent() {
+        assertEquals(
+            "<div>\n    {{ collection:blog }}\n        <img src=\"x\" alt=\"y\">\n        <br>\n    {{ /collection }}\n</div>",
+            reformat("<div>\n{{ collection:blog }}\n<img src=\"x\" alt=\"y\">\n<br>\n{{ /collection }}\n</div>")
+        )
+        // bare void as the only child, and two bare voids as siblings — all at the sibling level
+        assertEquals(
+            "<div>\n    {{ collection:blog }}\n        <br>\n    {{ /collection }}\n</div>",
+            reformat("<div>\n{{ collection:blog }}\n<br>\n{{ /collection }}\n</div>")
+        )
+        assertEquals(
+            "<div>\n    {{ collection:blog }}\n        <br>\n        <hr>\n    {{ /collection }}\n</div>",
+            reformat("<div>\n{{ collection:blog }}\n<br>\n<hr>\n{{ /collection }}\n</div>")
+        )
+    }
+
     /** Nested Antlers blocks must not each add an indent level. */
     fun testNestedAntlersNoAccumulation() {
         assertEquals(
