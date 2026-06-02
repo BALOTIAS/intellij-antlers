@@ -28,9 +28,16 @@ import com.intellij.xml.template.formatter.TemplateLanguageBlock
  * Known tradeoff (accepted): an Antlers pair-tag body that is not wrapped in an HTML element stays at
  * its surrounding HTML level (no extra Antlers indent level).
  *
- * Note: bare/attribute-less void HTML elements (`<br>`, `<hr>`) inside a `{{ }}` pair indent to the
- * normal sibling level just like attributed voids (`<img …>`); the HTML formatter assigns both an
- * identical `Indent.NORMAL`. Pinned by `AntlersHtmlFormatTest.testBareVoidElementIndent`.
+ * Bare void HTML elements (`<br>`, `<hr>`) inside a `{{ }}` pair normally indent to the sibling level
+ * just like attributed voids (pinned by `AntlersHtmlFormatTest.testBareVoidElementIndent`).
+ *
+ * KNOWN LIMITATIONS (cosmetic under-indentation only — never runaway, always idempotent):
+ *  - A void element on its own line immediately AFTER an element whose attribute contains an Antlers
+ *    fragment (e.g. `<img src="{{ image }}">` then `<br>`) indents to column 0 instead of the sibling
+ *    level — the `{{ }}` inside the attribute disrupts the HTML markup block tree for the next sibling
+ *    (a framework/HTML-formatter quirk, not our indent logic). Pinned by `testVoidAfterAntlersAttribute`.
+ *  - Content-dependent indent: `<li>x</li>` and `<li>{{ title }}</li>` can land at different levels
+ *    because an inner `{{ }}` changes the block-wrapping depth. Stable + idempotent, just a surprise.
  *
  * In-`{{ }}` spacing is handled separately by [AntlersSpacingPostFormatProcessor]; this builder adds
  * no Antlers spacing (getSpacing returns null).
