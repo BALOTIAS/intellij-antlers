@@ -20,7 +20,8 @@ import com.intellij.util.IncorrectOperationException
 /**
  * Synthetic, renamable declaration for a blueprint field handle. Both blueprint references resolve
  * to this so Find Usages and Rename have a stable, identity-bearing target. Identity is by
- * (handle, namespace, file, offset); navigation lands precisely on the YAML `handle:` token.
+ * (file, offset) — the physical declaration site, so a fieldset field imported into several
+ * collections is one declaration; navigation lands precisely on the YAML `handle:` token.
  */
 class AntlersFieldDeclaration(
     private val project: Project,
@@ -60,10 +61,7 @@ class AntlersFieldDeclaration(
     override fun isEquivalentTo(another: PsiElement?): Boolean = this == another
 
     override fun equals(other: Any?): Boolean =
-        other is AntlersFieldDeclaration &&
-            handle == other.handle && namespace == other.namespace &&
-            file == other.file && offset == other.offset
+        other is AntlersFieldDeclaration && file == other.file && offset == other.offset
 
-    override fun hashCode(): Int =
-        ((handle.hashCode() * 31 + namespace.hashCode()) * 31 + file.hashCode()) * 31 + offset
+    override fun hashCode(): Int = file.hashCode() * 31 + offset
 }

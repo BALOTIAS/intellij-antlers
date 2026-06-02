@@ -20,7 +20,7 @@ class AntlersBlueprintFieldReference(
     override fun isReferenceTo(target: PsiElement): Boolean {
         if (target !is AntlersFieldDeclaration) return false
         val field = AntlersFieldContext.resolveField(element, handle, element.project) ?: return false
-        return field.handle == target.handle && field.namespace == target.namespace
+        return field.file == target.file && field.offset == target.offset
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {

@@ -20,8 +20,12 @@ class AntlersBlueprintMemberReference(
         return AntlersFieldDeclaration(element.project, field)
     }
 
-    override fun isReferenceTo(target: PsiElement): Boolean =
-        target is AntlersFieldDeclaration && handle == target.handle && namespace == target.namespace
+    override fun isReferenceTo(target: PsiElement): Boolean {
+        if (target !is AntlersFieldDeclaration) return false
+        val field = BlueprintService.getInstance(element.project).fieldsFor(namespace)
+            .firstOrNull { it.handle == handle } ?: return false
+        return field.file == target.file && field.offset == target.offset
+    }
 
     override fun handleElementRename(newElementName: String): PsiElement {
         val leaf = element as? LeafPsiElement ?: return element

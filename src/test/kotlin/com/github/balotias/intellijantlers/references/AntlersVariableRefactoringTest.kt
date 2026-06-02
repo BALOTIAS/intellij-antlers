@@ -146,4 +146,37 @@ class AntlersVariableRefactoringTest : BasePlatformTestCase() {
         assertEquals("{{ seo_title }}", t1.text)
         assertEquals("{{ seo_title }}", t2.text)
     }
+
+    fun testRenameFieldsetFieldAcrossScopedCollections() {
+        myFixture.addFileToProject(
+            "resources/fieldsets/seo.yaml",
+            "fields:\n  - handle: meta_title\n    field:\n      type: text\n"
+        )
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/blog/blog.yaml", "fields:\n  - import: seo\n"
+        )
+        myFixture.addFileToProject(
+            "resources/blueprints/collections/news/news.yaml", "fields:\n  - import: seo\n"
+        )
+        myFixture.addFileToProject("content/collections/blog.yaml", "template: blog/show\n")
+        myFixture.addFileToProject("content/collections/news.yaml", "template: news/show\n")
+        val blogTmpl = myFixture.addFileToProject("resources/views/blog/show.antlers.html", "{{ meta_title }}")
+        val newsTmpl = myFixture.addFileToProject("resources/views/news/show.antlers.html", "{{ meta_title }}")
+        myFixture.configureFromExistingVirtualFile(blogTmpl.virtualFile)
+        val decl = declAt(blogTmpl, "{{ meta_title }}".indexOf("meta"))
+        myFixture.renameElement(decl, "seo_title")
+        commit()
+        assertEquals("{{ seo_title }}", blogTmpl.text)
+        assertEquals("blog and news both import the same fieldset field; news usage must rename too: ${newsTmpl.text}",
+            "{{ seo_title }}", newsTmpl.text)
+    }
+
+    fun testRenameFromUsageCaret() {
+        addBlueprint("hero_title")
+        myFixture.configureByText("page.antlers.html", "{{ hero_<caret>title }}")
+        myFixture.renameElementAtCaret("hero_subtitle")
+        commit()
+        assertTrue("usage renamed at caret: ${myFixture.file.text}",
+            myFixture.file.text.contains("{{ hero_subtitle }}"))
+    }
 }
