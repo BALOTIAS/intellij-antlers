@@ -127,6 +127,19 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                 }
             }
 
+            AntlersCompletionKind.TAG_SHORTHAND -> {
+                for (name in SHORTHAND_TAGS) {
+                    val tag = catalog.tag(name) ?: continue
+                    result.addElement(
+                        LookupElementBuilder.create(name)
+                            .withPresentableText(":$name")
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText(if (tag.isPair) "Shorthand (block)" else "Shorthand")
+                            .withInsertHandler(ShorthandTagInsertHandler(name, tag.isPair))
+                    )
+                }
+            }
+
             AntlersCompletionKind.FIELD_PATH ->
                 AntlersMemberResolver.resolveField(parameters.position, info.pathPrefix, project)
                     ?.let { offerMembers(it, project, result) }

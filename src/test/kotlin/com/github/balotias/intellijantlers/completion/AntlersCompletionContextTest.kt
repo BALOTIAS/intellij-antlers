@@ -61,4 +61,13 @@ class AntlersCompletionContextTest : BasePlatformTestCase() {
 
     fun testBoundParamWithDollarSigilIsNone() =
         assertEquals(AntlersCompletionKind.NONE, kindAt("{{ collection :\$from=<caret> }}"))
+
+    fun testShorthandColonAfterBrace() =
+        assertEquals(AntlersCompletionKind.TAG_SHORTHAND, kindAt("{{ :coll<caret> }}"))
+
+    fun testShorthandBareColon() =
+        assertEquals(AntlersCompletionKind.TAG_SHORTHAND, kindAt("{{ :<caret> }}"))
+
+    fun testMethodColonAfterHeadUnchanged() =
+        assertEquals(AntlersCompletionKind.TAG_METHOD, kindAt("{{ collection:<caret> }}"))
 }

@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 
-enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, PARAMETER, PARAMETER_VALUE, MODIFIER, FIELD_PATH, NONE }
+enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, TAG_SHORTHAND, PARAMETER, PARAMETER_VALUE, MODIFIER, FIELD_PATH, NONE }
 
 data class AntlersCompletionInfo(
     val kind: AntlersCompletionKind,
@@ -41,7 +41,9 @@ object AntlersCompletionContext {
                 AntlersCompletionInfo(AntlersCompletionKind.FIELD_PATH, pathPrefix = segmentsBeforeCaret(statement, position))
 
             AntlersTypes.T_COLON ->
-                headOf(statement)?.let {
+                if (prevSignificantLeaf(prev, statement)?.node?.elementType == AntlersTypes.T_LDOUBLE)
+                    AntlersCompletionInfo(AntlersCompletionKind.TAG_SHORTHAND)
+                else headOf(statement)?.let {
                     AntlersCompletionInfo(AntlersCompletionKind.TAG_METHOD, it, segmentsBeforeCaret(statement, position))
                 } ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
