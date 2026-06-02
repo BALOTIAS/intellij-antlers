@@ -4,6 +4,7 @@ import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.parser.AntlersFile
 import com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin
 import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
+import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
 import com.github.balotias.intellijantlers.scope.NestingNode
 import com.intellij.lang.annotation.AnnotationHolder
@@ -43,6 +44,27 @@ class AntlersBalanceAnnotator : Annotator {
 
         // Openers never closed (every node in the tree is already a known construct by construction).
         reportUnclosed(tree.roots, holder)
+
+        // Paired tag whose closer has an explicit handle that differs from the opener's handle.
+        reportHandleMismatch(tree.roots, holder)
+    }
+
+    private fun reportHandleMismatch(nodes: List<NestingNode>, holder: AnnotationHolder) {
+        for (n in nodes) {
+            val closer = n.closer
+            if (closer != null) {
+                val openerHandle = (n.opener.namePath as? AntlersNamePathMixin)
+                    ?.segments?.drop(1)?.joinToString(":") ?: ""
+                val closerName = (closer.closingTag as? AntlersClosingTagMixin)?.closedName ?: ""
+                val closerHandle = closerName.substringAfter(":", "")
+                if (openerHandle.isNotEmpty() && closerHandle.isNotEmpty() && openerHandle != closerHandle) {
+                    holder.newAnnotation(HighlightSeverity.WARNING,
+                        "Closing handle ':$closerHandle' does not match the opening '{{ ${n.name}:$openerHandle }}'.")
+                        .range(closer).create()
+                }
+            }
+            reportHandleMismatch(n.children, holder)
+        }
     }
 
     private fun reportUnclosed(nodes: List<NestingNode>, holder: AnnotationHolder) {

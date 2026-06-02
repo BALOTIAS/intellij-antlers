@@ -46,4 +46,21 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
         assertTrue("stray /unknownaddon must not be flagged", balance("{{ /unknownaddon }}").isEmpty())
         assertTrue("bare unknown tag must not be flagged", balance("{{ unknownaddon }}").isEmpty())
     }
+
+    private fun mismatch(text: String): List<com.intellij.codeInsight.daemon.impl.HighlightInfo> {
+        myFixture.configureByText("p.antlers.html", text)
+        return myFixture.doHighlighting().filter { (it.description ?: "").contains("does not match") }
+    }
+
+    fun testHandleMismatchWarns() {
+        val d = mismatch("{{ collection:blog }}{{ /collection:news }}")
+        assertTrue("mismatch flagged: ${d.map { it.description }}",
+            d.any { it.severity == com.intellij.lang.annotation.HighlightSeverity.WARNING })
+    }
+
+    fun testHeadOnlyCloserNotFlagged() =
+        assertTrue(mismatch("{{ collection:blog }}{{ /collection }}").isEmpty())
+
+    fun testMatchingHandleNotFlagged() =
+        assertTrue(mismatch("{{ collection:blog }}{{ /collection:blog }}").isEmpty())
 }
