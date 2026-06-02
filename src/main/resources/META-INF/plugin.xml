@@ -47,5 +47,13 @@
         <colorSettingsPage implementation="com.github.balotias.intellijantlers.highlighting.AntlersColorSettingsPage"/>
         <liveTemplateContext contextId="ANTLERS" implementation="com.github.balotias.intellijantlers.template.AntlersTemplateContextType"/>
         <defaultLiveTemplates file="liveTemplates/Antlers"/>
+        <internalFileTemplate name="Antlers Template"/>
     </extensions>
+
+    <actions>
+        <action id="Antlers.CreateFile"
+                class="com.github.balotias.intellijantlers.actions.CreateAntlersFileAction">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+    </actions>
 </idea-plugin>
