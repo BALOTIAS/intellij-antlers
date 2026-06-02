@@ -38,5 +38,6 @@
                          groupName="Antlers" enabledByDefault="true" level="WARNING"/>
         <lang.psiStructureViewFactory language="Antlers"
             implementationClass="com.github.balotias.intellijantlers.structure.AntlersStructureViewFactory"/>
+        <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersSpacingPostFormatProcessor"/>
     </extensions>
 </idea-plugin>
