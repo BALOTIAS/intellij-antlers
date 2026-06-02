@@ -5,14 +5,20 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 class AntlersLiveTemplatesTest : BasePlatformTestCase() {
 
-    fun testInContextForAntlersFile() {
-        myFixture.configureByText("page.antlers.html", "{{ x }}")
+    fun testInContextInHtmlRegion() {
+        myFixture.configureByText("page.antlers.html", "<div><caret></div>")
         val ctx = TemplateActionContext.expanding(myFixture.file, myFixture.editor)
         assertTrue(AntlersTemplateContextType().isInContext(ctx))
     }
 
+    fun testNotInContextInsideBraces() {
+        myFixture.configureByText("page.antlers.html", "{{ <caret> }}")
+        val ctx = TemplateActionContext.expanding(myFixture.file, myFixture.editor)
+        assertFalse(AntlersTemplateContextType().isInContext(ctx))
+    }
+
     fun testNotInContextForPlainText() {
-        myFixture.configureByText("note.txt", "hello")
+        myFixture.configureByText("note.txt", "hel<caret>lo")
         val ctx = TemplateActionContext.expanding(myFixture.file, myFixture.editor)
         assertFalse(AntlersTemplateContextType().isInContext(ctx))
     }
