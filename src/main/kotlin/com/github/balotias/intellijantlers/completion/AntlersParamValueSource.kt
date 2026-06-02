@@ -36,10 +36,15 @@ object AntlersParamValueSource {
 
     private fun sortValues(position: PsiElement, project: Project): List<ParamValue> {
         val fields = (AntlersFieldContext.fieldsInScope(position, project)?.map { it.handle }
-            ?: BlueprintService.getInstance(project).fields().map { it.handle })
-        val keys = (fields + SORT_KEYS).distinct()
+            ?: BlueprintService.getInstance(project).fields().map { it.handle }).distinct()
+        val staticKeys = SORT_KEYS.filter { it !in fields }   // blueprint fields → "Field", curated keys → "Sort"
         val out = mutableListOf<ParamValue>()
-        for (k in keys) {
+        for (k in fields) {
+            out.add(ParamValue(k, "Field"))
+            out.add(ParamValue("$k:asc", "Field"))
+            out.add(ParamValue("$k:desc", "Field"))
+        }
+        for (k in staticKeys) {
             out.add(ParamValue(k, "Sort"))
             out.add(ParamValue("$k:asc", "Sort"))
             out.add(ParamValue("$k:desc", "Sort"))
