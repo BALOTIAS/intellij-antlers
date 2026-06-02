@@ -1,6 +1,8 @@
 package com.github.balotias.intellijantlers.completion
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.github.balotias.intellijantlers.editor.AntlersParamSession
+import com.intellij.codeInsight.lookup.Lookup
 
 class AntlersLogicKeywordTest : BasePlatformTestCase() {
 
@@ -46,5 +48,37 @@ class AntlersLogicKeywordTest : BasePlatformTestCase() {
         // letter with `e`, so it cannot surface under an `e` prefix regardless of what is offered.
         // Use an `i` prefix to assert openers are still offered when a pair tag is innermost.
         assertTrue("openers still offered", lookups("{{ if x }}{{ collection }}{{ i<caret> }}").contains("if"))
+    }
+
+    private fun insert(text: String, keyword: String) {
+        myFixture.configureByText("p.antlers.html", text)
+        myFixture.completeBasic()
+        myFixture.lookup?.let { lk ->
+            val item = lk.items.firstOrNull { it.lookupString == keyword } ?: return
+            lk.currentItem = item
+            myFixture.finishLookup(Lookup.NORMAL_SELECT_CHAR)
+        }
+    }
+
+    private fun docText() = myFixture.editor.document.text
+
+    fun testOpenerInsertsConditionSlotAndCloser() {
+        insert("{{ i<caret> }}", "if")
+        assertEquals("{{ if  }}{{ /if }}", docText())
+        assertEquals("{{ if ".length, myFixture.caretOffset)
+        // A condition is not params → no repeating-param session is armed.
+        assertNull(AntlersParamSession.of(myFixture.editor))
+    }
+
+    fun testElseifInsertsConditionSlotNoCloser() {
+        insert("{{ if x }}{{ el<caret> }}", "elseif")
+        assertEquals("{{ if x }}{{ elseif  }}", docText())
+        assertEquals("{{ if x }}{{ elseif ".length, myFixture.caretOffset)
+    }
+
+    fun testEndifInsertsPlainAndCaretAfterBraces() {
+        insert("{{ if x }}{{ end<caret> }}", "endif")
+        assertEquals("{{ if x }}{{ endif }}", docText())
+        assertEquals("{{ if x }}{{ endif }}".length, myFixture.caretOffset)
     }
 }
