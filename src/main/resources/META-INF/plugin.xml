@@ -44,5 +44,6 @@
         <referencesSearch implementation="com.github.balotias.intellijantlers.references.AntlersFieldReferenceSearcher"/>
         <renamePsiElementProcessor implementation="com.github.balotias.intellijantlers.references.AntlersFieldRenameProcessor"/>
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersSpacingPostFormatProcessor"/>
+        <colorSettingsPage implementation="com.github.balotias.intellijantlers.highlighting.AntlersColorSettingsPage"/>
     </extensions>
 </idea-plugin>
