@@ -33,6 +33,22 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
         when (info.kind) {
             AntlersCompletionKind.TAG_NAME -> {
+                if (info.isClosing) {
+                    val stmt = com.intellij.psi.util.PsiTreeUtil.getParentOfType(
+                        parameters.position, com.github.balotias.intellijantlers.psi.AntlersStatement::class.java)
+                    val before = stmt?.textRange?.startOffset ?: parameters.offset
+                    val unclosed = com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
+                        .nearestUnclosedAt(parameters.position.containingFile, before, project)
+                    if (unclosed != null) {
+                        result.addElement(
+                            com.intellij.codeInsight.completion.PrioritizedLookupElement.withPriority(
+                                LookupElementBuilder.create(unclosed)
+                                    .withIcon(AntlersIcons.FILE).withTypeText("Close tag"),
+                                Double.MAX_VALUE
+                            )
+                        )
+                    }
+                }
                 for (tag in catalog.tags()) {
                     result.addElement(
                         LookupElementBuilder.create(tag.name)

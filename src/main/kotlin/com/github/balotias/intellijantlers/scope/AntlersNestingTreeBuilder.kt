@@ -79,6 +79,36 @@ object AntlersNestingTreeBuilder {
         return NestingTree(roots, unmatched)
     }
 
+    /** Name of the innermost still-open pair tag / condition strictly before [beforeOffset], or null. */
+    fun nearestUnclosedAt(root: PsiElement, beforeOffset: Int, project: Project): String? {
+        val catalog = if (project.isDefault) null else AntlersCatalogService.getInstance(project)
+        val stack = ArrayDeque<String>()
+        val statements = PsiTreeUtil.findChildrenOfType(root, AntlersStatement::class.java)
+            .filter { it.textRange.startOffset < beforeOffset }
+            .sortedBy { it.textRange.startOffset }
+        for (stmt in statements) {
+            val closing = stmt.closingTag
+            if (closing != null) {
+                val name = (closing as? AntlersClosingTagMixin)?.closedName?.substringBefore(':')
+                if (name != null) { val i = stack.indexOfLast { it == name }; if (i >= 0) while (stack.size > i) stack.removeLast() }
+                continue
+            }
+            val condition = stmt.condition
+            if (condition != null) {
+                val kw = (condition as? AntlersConditionMixin)?.keyword
+                if (kw != null) {
+                    val opener = CONDITION_CLOSERS[kw]
+                    if (opener != null) { val i = stack.indexOfLast { it == opener }; if (i >= 0) while (stack.size > i) stack.removeLast() }
+                    else if (kw in CONDITION_OPENERS) stack.addLast(kw)
+                }
+                continue
+            }
+            val head = (stmt.namePath as? AntlersNamePathMixin)?.head
+            if (head != null && head.isNotBlank() && catalog?.tag(head)?.isPair == true) stack.addLast(head)
+        }
+        return stack.lastOrNull()
+    }
+
     /** Close the frame at [idx] with [closer]; drop inner frames but hoist their closed children up. */
     private fun closeMatched(stack: ArrayDeque<Frame>, idx: Int, closer: AntlersStatement, roots: MutableList<NestingNode>) {
         // Inner unmatched openers are DROPPED (not flagged — matching the original walk), but their

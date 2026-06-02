@@ -14,7 +14,8 @@ data class AntlersCompletionInfo(
     val kind: AntlersCompletionKind,
     val tagHead: String? = null,
     val pathPrefix: List<String> = emptyList(),
-    val paramName: String? = null
+    val paramName: String? = null,
+    val isClosing: Boolean = false
 )
 
 object AntlersCompletionContext {
@@ -33,7 +34,7 @@ object AntlersCompletionContext {
 
             AntlersTypes.T_SLASH ->
                 if (prevSignificantLeaf(prev, statement)?.node?.elementType == AntlersTypes.T_LDOUBLE)
-                    AntlersCompletionInfo(AntlersCompletionKind.TAG_NAME)
+                    AntlersCompletionInfo(AntlersCompletionKind.TAG_NAME, isClosing = true)
                 else AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
             AntlersTypes.T_DOT ->
