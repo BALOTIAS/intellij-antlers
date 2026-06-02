@@ -12,6 +12,8 @@ import com.intellij.codeInsight.lookup.LookupElement
  */
 class AntlersTagInsertHandler(private val isPair: Boolean) : InsertHandler<LookupElement> {
 
+    private val colonHandleTags = setOf("collection", "taxonomy", "nav", "foreach", "partial")
+
     override fun handleInsert(context: InsertionContext, item: LookupElement) {
         val document = context.document
         val name = item.lookupString
@@ -21,6 +23,20 @@ class AntlersTagInsertHandler(private val isPair: Boolean) : InsertHandler<Looku
         val nextClose = text.indexOf("}}", nameEnd)
         val nextOpen = text.indexOf("{{", nameEnd)
         val alreadyClosed = nextClose >= 0 && (nextOpen < 0 || nextClose < nextOpen)
+
+        if (name in colonHandleTags) {
+            // Idiomatic colon form: `{{ collection:<caret> }}` (+ closer for pair tags).
+            if (alreadyClosed) document.insertString(nameEnd, ":")
+            else document.insertString(nameEnd, ": }}")
+            val caretPos = nameEnd + 1                       // right after the ':'
+            if (isPair) {
+                val close = document.charsSequence.toString().indexOf("}}", caretPos)
+                if (close >= 0) document.insertString(close + 2, "{{ /$name }}")
+            }
+            context.editor.caretModel.moveToOffset(caretPos)
+            context.commitDocument()
+            return
+        }
 
         if (!isPair) {
             if (!alreadyClosed) {

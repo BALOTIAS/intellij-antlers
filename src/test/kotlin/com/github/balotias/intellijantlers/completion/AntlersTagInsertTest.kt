@@ -18,14 +18,33 @@ class AntlersTagInsertTest : BasePlatformTestCase() {
     }
 
     fun testPairTagCaretInParamSlot() {
-        completeTag("{{ collection<caret> }}", "collection")
-        assertEquals("{{ collection  }}{{ /collection }}", myFixture.file.text)
-        assertEquals("{{ collection ".length, myFixture.caretOffset)
+        completeTag("{{ cache<caret> }}", "cache")
+        assertEquals("{{ cache  }}{{ /cache }}", myFixture.file.text)
+        assertEquals("{{ cache ".length, myFixture.caretOffset)
     }
 
     fun testSingleTagUnchanged() {
+        completeTag("{{ yield<caret> }}", "yield")
+        assertEquals("{{ yield }}", myFixture.file.text)
+        assertEquals("{{ yield".length, myFixture.caretOffset)
+    }
+
+    fun testCollectionPrefillsColonForm() {
+        completeTag("{{ collection<caret> }}", "collection")
+        assertEquals("{{ collection: }}{{ /collection }}", myFixture.file.text)
+        assertEquals("{{ collection:".length, myFixture.caretOffset)   // caret right after the colon
+    }
+
+    fun testPartialPrefillsColonForm() {
         completeTag("{{ partial<caret> }}", "partial")
-        assertEquals("{{ partial }}", myFixture.file.text)
-        assertEquals("{{ partial".length, myFixture.caretOffset)
+        assertEquals("{{ partial: }}", myFixture.file.text)
+        assertEquals("{{ partial:".length, myFixture.caretOffset)
+    }
+
+    fun testNonHandleTagKeepsParamSlot() {
+        // 'cache' is a pair tag NOT in the colon-handle set → param-slot behavior (no colon).
+        completeTag("{{ cache<caret> }}", "cache")
+        assertEquals("{{ cache  }}{{ /cache }}", myFixture.file.text)
+        assertEquals("{{ cache ".length, myFixture.caretOffset)
     }
 }
