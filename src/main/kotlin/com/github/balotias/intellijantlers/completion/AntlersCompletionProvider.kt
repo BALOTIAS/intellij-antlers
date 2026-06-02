@@ -33,11 +33,12 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
         when (info.kind) {
             AntlersCompletionKind.TAG_NAME -> {
+                var unclosed: String? = null
                 if (info.isClosing) {
                     val stmt = com.intellij.psi.util.PsiTreeUtil.getParentOfType(
                         parameters.position, com.github.balotias.intellijantlers.psi.AntlersStatement::class.java)
                     val before = stmt?.textRange?.startOffset ?: parameters.offset
-                    val unclosed = com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
+                    unclosed = com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
                         .nearestUnclosedAt(parameters.position.containingFile, before, project)
                     if (unclosed != null) {
                         result.addElement(
@@ -50,6 +51,7 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     }
                 }
                 for (tag in catalog.tags()) {
+                    if (tag.name == unclosed) continue   // already offered as the prioritized closer (no duplicate)
                     result.addElement(
                         LookupElementBuilder.create(tag.name)
                             .withIcon(AntlersIcons.FILE)

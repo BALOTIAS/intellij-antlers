@@ -21,4 +21,11 @@ class AntlersClosingTagTest : BasePlatformTestCase() {
     fun testNoUnclosedNoCrash() {
         firstSuggestion("{{ /<caret> }}")   // must not throw
     }
+
+    fun testNoDuplicateForPreselectedCloser() {
+        myFixture.configureByText("p.antlers.html", "{{ collection:blog }}{{ /<caret> }}")
+        myFixture.completeBasic()
+        val collectionEntries = myFixture.lookupElementStrings?.count { it == "collection" } ?: 0
+        assertEquals("collection should appear exactly once (no normal-list duplicate)", 1, collectionEntries)
+    }
 }
