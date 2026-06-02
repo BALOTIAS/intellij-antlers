@@ -9,8 +9,9 @@ class ModifierInsertHandler(private val takesArguments: Boolean) : InsertHandler
     override fun handleInsert(context: InsertionContext, item: LookupElement) {
         if (!takesArguments) return
         val tail = "()"
-        context.document.insertString(context.tailOffset, tail)
-        context.editor.caretModel.moveToOffset(context.tailOffset + 1)
+        val at = context.tailOffset
+        context.document.insertString(at, tail)
+        context.editor.caretModel.moveToOffset(at + 1)
         context.commitDocument()
     }
 }

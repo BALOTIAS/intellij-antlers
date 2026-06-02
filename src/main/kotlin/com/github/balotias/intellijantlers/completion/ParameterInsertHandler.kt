@@ -8,8 +8,9 @@ import com.intellij.codeInsight.lookup.LookupElement
 object ParameterInsertHandler : InsertHandler<LookupElement> {
     override fun handleInsert(context: InsertionContext, item: LookupElement) {
         val tail = "=\"\""
-        context.document.insertString(context.tailOffset, tail)
-        context.editor.caretModel.moveToOffset(context.tailOffset + tail.length - 1)
+        val at = context.tailOffset
+        context.document.insertString(at, tail)
+        context.editor.caretModel.moveToOffset(at + tail.length - 1)
         context.commitDocument()
     }
 }
