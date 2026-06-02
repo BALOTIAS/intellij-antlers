@@ -51,8 +51,9 @@ class AntlersCompletionTest : BasePlatformTestCase() {
     }
 
     fun testCollectionInsertsClosingTag() {
+        // collection is a handle-taking tag → idiomatic colon form, with the closer still inserted.
         myFixture.configureByText("test.antlers.html", "{{ collec<caret>")
         myFixture.completeBasic()
-        myFixture.checkResult("{{ collection <caret> }}{{ /collection }}")
+        myFixture.checkResult("{{ collection:<caret> }}{{ /collection }}")
     }
 }
