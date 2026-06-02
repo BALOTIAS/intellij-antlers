@@ -76,24 +76,8 @@ class AntlersPartialReference(
         return rel.removeSuffix(".antlers.html").removeSuffix(".html")
     }
 
-    override fun getVariants(): Array<Any> {
-        val root = StatamicProject.viewsRoot(element) ?: return emptyArray()
-        val result = mutableListOf<String>()
-        collectPartials(root, root, result)
-        return result.toTypedArray()
-    }
-
-    private fun collectPartials(root: com.intellij.openapi.vfs.VirtualFile, dir: com.intellij.openapi.vfs.VirtualFile, result: MutableList<String>) {
-        for (child in dir.children) {
-            if (child.isDirectory) {
-                collectPartials(root, child, result)
-            } else if (child.name.endsWith(".antlers.html") || child.name.endsWith(".html")) {
-                val relPath = getRelativePath(root, child) ?: return
-                val stripped = relPath.removeSuffix(".antlers.html").removeSuffix(".html")
-                result.add(stripped)
-            }
-        }
-    }
+    override fun getVariants(): Array<Any> =
+        StatamicProject.listPartials(element).toTypedArray()
 
     private fun getRelativePath(root: com.intellij.openapi.vfs.VirtualFile, file: com.intellij.openapi.vfs.VirtualFile): String? {
         val rootPath = root.path

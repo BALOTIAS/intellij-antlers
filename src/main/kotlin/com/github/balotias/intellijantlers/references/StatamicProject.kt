@@ -42,4 +42,40 @@ object StatamicProject {
         val resources = root.findChild("resources") ?: return null
         return resources.findChild("views")
     }
+
+    /** All partial paths under `resources/views` (e.g. "blog/card"), extension-stripped. */
+    fun listPartials(element: PsiElement): List<String> {
+        val root = viewsRoot(element) ?: return emptyList()
+        val out = mutableListOf<String>()
+        collectPartials(root, root, out)
+        return out
+    }
+
+    /** Collection handles = subdirectory names of `resources/blueprints/collections`. */
+    fun listCollectionHandles(element: PsiElement): List<String> = blueprintSubdirs(element, "collections")
+
+    /** Taxonomy handles = subdirectory names of `resources/blueprints/taxonomies`. */
+    fun listTaxonomyHandles(element: PsiElement): List<String> = blueprintSubdirs(element, "taxonomies")
+
+    private fun blueprintSubdirs(element: PsiElement, kind: String): List<String> {
+        val resources = viewsRoot(element)?.parent ?: return emptyList()
+        val dir = resources.findChild("blueprints")?.findChild(kind) ?: return emptyList()
+        return dir.children.filter { it.isDirectory }.map { it.name }
+    }
+
+    private fun collectPartials(root: VirtualFile, dir: VirtualFile, out: MutableList<String>) {
+        for (child in dir.children) {
+            if (child.isDirectory) {
+                collectPartials(root, child, out)
+            } else if (child.name.endsWith(".antlers.html") || child.name.endsWith(".html")) {
+                val rel = relativePath(root, child) ?: continue
+                out.add(rel.removeSuffix(".antlers.html").removeSuffix(".html"))
+            }
+        }
+    }
+
+    private fun relativePath(root: VirtualFile, file: VirtualFile): String? {
+        if (!file.path.startsWith(root.path)) return null
+        return file.path.removePrefix("${root.path}/")
+    }
 }
