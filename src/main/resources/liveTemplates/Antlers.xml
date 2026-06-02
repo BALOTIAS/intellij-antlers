@@ -17,7 +17,7 @@
       <option name="ANTLERS" value="true"/>
     </context>
   </template>
-  <template name="coll" value="{{ collection:$HANDLE$ }}$END${{ /collection }}" description="Antlers collection loop" toReformat="false" toShortenFQNames="false">
+  <template name="coll" value="{{ collection:$HANDLE$ }}$END${{ /collection:$HANDLE$ }}" description="Antlers collection loop" toReformat="false" toShortenFQNames="false">
     <variable name="HANDLE" expression="" defaultValue="blog" alwaysStopAt="true"/>
     <context>
       <option name="ANTLERS" value="true"/>

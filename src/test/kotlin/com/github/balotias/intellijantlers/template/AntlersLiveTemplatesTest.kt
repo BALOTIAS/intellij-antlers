@@ -32,4 +32,11 @@ class AntlersLiveTemplatesTest : BasePlatformTestCase() {
         assertTrue("templates must carry the ANTLERS context: $text",
             text.contains("name=\"ANTLERS\" value=\"true\""))
     }
+
+    fun testCollTemplateMirrorsCloser() {
+        val text = javaClass.classLoader.getResourceAsStream("liveTemplates/Antlers.xml")!!
+            .bufferedReader().readText()
+        assertTrue("coll closer mirrors the handle: $text",
+            text.contains("{{ /collection:\$HANDLE\$ }}"))
+    }
 }
