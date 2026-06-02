@@ -2,6 +2,7 @@ package com.github.balotias.intellijantlers.completion
 
 import com.intellij.codeInsight.lookup.Lookup
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.github.balotias.intellijantlers.editor.AntlersParamSession
 
 class AntlersTagInsertTest : BasePlatformTestCase() {
 
@@ -17,10 +18,33 @@ class AntlersTagInsertTest : BasePlatformTestCase() {
         }
     }
 
-    fun testSingleTagStartsInParamSlot() {
+    fun testNoParamSingleCaretAfterTag() {
+        // `yield` has no params → caret lands after the tag, no slot, no session.
         completeTag("{{ yield<caret> }}", "yield")
-        assertEquals("{{ yield  }}", myFixture.file.text)
-        assertEquals("{{ yield ".length, myFixture.caretOffset)
+        assertEquals("{{ yield }}", myFixture.file.text)
+        assertEquals("{{ yield }}".length, myFixture.caretOffset)
+        assertNull(AntlersParamSession.of(myFixture.editor))
+    }
+
+    fun testNoParamPairCaretInBlock() {
+        // `nocache` has no params → caret lands in the block, no slot, no session.
+        completeTag("{{ nocache<caret> }}", "nocache")
+        assertEquals("{{ nocache }}{{ /nocache }}", myFixture.file.text)
+        assertEquals("{{ nocache }}".length, myFixture.caretOffset)
+        assertNull(AntlersParamSession.of(myFixture.editor))
+    }
+
+    fun testNoParamSingleNoSession() {
+        completeTag("{{ svg<caret> }}", "svg")
+        assertEquals("{{ svg }}", myFixture.file.text)
+        assertNull(AntlersParamSession.of(myFixture.editor))
+    }
+
+    fun testParamTagStillArmsSession() {
+        completeTag("{{ collection<caret> }}", "collection")
+        assertEquals("{{ collection  }}{{ /collection }}", myFixture.file.text)
+        assertEquals("{{ collection ".length, myFixture.caretOffset)
+        assertNotNull(AntlersParamSession.of(myFixture.editor))
     }
 
     fun testCollectionDefaultIsParamSlot() {

@@ -6,12 +6,15 @@ import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 
 /**
- * Inserts an Antlers tag with a centred parameter slot: `{{ name <caret> }}` (one space each side of
- * the caret), plus `{{ /name }}` appended for pair tags. Starting the caret in a real slot lets the
- * user type a param immediately, and the [AntlersParamSession] armed here drives the repeating
- * Tab-to-next-param / Tab-to-block flow (see AntlersParamTabHandler).
+ * Inserts an Antlers tag. A tag that takes parameters gets a centred param slot `{{ name <caret> }}`
+ * (plus `{{ /name }}` for pairs) and arms the repeating-param [AntlersParamSession]. A tag with NO
+ * parameters skips the slot/session: the caret lands in the block (pair) or right after the tag
+ * (single), since there is nothing to type inside the tag.
  */
-class AntlersTagInsertHandler(private val isPair: Boolean) : InsertHandler<LookupElement> {
+class AntlersTagInsertHandler(
+    private val isPair: Boolean,
+    private val hasParams: Boolean,
+) : InsertHandler<LookupElement> {
 
     override fun handleInsert(context: InsertionContext, item: LookupElement) {
         val document = context.document
@@ -23,19 +26,40 @@ class AntlersTagInsertHandler(private val isPair: Boolean) : InsertHandler<Looku
         val nextOpen = text.indexOf("{{", nameEnd)
         val alreadyClosed = nextClose >= 0 && (nextOpen < 0 || nextClose < nextOpen)
 
-        // Build the opening tag's param slot. `paramCaret` is the centred caret; `openTagCloseStart`
-        // is the offset of this opening tag's "}}".
+        if (!hasParams) {
+            // No params → no slot. Single-space the opener; caret past "}}" (in the block for a pair).
+            val closeStart: Int
+            if (alreadyClosed) {
+                val gap = text.substring(nameEnd, nextClose)
+                if (gap.isBlank()) {
+                    if (gap != " ") document.replaceString(nameEnd, nextClose, " ")
+                    closeStart = nameEnd + 1
+                } else {
+                    closeStart = nextClose            // existing params (rare) → don't mangle text
+                }
+            } else {
+                val needsSpace = nameEnd > 0 && text[nameEnd - 1] != ' '
+                val ins = if (needsSpace) " }}" else "}}"
+                document.insertString(nameEnd, ins)
+                closeStart = nameEnd + ins.length - 2
+            }
+            val afterClose = closeStart + 2
+            if (isPair) document.insertString(afterClose, "{{ /$name }}")
+            context.editor.caretModel.moveToOffset(afterClose)
+            context.commitDocument()
+            return
+        }
+
+        // Param tag: centred slot, capture where the caret goes and where "}}" starts.
         val paramCaret: Int
         val openTagCloseStart: Int
         if (alreadyClosed) {
             val gap = text.substring(nameEnd, nextClose)
             if (gap.isBlank()) {
-                // `{{ name<gap>}}` → normalize to `{{ name  }}`, caret centred.
                 document.replaceString(nameEnd, nextClose, "  ")
                 paramCaret = nameEnd + 1
                 openTagCloseStart = nameEnd + 2
             } else {
-                // Existing params already in the opener → caret right after the name.
                 paramCaret = nameEnd
                 openTagCloseStart = nextClose
             }
