@@ -2,8 +2,22 @@
 
 **Date:** 2026-06-02
 **Branch:** `antlers-editor-ux-fixes`
-**Status:** Approved approach (spike-proven), pending spec review
+**Status:** ❌ ABANDONED — reverted. Kept as an investigation record.
 **Spike evidence:** `spike/reformat-indentation` (commits `b244961`, `82553c8`)
+
+> **ABANDONED (2026-06-02):** The approach below was implemented and REVERTED. The spike validated
+> too narrow a set of content shapes (Antlers `{{ … }}` as the pair body's first child). On
+> realistic templates with **plain or mixed text content** (`<li>Some text</li>`, `<h1>Title</h1>`,
+> `{{ if x }}<p>a</p><p>b</p>{{ /if }}`) the absolute lever
+> `Indent.getSpaceIndent(N, relativeToDirectParent=false)` **accumulates down the block-ancestor
+> chain** — and the number of nested block wrappers inside a pair body depends on the content shape
+> (1 for `{{ title }}`, 3 for `<li>x</li>`), so the bump applies multiple times → **runaway
+> indentation** (e.g. `<li>x</li>` landed at column 20 instead of 8). This is a flat-AST template
+> indentation problem that the XML-template framework's block-wrapping makes genuinely hard; the
+> correct lever (one *relative* indent per logical nesting level) is the same synthetic-nesting
+> problem the framework resists. **Decision: reformat stays spacing-only (the documented G2 scope);
+> indentation is a known non-feature.** Lesson: a formatting "spike" MUST test plain/mixed/multi-
+> child/no-wrapper bodies, not just `{{ }}`-first content.
 
 ## Goal
 
