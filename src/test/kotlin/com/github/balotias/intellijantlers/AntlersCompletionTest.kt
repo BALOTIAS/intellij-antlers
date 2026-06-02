@@ -53,6 +53,6 @@ class AntlersCompletionTest : BasePlatformTestCase() {
     fun testCollectionInsertsClosingTag() {
         myFixture.configureByText("test.antlers.html", "{{ collec<caret>")
         myFixture.completeBasic()
-        myFixture.checkResult("{{ collection }}\n    <caret>\n{{ /collection }}")
+        myFixture.checkResult("{{ collection <caret> }}{{ /collection }}")
     }
 }
