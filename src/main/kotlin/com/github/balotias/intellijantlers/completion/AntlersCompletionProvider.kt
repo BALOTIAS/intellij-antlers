@@ -135,6 +135,8 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     )
                 }
 
+            AntlersCompletionKind.PARAMETER_VALUE -> { /* filled in by the provider-wiring task */ }
+
             AntlersCompletionKind.NONE -> {}
         }
     }

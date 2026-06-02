@@ -41,6 +41,21 @@ class AntlersCompletionContextTest : BasePlatformTestCase() {
     fun testParameterAfterMethod() = assertEquals(AntlersCompletionKind.PARAMETER, kindAt("{{ collection:blog <caret> }}"))
     fun testModifier() = assertEquals(AntlersCompletionKind.MODIFIER, kindAt("{{ title | <caret> }}"))
     fun testNoneInHtml() = assertEquals(AntlersCompletionKind.NONE, kindAt("<div <caret>></div>"))
-    fun testNoneInValue() = assertEquals(AntlersCompletionKind.NONE, kindAt("{{ collection limit=\"<caret>\" }}"))
     fun testClosingTagNoParameter() = assertEquals(AntlersCompletionKind.NONE, kindAt("{{ /collection <caret> }}"))
+
+    fun testParameterValueInString() {
+        val info = classifyAt("{{ collection from=\"<caret>\" }}")
+        assertEquals(AntlersCompletionKind.PARAMETER_VALUE, info.kind)
+        assertEquals("from", info.paramName)
+        assertEquals("collection", info.tagHead)
+    }
+
+    fun testParameterValueUnquoted() =
+        assertEquals(AntlersCompletionKind.PARAMETER_VALUE, kindAt("{{ collection from=<caret> }}"))
+
+    fun testParameterValueAfterMethod() =
+        assertEquals(AntlersCompletionKind.PARAMETER_VALUE, kindAt("{{ collection:blog sort=<caret> }}"))
+
+    fun testBoundParamIsNone() =
+        assertEquals(AntlersCompletionKind.NONE, kindAt("{{ collection :from=<caret> }}"))
 }

@@ -8,12 +8,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 
-enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, PARAMETER, MODIFIER, FIELD_PATH, NONE }
+enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, PARAMETER, PARAMETER_VALUE, MODIFIER, FIELD_PATH, NONE }
 
 data class AntlersCompletionInfo(
     val kind: AntlersCompletionKind,
     val tagHead: String? = null,
-    val pathPrefix: List<String> = emptyList()
+    val pathPrefix: List<String> = emptyList(),
+    val paramName: String? = null
 )
 
 object AntlersCompletionContext {
@@ -43,7 +44,19 @@ object AntlersCompletionContext {
                     AntlersCompletionInfo(AntlersCompletionKind.TAG_METHOD, it, segmentsBeforeCaret(statement, position))
                 } ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
 
-            AntlersTypes.T_EQUALS -> AntlersCompletionInfo(AntlersCompletionKind.NONE)
+            AntlersTypes.T_EQUALS -> {
+                val nameLeaf = prevSignificantLeaf(prev, statement)
+                if (nameLeaf?.node?.elementType != AntlersTypes.T_IDENT) {
+                    AntlersCompletionInfo(AntlersCompletionKind.NONE)
+                } else if (prevSignificantLeaf(nameLeaf, statement)?.node?.elementType == AntlersTypes.T_COLON) {
+                    // Bound param `:name="$var"` takes a variable expression, not a literal value.
+                    AntlersCompletionInfo(AntlersCompletionKind.NONE)
+                } else {
+                    headOf(statement)?.let {
+                        AntlersCompletionInfo(AntlersCompletionKind.PARAMETER_VALUE, it, paramName = nameLeaf.text)
+                    } ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
+                }
+            }
 
             AntlersTypes.T_IDENT, AntlersTypes.T_STRING, AntlersTypes.T_NUMBER,
             AntlersTypes.T_RBRACE, AntlersTypes.T_RBRACKET, AntlersTypes.T_RPAREN ->
