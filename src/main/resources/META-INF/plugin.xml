@@ -45,5 +45,7 @@
         <renamePsiElementProcessor implementation="com.github.balotias.intellijantlers.references.AntlersFieldRenameProcessor"/>
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersSpacingPostFormatProcessor"/>
         <colorSettingsPage implementation="com.github.balotias.intellijantlers.highlighting.AntlersColorSettingsPage"/>
+        <liveTemplateContext contextId="ANTLERS" implementation="com.github.balotias.intellijantlers.template.AntlersTemplateContextType"/>
+        <defaultLiveTemplates file="liveTemplates/Antlers"/>
     </extensions>
 </idea-plugin>

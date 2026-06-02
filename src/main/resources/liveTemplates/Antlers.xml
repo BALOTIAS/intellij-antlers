@@ -1,0 +1,38 @@
+<templateSet group="Antlers">
+  <template name="if" value="{{ if $COND$ }}$END${{ /if }}" description="Antlers if block" toReformat="false" toShortenFQNames="false">
+    <variable name="COND" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="ANTLERS" value="true"/>
+    </context>
+  </template>
+  <template name="ife" value="{{ if $COND$ }}$SELECTION$$END${{ else }}{{ /if }}" description="Antlers if/else block" toReformat="false" toShortenFQNames="false">
+    <variable name="COND" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="ANTLERS" value="true"/>
+    </context>
+  </template>
+  <template name="unless" value="{{ unless $COND$ }}$END${{ /unless }}" description="Antlers unless block" toReformat="false" toShortenFQNames="false">
+    <variable name="COND" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="ANTLERS" value="true"/>
+    </context>
+  </template>
+  <template name="coll" value="{{ collection:$HANDLE$ }}$END${{ /collection }}" description="Antlers collection loop" toReformat="false" toShortenFQNames="false">
+    <variable name="HANDLE" expression="" defaultValue="&quot;blog&quot;" alwaysStopAt="true"/>
+    <context>
+      <option name="ANTLERS" value="true"/>
+    </context>
+  </template>
+  <template name="partial" value="{{ partial:src=&quot;$PATH$&quot; }}" description="Antlers partial include" toReformat="false" toShortenFQNames="false">
+    <variable name="PATH" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="ANTLERS" value="true"/>
+    </context>
+  </template>
+  <template name="pair" value="{{ $TAG$ }}$END${{ /$TAG$ }}" description="Antlers paired tag" toReformat="false" toShortenFQNames="false">
+    <variable name="TAG" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="ANTLERS" value="true"/>
+    </context>
+  </template>
+</templateSet>
