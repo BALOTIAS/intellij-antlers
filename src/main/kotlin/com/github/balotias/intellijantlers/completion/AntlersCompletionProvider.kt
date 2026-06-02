@@ -66,7 +66,7 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                             .withIcon(AntlersIcons.FILE)
                             .withTypeText(if (tag.isPair) "Tag (block)" else "Tag")
                             .withTailText(if (tag.description.isNotBlank()) "  ${tag.description}" else null, true)
-                            .withInsertHandler(AntlersTagInsertHandler(tag.isPair))
+                            .withInsertHandler(AntlersTagInsertHandler(tag.isPair, tag.parameters.isNotEmpty()))
                     )
                 }
                 val seen = catalog.tags().mapTo(mutableSetOf()) { it.name }
