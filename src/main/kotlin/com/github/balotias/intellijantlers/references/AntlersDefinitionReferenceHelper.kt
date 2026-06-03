@@ -31,6 +31,11 @@ object AntlersDefinitionReferenceHelper {
         val idents = path.node.getChildren(null).filter { it.elementType == AntlersTypes.T_IDENT }
         val index = idents.indexOfFirst { it.psi == element }
 
+        // `{{ view:<name> }}` — the second ident resolves to the front-matter key.
+        if (index == 1 && idents.firstOrNull()?.psi?.text == "view") {
+            return arrayOf(AntlersViewVariableReference(element, name))
+        }
+
         if (index == 0) {
             // Head segment: PHP class ref + blueprint field ref (PsiMultiReference picks the
             // first that resolves — PHP class first).
