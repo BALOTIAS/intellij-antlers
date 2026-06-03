@@ -1,0 +1,5 @@
+Antlers File(0,25)
+  AntlersPhpBlockImpl(PHP_BLOCK)(0,25)
+    PsiElement(AntlersTokenType.{{?)('{{?')(0,3)
+    PsiElement(AntlersTokenType.T_PHP_TEXT)(' $title = "hello"; ')(3,22)
+    PsiElement(AntlersTokenType.?}})('?}}')(22,25)

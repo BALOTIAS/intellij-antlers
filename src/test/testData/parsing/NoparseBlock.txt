@@ -1,0 +1,7 @@
+Antlers File(0,52)
+  AntlersNoparseBlockImpl(NOPARSE_BLOCK)(0,52)
+    PsiElement(AntlersTokenType.T_NOPARSE_OPEN)('{{ noparse }}')(0,13)
+    PsiElement(AntlersTokenType.T_NOPARSE_TEXT)('{')(13,14)
+    PsiElement(AntlersTokenType.T_NOPARSE_TEXT)('{')(14,15)
+    PsiElement(AntlersTokenType.T_NOPARSE_TEXT)(' title }} stays literal')(15,38)
+    PsiElement(AntlersTokenType.T_NOPARSE_CLOSE)('{{ /noparse }}')(38,52)
