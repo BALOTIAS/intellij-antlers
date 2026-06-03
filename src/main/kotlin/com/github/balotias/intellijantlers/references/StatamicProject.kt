@@ -48,8 +48,9 @@ object StatamicProject {
      * views root, and the exact name before the underscored-partial convention (`{{ partial:btn }}`
      * resolves `_btn.antlers.html` — Statamic's recommended partial naming).
      */
-    fun resolvePartial(element: PsiElement, path: String): VirtualFile? {
+    fun resolvePartial(element: PsiElement, rawPath: String): VirtualFile? {
         val root = viewsRoot(element) ?: return null
+        val path = rawPath.replace('.', '/')   // Laravel/Statamic dot notation: layouts.default.footer
         val exts = listOf("antlers.html", "html")
         val names = listOf(path, underscoredPartial(path))   // exact name, then `_basename`
         for (loc in listOf("partials/", "")) {
