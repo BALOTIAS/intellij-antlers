@@ -43,13 +43,27 @@ object StatamicProject {
         return resources.findChild("views")
     }
 
-    /** Resolves a partial [path] to its file: `views/partials/<path>` (preferred) then `views/<path>`. */
+    /**
+     * Resolves a partial [path] to its file. Precedence: the `views/partials/` subfolder before the
+     * views root, and the exact name before the underscored-partial convention (`{{ partial:btn }}`
+     * resolves `_btn.antlers.html` — Statamic's recommended partial naming).
+     */
     fun resolvePartial(element: PsiElement, path: String): VirtualFile? {
         val root = viewsRoot(element) ?: return null
         val exts = listOf("antlers.html", "html")
-        for (ext in exts) root.findFileByRelativePath("partials/$path.$ext")?.let { return it }
-        for (ext in exts) root.findFileByRelativePath("$path.$ext")?.let { return it }
+        val names = listOf(path, underscoredPartial(path))   // exact name, then `_basename`
+        for (loc in listOf("partials/", "")) {
+            for (name in names) {
+                for (ext in exts) root.findFileByRelativePath("$loc$name.$ext")?.let { return it }
+            }
+        }
         return null
+    }
+
+    /** Inserts a leading underscore before the path's last segment: `blog/card` → `blog/_card`. */
+    private fun underscoredPartial(path: String): String {
+        val slash = path.lastIndexOf('/')
+        return if (slash < 0) "_$path" else path.substring(0, slash + 1) + "_" + path.substring(slash + 1)
     }
 
     /** All partial paths under `resources/views` (e.g. "blog/card"), extension-stripped; a partial in
@@ -79,9 +93,17 @@ object StatamicProject {
                 collectPartials(root, child, out)
             } else if (child.name.endsWith(".antlers.html") || child.name.endsWith(".html")) {
                 val rel = relativePath(root, child)?.removeSuffix(".antlers.html")?.removeSuffix(".html") ?: continue
-                out.add(rel.removePrefix("partials/"))   // a `views/partials/btn` partial is offered as `btn`
+                // `views/partials/btn` → `btn`; an underscored partial `_btn` → `btn` (referenced w/o `_`).
+                out.add(stripLeadingUnderscore(rel.removePrefix("partials/")))
             }
         }
+    }
+
+    /** Strips a leading underscore from a partial name's last segment: `_btn` → `btn`, `blog/_card` → `blog/card`. */
+    private fun stripLeadingUnderscore(name: String): String {
+        val slash = name.lastIndexOf('/')
+        val base = name.substring(slash + 1)
+        return if (base.startsWith("_")) name.substring(0, slash + 1) + base.removePrefix("_") else name
     }
 
     private fun relativePath(root: VirtualFile, file: VirtualFile): String? {

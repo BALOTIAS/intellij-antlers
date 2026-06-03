@@ -76,6 +76,38 @@ class AntlersPartialReferenceTest : BasePlatformTestCase() {
         assertEquals("falls back to views root", "views", t!!.virtualFile.parent.name)
     }
 
+    fun testResolvesUnderscoredPartialInPartialsFolder() {
+        // Statamic convention: {{ partial:btn }} resolves _btn.antlers.html.
+        myFixture.addFileToProject("resources/views/partials/_btn.antlers.html", "<button></button>")
+        val t = resolvePartialAt("{{ partial:b<caret>tn }}")
+        assertNotNull("underscored partial should resolve", t)
+        assertEquals("_btn.antlers.html", t!!.name)
+        assertEquals("partials", t.virtualFile.parent.name)
+    }
+
+    fun testResolvesUnderscoredPartialAtViewsRoot() {
+        myFixture.addFileToProject("resources/views/_btn.antlers.html", "x")
+        val t = resolvePartialAt("{{ partial:b<caret>tn }}")
+        assertNotNull(t)
+        assertEquals("_btn.antlers.html", t!!.name)
+    }
+
+    fun testResolvesUnderscoredNestedPartial() {
+        myFixture.addFileToProject("resources/views/blog/_card.antlers.html", "x")
+        val t = resolvePartialAt("{{ partial:blog/c<caret>ard }}")
+        assertNotNull(t)
+        assertEquals("_card.antlers.html", t!!.name)
+    }
+
+    fun testCompletionOffersUnderscoredPartialAsShortName() {
+        myFixture.addFileToProject("resources/views/partials/_btn.antlers.html", "x")
+        myFixture.addFileToProject("resources/views/partials/_card.antlers.html", "x")
+        myFixture.configureByText("page.antlers.html", "{{ partial:src=\"<caret>\" }}")
+        val variants = myFixture.completeBasic()?.map { it.lookupString } ?: emptyList()
+        assertTrue("offers btn (no underscore): $variants", variants.contains("btn"))
+        assertFalse("not the _btn form: $variants", variants.contains("_btn"))
+    }
+
     fun testCompletionOffersPartialsFolderShortName() {
         myFixture.addFileToProject("resources/views/partials/btn.antlers.html", "x")
         myFixture.addFileToProject("resources/views/partials/card.antlers.html", "x")
