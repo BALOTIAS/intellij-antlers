@@ -7,4 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface AntlersCondition extends PsiElement {
 
+  @NotNull
+  List<AntlersModifier> getModifierList();
+
 }

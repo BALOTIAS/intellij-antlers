@@ -76,7 +76,7 @@ closingTag ::= T_SLASH namePath? {
   mixin="com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin"
 }
 
-condition ::= <<atConditionKeyword>> conditionKeyword exprToken_* {
+condition ::= <<atConditionKeyword>> conditionKeyword (modifier | exprToken_)* {
   mixin="com.github.balotias.intellijantlers.psi.AntlersConditionMixin"
 }
 private conditionKeyword ::= T_IDENT
