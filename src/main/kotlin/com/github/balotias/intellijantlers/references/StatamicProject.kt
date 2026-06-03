@@ -43,12 +43,22 @@ object StatamicProject {
         return resources.findChild("views")
     }
 
-    /** All partial paths under `resources/views` (e.g. "blog/card"), extension-stripped. */
+    /** Resolves a partial [path] to its file: `views/partials/<path>` (preferred) then `views/<path>`. */
+    fun resolvePartial(element: PsiElement, path: String): VirtualFile? {
+        val root = viewsRoot(element) ?: return null
+        val exts = listOf("antlers.html", "html")
+        for (ext in exts) root.findFileByRelativePath("partials/$path.$ext")?.let { return it }
+        for (ext in exts) root.findFileByRelativePath("$path.$ext")?.let { return it }
+        return null
+    }
+
+    /** All partial paths under `resources/views` (e.g. "blog/card"), extension-stripped; a partial in
+     *  the `partials/` subfolder is offered by its short name (`btn`, not `partials/btn`), de-duplicated. */
     fun listPartials(element: PsiElement): List<String> {
         val root = viewsRoot(element) ?: return emptyList()
-        val out = mutableListOf<String>()
+        val out = LinkedHashSet<String>()
         collectPartials(root, root, out)
-        return out
+        return out.toList()
     }
 
     /** Collection handles = subdirectory names of `resources/blueprints/collections`. */
@@ -63,13 +73,13 @@ object StatamicProject {
         return dir.children.filter { it.isDirectory }.map { it.name }
     }
 
-    private fun collectPartials(root: VirtualFile, dir: VirtualFile, out: MutableList<String>) {
+    private fun collectPartials(root: VirtualFile, dir: VirtualFile, out: MutableSet<String>) {
         for (child in dir.children) {
             if (child.isDirectory) {
                 collectPartials(root, child, out)
             } else if (child.name.endsWith(".antlers.html") || child.name.endsWith(".html")) {
-                val rel = relativePath(root, child) ?: continue
-                out.add(rel.removeSuffix(".antlers.html").removeSuffix(".html"))
+                val rel = relativePath(root, child)?.removeSuffix(".antlers.html")?.removeSuffix(".html") ?: continue
+                out.add(rel.removePrefix("partials/"))   // a `views/partials/btn` partial is offered as `btn`
             }
         }
     }
