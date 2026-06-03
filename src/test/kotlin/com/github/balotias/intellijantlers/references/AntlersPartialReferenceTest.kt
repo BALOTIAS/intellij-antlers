@@ -24,6 +24,18 @@ class AntlersPartialReferenceTest : BasePlatformTestCase() {
         assertEquals("card.antlers.html", target!!.name)
     }
 
+    fun testResolveStaticSpaceForm() {
+        // `{{ partial src="..." }}` (no colon) — a static `src` parameter resolves too.
+        val target = resolveAt("blog/card", "{{ partial src=\"blog/c<caret>ard\" }}")
+        assertNotNull("static src= partial should resolve", target)
+        assertEquals("card.antlers.html", target!!.name)
+    }
+
+    fun testNonPartialSrcNotResolved() {
+        // A `src=` on a non-partial tag must NOT get a partial reference.
+        assertNull(resolveAt("blog/card", "{{ asset src=\"blog/c<caret>ard\" }}"))
+    }
+
     fun testResolveMethodForm() {
         val target = resolveAt("blog/card", "{{ partial:blog/c<caret>ard }}")
         assertNotNull(":path partial should resolve", target)

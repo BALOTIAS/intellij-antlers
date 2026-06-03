@@ -33,6 +33,20 @@ class AntlersGrammarParamModifierTest : BasePlatformTestCase() {
         assertTrue("no parse errors: ${errors().map { it.errorDescription }}", errors().isEmpty())
     }
 
+    fun testMultiAndTypedColonModifierArgs() {
+        // `(T_COLON modifierArg_)+` with a number, a multi-arg, a quoted string, and a $var.
+        for (text in listOf(
+            "{{ x | truncate:10:20 }}",
+            "{{ x | format:'Y-m-d' }}",
+            "{{ x | default:\$fallback }}",
+        )) {
+            configure(text)
+            val mod = PsiTreeUtil.findChildOfType(myFixture.file, AntlersModifier::class.java)
+            assertNotNull("modifier parsed for: $text", mod)
+            assertTrue("no parse errors for $text: ${errors().map { it.errorDescription }}", errors().isEmpty())
+        }
+    }
+
     fun testShorthandHandleStillOneNamePath() {
         // Regression: `collection:blog` (no `=`) is still a single name-path, not a param.
         configure("{{ collection:blog }}{{ /collection:blog }}")
