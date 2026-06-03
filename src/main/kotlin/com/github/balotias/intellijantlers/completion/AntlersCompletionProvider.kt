@@ -135,6 +135,16 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                         )
                     }
                 }
+                // `view` namespace — only when this file actually has front matter.
+                if (com.github.balotias.intellijantlers.view.ViewFrontMatterService.getInstance(project)
+                        .frontMatter(file) != null && seen.add("view")
+                ) {
+                    result.addElement(
+                        LookupElementBuilder.create("view")
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText("Namespace")
+                    )
+                }
             }
 
             AntlersCompletionKind.TAG_METHOD -> {
@@ -156,6 +166,17 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     for ((handle, type) in handles) {
                         result.addElement(
                             LookupElementBuilder.create(handle).withIcon(AntlersIcons.FILE).withTypeText(type)
+                        )
+                    }
+                } else if (info.pathPrefix == listOf("view")) {
+                    // `{{ view:<caret> }}` — offer the view's front-matter keys.
+                    val file = parameters.position.containingFile
+                    for (e in com.github.balotias.intellijantlers.view.ViewFrontMatterService.getInstance(project).topLevel(file)) {
+                        result.addElement(
+                            LookupElementBuilder.create(e.name)
+                                .withIcon(AntlersIcons.FILE)
+                                .withTypeText("View")
+                                .withTailText(if (e.valuePreview.isNotBlank()) "  ${e.valuePreview}" else null, true)
                         )
                     }
                 } else {
