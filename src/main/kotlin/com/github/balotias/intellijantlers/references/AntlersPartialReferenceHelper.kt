@@ -59,14 +59,16 @@ object AntlersPartialReferenceHelper {
         // Skip the "src" method ident (handled by refsForString)
         if (element.text == "src" && isMethodIdent(element, namePath)) return emptyArray()
 
-        // The element is either:
-        //   (a) the method ident inside namePath (e.g. `blog` in partial:blog)
-        //   (b) a loose T_IDENT after T_SLASH (e.g. `card` in partial:blog/card)
+        // The element is a path segment ident: any namePath ident after the head (`layouts`/`default`/
+        // `footer` in partial:layouts.default.footer), or a loose T_IDENT after T_SLASH (`card` in
+        // partial:blog/card).
         val inNamePath = PsiTreeUtil.isAncestor(namePath, element, false)
-        val isPathMethodIdent = inNamePath && isMethodIdent(element, namePath)
+        val npIdents = namePath.node.getChildren(null)
+            .filter { it.elementType == AntlersTypes.T_IDENT }.map { it.psi }
+        val isPathSegmentIdent = inNamePath && npIdents.indexOf(element) >= 1
         val isLoosePathIdent = !inNamePath && isPrecededBySlash(element)
 
-        if (!isPathMethodIdent && !isLoosePathIdent) return emptyArray()
+        if (!isPathSegmentIdent && !isLoosePathIdent) return emptyArray()
 
         val fullPath = extractPartialPath(statement) ?: return emptyArray()
         return arrayOf(
@@ -76,9 +78,10 @@ object AntlersPartialReferenceHelper {
 
     /** True when [element] is the LAST identifier of a colon-form partial path (the renamable segment). */
     private fun isTailPathIdent(element: PsiElement, namePath: AntlersNamePathMixin): Boolean {
-        // The path's last ident is the last loose T_IDENT after the namePath, or (if none) the method ident.
-        var last: PsiElement? = namePath.node.getChildren(null)
-            .filter { it.elementType == AntlersTypes.T_IDENT }.getOrNull(1)?.psi
+        // The path's last ident is the last loose T_IDENT after the namePath, or (if none) the last
+        // namePath segment (e.g. `footer` in partial:layouts.default.footer).
+        val npIdents = namePath.node.getChildren(null).filter { it.elementType == AntlersTypes.T_IDENT }
+        var last: PsiElement? = if (npIdents.size >= 2) npIdents.last().psi else null
         var sib: PsiElement? = namePath.nextSibling
         while (sib != null) {
             val t = sib.node?.elementType
@@ -118,12 +121,12 @@ object AntlersPartialReferenceHelper {
     private fun extractPartialPath(statement: AntlersStatement): String? {
         val namePath = PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)
             ?: return null
-        // Only the `:path` form reaches here (the `src="..."` form is handled by refsForString,
-        // where the string lives inside the `src` parameter).
-        val method = namePath.method ?: return null
-
-        // :path form: method is first segment, followed by /seg pairs
-        val sb = StringBuilder(method)
+        // Only the `:path` form reaches here (the `src="..."` form is handled by refsForString).
+        // All namePath segments after the head form the path (`layouts.default.footer` →
+        // `layouts/default/footer`); the `partial:blog/card` slash form adds loose `/seg` idents.
+        val pathSegments = namePath.segments.drop(1)
+        if (pathSegments.isEmpty()) return null
+        val sb = StringBuilder(pathSegments.joinToString("/"))
         var sibling: PsiElement? = namePath.nextSibling
         while (sibling != null) {
             val t = sibling.node?.elementType

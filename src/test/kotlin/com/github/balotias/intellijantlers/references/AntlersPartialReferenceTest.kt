@@ -76,6 +76,36 @@ class AntlersPartialReferenceTest : BasePlatformTestCase() {
         assertEquals("falls back to views root", "views", t!!.virtualFile.parent.name)
     }
 
+    fun testResolvesDotNotationNestedPartial() {
+        // Laravel/Statamic dot notation: {{ partial:layouts.default.footer }} -> layouts/default/footer.
+        myFixture.addFileToProject("resources/views/layouts/default/footer.antlers.html", "x")
+        val t = resolvePartialAt("{{ partial:layouts.default.fo<caret>oter }}")
+        assertNotNull("dot-notation nested partial should resolve", t)
+        assertEquals("footer.antlers.html", t!!.name)
+        assertEquals("default", t.virtualFile.parent.name)
+    }
+
+    fun testResolvesDotNotationFromMiddleSegment() {
+        myFixture.addFileToProject("resources/views/layouts/default/footer.antlers.html", "x")
+        val t = resolvePartialAt("{{ partial:layouts.def<caret>ault.footer }}")
+        assertNotNull("clicking a middle segment navigates the whole partial", t)
+        assertEquals("footer.antlers.html", t!!.name)
+    }
+
+    fun testResolvesDotNotationUnderscoredInPartialsFolder() {
+        myFixture.addFileToProject("resources/views/partials/layouts/default/_footer.antlers.html", "x")
+        val t = resolvePartialAt("{{ partial:layouts.default.fo<caret>oter }}")
+        assertNotNull(t)
+        assertEquals("_footer.antlers.html", t!!.name)
+    }
+
+    fun testResolvesDotNotationInSrcString() {
+        myFixture.addFileToProject("resources/views/layouts/default/footer.antlers.html", "x")
+        val t = resolvePartialAt("{{ partial:src=\"layouts.default.fo<caret>oter\" }}")
+        assertNotNull(t)
+        assertEquals("footer.antlers.html", t!!.name)
+    }
+
     fun testResolvesUnderscoredPartialInPartialsFolder() {
         // Statamic convention: {{ partial:btn }} resolves _btn.antlers.html.
         myFixture.addFileToProject("resources/views/partials/_btn.antlers.html", "<button></button>")
