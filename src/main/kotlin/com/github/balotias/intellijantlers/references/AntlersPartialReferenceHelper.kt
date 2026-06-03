@@ -1,6 +1,7 @@
 package com.github.balotias.intellijantlers.references
 
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
+import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.intellij.openapi.util.TextRange
@@ -15,9 +16,9 @@ import com.intellij.psi.util.PsiTreeUtil
  * getReferences() on the leaf PSI element. This avoids the PsiReferenceContributor
  * mechanism which is unreliable for non-Java-derived languages in BasePlatformTestCase.
  *
- * Grammar reality for `{{ partial:src="blog/card" }}`:
- *   - Parsed as namePath(head=partial, method=src) followed by T_EQUALS and T_STRING.
- *   - The T_STRING "blog/card" is a direct child of the statement.
+ * Grammar reality for `{{ partial:src="blog/card" }}` (and the static `{{ partial src="..." }}`):
+ *   - `src="blog/card"` parses as an AntlersParameter (`:src=` bound, `src=` static); the T_STRING
+ *     "blog/card" is the parameter's value element.
  *
  * Grammar reality for `{{ partial:blog/card }}`:
  *   - Parsed as namePath(head=partial, method=blog) followed by T_SLASH, T_IDENT(card).
@@ -31,10 +32,11 @@ object AntlersPartialReferenceHelper {
             ?: return emptyArray()
         val namePath = PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)
             ?: return emptyArray()
-        // partial:src="..." → head=partial, method=src
-        if (namePath.head != "partial" || namePath.method != "src") return emptyArray()
-        // Must be preceded by T_EQUALS
-        if (!isPrecededByEquals(element)) return emptyArray()
+        if (namePath.head != "partial") return emptyArray()
+        // The string must be the value of a `src` parameter (`:src="..."` or `src="..."`).
+        val param = PsiTreeUtil.getParentOfType(element, AntlersParameterMixin::class.java)
+            ?: return emptyArray()
+        if (param.parameterName != "src" || param.valueElement != element) return emptyArray()
 
         val raw = element.text
         val inner = raw.removeSurrounding("\"").removeSurrounding("'")
@@ -113,42 +115,12 @@ object AntlersPartialReferenceHelper {
         return false
     }
 
-    private fun isPrecededByEquals(element: PsiElement): Boolean {
-        var prev: PsiElement? = element.prevSibling
-        while (prev != null) {
-            val t = prev.node?.elementType
-            if (t == AntlersTypes.T_WS || t == com.intellij.psi.TokenType.WHITE_SPACE) {
-                prev = prev.prevSibling; continue
-            }
-            return t == AntlersTypes.T_EQUALS
-        }
-        return false
-    }
-
     private fun extractPartialPath(statement: AntlersStatement): String? {
         val namePath = PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)
             ?: return null
+        // Only the `:path` form reaches here (the `src="..."` form is handled by refsForString,
+        // where the string lives inside the `src` parameter).
         val method = namePath.method ?: return null
-
-        if (method == "src") {
-            // src="..." form: find T_STRING after T_EQUALS
-            var sibling: PsiElement? = namePath.nextSibling
-            var seenEquals = false
-            while (sibling != null) {
-                val t = sibling.node?.elementType
-                when {
-                    t == AntlersTypes.T_WS || t == com.intellij.psi.TokenType.WHITE_SPACE -> { /* skip */ }
-                    t == AntlersTypes.T_EQUALS -> seenEquals = true
-                    t == AntlersTypes.T_STRING && seenEquals -> {
-                        val raw = sibling.text
-                        return raw.removeSurrounding("\"").removeSurrounding("'")
-                    }
-                    else -> break
-                }
-                sibling = sibling.nextSibling
-            }
-            return null
-        }
 
         // :path form: method is first segment, followed by /seg pairs
         val sb = StringBuilder(method)
