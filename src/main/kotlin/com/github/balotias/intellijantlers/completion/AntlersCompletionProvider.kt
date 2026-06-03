@@ -2,8 +2,11 @@ package com.github.balotias.intellijantlers.completion
 
 import com.github.balotias.intellijantlers.AntlersIcons
 import com.github.balotias.intellijantlers.blueprint.BlueprintField
+import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.blueprint.SystemVariables
+import com.github.balotias.intellijantlers.references.StatamicProject
+import com.github.balotias.intellijantlers.scope.FormVariables
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.catalog.FieldtypeProperties
 import com.github.balotias.intellijantlers.scope.AntlersFieldContext
@@ -109,6 +112,19 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                         }
                     }
                 }
+                // Form runtime vars only inside a {{ form:… }} scope.
+                if (scopes.any { it.namespace.kind == BlueprintNamespace.Kind.FORM }) {
+                    for (fv in FormVariables.ALL) {
+                        if (seen.add(fv.name)) {
+                            result.addElement(
+                                LookupElementBuilder.create(fv.name)
+                                    .withIcon(AntlersIcons.FILE)
+                                    .withTypeText("Form")
+                                    .withTailText("  ${fv.description}", true)
+                            )
+                        }
+                    }
+                }
                 for (sv in SystemVariables.ALL) {
                     if (seen.add(sv.name)) {
                         result.addElement(
@@ -127,6 +143,19 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                     tag.methods.forEach { m ->
                         result.addElement(
                             LookupElementBuilder.create(m).withIcon(AntlersIcons.FILE).withTypeText("Method")
+                        )
+                    }
+                    // Colon shorthand handles: {{ collection:blog }}, {{ form:contact }}, etc.
+                    val handles: List<Pair<String, String>> = when (info.tagHead) {
+                        "collection" -> StatamicProject.listCollectionHandles(parameters.position).map { it to "Collection" }
+                        "taxonomy" -> StatamicProject.listTaxonomyHandles(parameters.position).map { it to "Taxonomy" }
+                        "form" -> StatamicProject.listFormHandles(parameters.position).map { it to "Form" }
+                        "nav" -> StatamicProject.listNavHandles(parameters.position).map { it to "Nav" }
+                        else -> emptyList()
+                    }
+                    for ((handle, type) in handles) {
+                        result.addElement(
+                            LookupElementBuilder.create(handle).withIcon(AntlersIcons.FILE).withTypeText(type)
                         )
                     }
                 } else {
