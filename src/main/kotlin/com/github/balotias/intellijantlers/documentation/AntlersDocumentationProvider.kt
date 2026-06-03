@@ -75,6 +75,12 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
             }
             val idents = path.node.getChildren(null).filter { it.elementType == AntlersTypes.T_IDENT }
             val index = idents.indexOfFirst { it.psi == ident }
+            if (index == 1 && idents.firstOrNull()?.psi?.text == "view") {
+                val entry = com.github.balotias.intellijantlers.view.ViewFrontMatterService
+                    .getInstance(ident.project).topLevel(ident.containingFile)
+                    .firstOrNull { it.name == name } ?: return null
+                return section("View variable <b>${esc(name)}</b>", entry.valuePreview, "")
+            }
             if (index > 0) {
                 val prefix = idents.take(index).map { it.text }
                 val parent = AntlersMemberResolver.resolveField(ident, prefix, ident.project)
