@@ -35,6 +35,26 @@ class AntlersMultilineFormatTest : BasePlatformTestCase() {
         assertEquals("{{ collection:blog\n${u}limit=\"3\"\n${u}as=\"posts\"\n}}", out)
     }
 
+    // The spacing pass collapses the opener-line gap BEFORE this processor runs; params must still be
+    // indented in a SINGLE reformat (regression: stale PSI offsets used to skip the whole statement).
+    fun testCollapsibleOpenerSpacingStillIndentsInOnePass() {
+        val out = reformat("{{   collection:blog\nlimit=\"3\"\n}}")
+        val u = unit()
+        assertEquals("{{ collection:blog\n${u}limit=\"3\"\n}}", out)
+    }
+
+    fun testCollapsiblePipeSpacingStillIndentsInOnePass() {
+        val out = reformat("{{ a  |  b\nlimit=\"3\"\n}}")
+        val u = unit()
+        assertEquals("{{ a | b\n${u}limit=\"3\"\n}}", out)
+    }
+
+    fun testIdempotentFromUnnormalizedInput() {
+        val once = reformat("{{   collection:blog\nlimit=\"3\"\n}}")
+        val twice = reformat(once)
+        assertEquals(once, twice)
+    }
+
     fun testOverwritesExistingIndent() {
         val out = reformat("{{ collection:blog\n        limit=\"3\"\n}}")   // 8 leading spaces
         val u = unit()

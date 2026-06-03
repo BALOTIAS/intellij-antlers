@@ -7,6 +7,7 @@ import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.intellij.application.options.CodeStyle
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.CodeStyleSettings
@@ -25,8 +26,13 @@ class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
-        val antlers = source.viewProvider.getPsi(AntlersLanguage.INSTANCE) as? AntlersFile ?: return rangeToReformat
         val document = source.viewProvider.document ?: return rangeToReformat
+        // A prior PostFormatProcessor (the spacing pass) can edit the document WITHOUT committing PSI;
+        // re-sync so AntlersStatement / T_STRING text ranges match the current document text. Without
+        // this, stale offsets make the range guard below skip a statement whose opener-line spacing was
+        // just collapsed — leaving its params un-indented until a second reformat.
+        PsiDocumentManager.getInstance(source.project).commitDocument(document)
+        val antlers = source.viewProvider.getPsi(AntlersLanguage.INSTANCE) as? AntlersFile ?: return rangeToReformat
 
         val opts = CodeStyle.getIndentOptions(source)
         val unit = if (opts.USE_TAB_CHARACTER) "\t" else " ".repeat(opts.INDENT_SIZE)
@@ -44,7 +50,10 @@ class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
 
             val openerIndent = leadingWhitespace(document, openerLine)
             val contIndent = openerIndent + unit
-            val rdoubleStart = range.endOffset - 2                       // start of the `}}` token
+            // `}}` token start, or -1 when the tag is unclosed (the pin=1 grammar allows a missing closer).
+            val lastLeaf = PsiTreeUtil.getDeepestLast(stmt)
+            val rdoubleStart =
+                if (lastLeaf.node.elementType == AntlersTypes.T_RDOUBLE) lastLeaf.textRange.startOffset else -1
 
             // Antlers strings may contain newlines; never reindent a line that begins inside one.
             val stringSpans = PsiTreeUtil.collectElements(stmt) {
