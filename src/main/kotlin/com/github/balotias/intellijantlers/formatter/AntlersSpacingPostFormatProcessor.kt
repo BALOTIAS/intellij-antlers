@@ -55,6 +55,7 @@ class AntlersSpacingPostFormatProcessor : PostFormatProcessor {
             val gap = TextRange(aEnd, bStart)
             if (gap.startOffset < rangeToReformat.startOffset || gap.endOffset > rangeToReformat.endOffset) return
             val current = document.getText(gap)
+            if (current.contains('\n')) return          // preserve intentional line breaks (multi-line tags)
             if (current == " ") return                 // already correct (idempotent)
             if (current.isNotEmpty() && current.isNotBlank()) return  // non-whitespace in gap → skip (defensive)
             edits.add(gap to " ")
