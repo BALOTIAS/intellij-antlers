@@ -4,6 +4,13 @@ package com.github.balotias.intellijantlers.catalog
 object CatalogTags {
     val ALL: List<TagDef> = listOf(
         TagDef(
+            name = "relate",
+            description = "Loop over a relationship field (Statamic 5; removed in 6 — use augmentation).",
+            docUrl = "https://statamic.dev/tags/relate",
+            isPair = true,
+            removedIn = 6,
+        ),
+        TagDef(
             name = "collection",
             description = "Fetch and loop over entries in a collection.",
             docUrl = "https://statamic.dev/tags/collection",

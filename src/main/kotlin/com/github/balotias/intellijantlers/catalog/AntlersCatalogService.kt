@@ -19,9 +19,11 @@ class AntlersCatalogService(private val project: Project) {
     private val bundledModifiers: List<ModifierDef> by lazy { CatalogLoader.loadModifiers() }
 
     fun tags(): List<TagDef> {
-        val custom = scannedTagNames().filter { name -> bundledTags.none { it.name == name } }
+        val major = StatamicVersionService.getInstance(project).majorVersion()
+        val bundled = bundledTags.filter { it.appliesTo(major) }
+        val custom = scannedTagNames().filter { name -> bundled.none { it.name == name } }
             .map { TagDef(name = it, description = "Custom tag") }
-        return bundledTags + custom
+        return bundled + custom
     }
 
     fun tagNames(): List<String> = tags().map { it.name }
@@ -37,9 +39,11 @@ class AntlersCatalogService(private val project: Project) {
         }, false)
 
     fun modifiers(): List<ModifierDef> {
-        val custom = scannedModifierNames().filter { name -> bundledModifiers.none { it.name == name } }
+        val major = StatamicVersionService.getInstance(project).majorVersion()
+        val bundled = bundledModifiers.filter { it.appliesTo(major) }
+        val custom = scannedModifierNames().filter { name -> bundled.none { it.name == name } }
             .map { ModifierDef(name = it, description = "Custom modifier") }
-        return bundledModifiers + custom
+        return bundled + custom
     }
 
     private fun scannedTagNames(): List<String> =

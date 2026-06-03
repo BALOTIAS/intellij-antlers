@@ -20,7 +20,7 @@ project's blueprints, fieldsets, and collections, so completion and navigation a
 - Code folding for paired tags, conditions, comments, noparse and PHP blocks.
 - A **Structure view** outline of the template's tag/condition nesting and partial includes.
 
-**Completion** (backed by a bundled Statamic 6 catalog + custom tags/modifiers discovered in your project)
+**Completion** (backed by a bundled Statamic 5 & 6 catalog — tailored to the version detected in your `composer.json` — plus custom tags/modifiers discovered in your project)
 - Tags, tag methods/sub-tags, parameter names, and **parameter values** — partial paths for
   `partial:src=`, collection/taxonomy handles for `from=`/`in=`/…, field names for `sort=`, and
   `true`/`false` for boolean params.
