@@ -9,13 +9,16 @@ Language support for **[Statamic](https://statamic.dev) Antlers** templates (`*.
 
 The plugin parses Antlers as a template language layered over HTML/CSS, so you get full Antlers
 intelligence inside `{{ }}` alongside the regular markup tooling around it. It understands your
-project's blueprints, fieldsets, and collections, so completion and navigation are blueprint-aware.
+project's blueprints, fieldsets, collections, and a view's YAML front matter, so completion and
+navigation are blueprint- and view-aware.
 
 ## Features
 
 **Editing**
 - Syntax highlighting for tags, variables, strings, numbers, comments, operators, and PHP/noparse
-  blocks — with customizable colors (*Settings → Editor → Color Scheme → Antlers*).
+  blocks — with customizable colors (*Settings → Editor → Color Scheme → Antlers*). Antlers
+  interpolation inside strings (`"object-position: {logo:focus_css}"`) is highlighted as real Antlers,
+  and a view's `---` … `---` front matter is highlighted YAML-style.
 - Brace matching (`{{ }}`, comments, noparse, PHP), commenting (`{{# … #}}`), and `{{ }}` auto-insert.
 - **Smart block editing**: completing a tag drops the caret where you'll actually type — a parameter
   slot for tags that take parameters, or straight into the block for tags that don't. **Tab** walks
@@ -31,15 +34,19 @@ project's blueprints, fieldsets, and collections, so completion and navigation a
   `true`/`false` for boolean params.
 - Logic keywords (`if`, `unless`, `else`, `elseif`, `endif`) offered inside `{{ }}`, context-aware —
   the followers (`else`/`elseif`/`endif`) appear only inside the matching open block.
-- Modifiers (after `|`) with their arguments.
-- Variables: blueprint fields, system variables, loop variables, and nav-tree variables — resolved
-  for the current scope (inside `{{ collection }}`, `{{ nav }}`, page-mapped templates, etc.).
+- Modifiers (after `|`) with their arguments — including modifiers used inside conditions
+  (`{{ if code | contains("…") }}`).
+- Collection/taxonomy/form/nav handles after the colon shorthand (`{{ collection:<caret> }}`).
+- Variables: blueprint fields, system variables, loop, nav-tree, and form variables — resolved
+  for the current scope (inside `{{ collection }}`, `{{ nav }}`, `{{ form }}`, page-mapped templates, etc.).
+- **View front matter**: keys declared in a view's `---` … `---` block are completed after `{{ view: }}`.
 - Member/relationship completion when dotting into grid/group fields and related entries.
 
 **Navigation & docs**
 - Go-to-declaration from a `{{ variable }}` to its blueprint field, from `{{ partial:… }}` to the
-  partial file, and from custom tag/modifier names to their PHP class.
-- Quick documentation (hover) for tags, modifiers, parameters, and variables.
+  partial file, from `{{ view:foo }}` to its front-matter key, and from custom tag/modifier names to
+  their PHP class.
+- Quick documentation (hover) for tags, modifiers, parameters, and variables (including `view:` keys).
 
 **Diagnostics**
 - A tag-balance annotator (unclosed/stray conditions and paired tags) that leaves unknown/addon tags
@@ -53,7 +60,8 @@ project's blueprints, fieldsets, and collections, so completion and navigation a
 **Convenience**
 - A small set of Antlers live templates (`if`, `unless`, `coll`, `partial`, …) and a
   *New → Antlers Template* file action.
-- A spacing formatter that normalizes the inside of `{{ }}` delimiters on *Reformat Code*.
+- A formatter that, on *Reformat Code*, normalizes spacing inside `{{ }}` delimiters and indents a
+  multi-line tag's parameters one level under the `{{` line (with `}}` on its own line).
 <!-- Plugin description end -->
 
 ## Compatibility
