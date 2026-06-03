@@ -14,6 +14,7 @@ class AntlersParamSession(
     val openTagStartMarker: RangeMarker,
     val openTagEndMarker: RangeMarker,
     val isPair: Boolean,
+    val conditionMode: Boolean = false,
 ) {
     /** Set once the caret has jumped to the terminal stop; the next Tab ends the session. */
     var reachedTerminal: Boolean = false

@@ -104,6 +104,19 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         return null
     }
 
+    override fun getCustomDocumentationElement(
+        editor: com.intellij.openapi.editor.Editor,
+        file: com.intellij.psi.PsiFile,
+        contextElement: PsiElement?,
+        targetOffset: Int,
+    ): PsiElement? {
+        // Modifiers, catalog tags, and params have no PSI reference, so the platform can't resolve a
+        // documentation target on hover/Ctrl-Q. Route the T_IDENT under the cursor to generateDoc.
+        if (contextElement?.node?.elementType == AntlersTypes.T_IDENT) return contextElement
+        val at = file.findElementAt(targetOffset)
+        return if (at?.node?.elementType == AntlersTypes.T_IDENT) at else null
+    }
+
     /** " · collection: blog › rows" style suffix; empty for the UNKNOWN namespace. */
     private fun namespaceLabel(ns: BlueprintNamespace): String {
         if (ns.kind == BlueprintNamespace.Kind.UNKNOWN) return ""

@@ -66,8 +66,10 @@ class AntlersLogicKeywordTest : BasePlatformTestCase() {
         insert("{{ i<caret> }}", "if")
         assertEquals("{{ if  }}{{ /if }}", docText())
         assertEquals("{{ if ".length, myFixture.caretOffset)
-        // A condition is not params → no repeating-param session is armed.
-        assertNull(AntlersParamSession.of(myFixture.editor))
+        // A condition-mode session is armed so Tab jumps into the block (not a repeating-param slot).
+        val session = AntlersParamSession.of(myFixture.editor)
+        assertNotNull(session)
+        assertTrue("condition-mode (single jump, no slot repeating)", session!!.conditionMode)
     }
 
     fun testElseifInsertsConditionSlotNoCloser() {

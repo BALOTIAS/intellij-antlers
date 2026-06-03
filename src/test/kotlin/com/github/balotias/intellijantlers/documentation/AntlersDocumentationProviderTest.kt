@@ -33,4 +33,27 @@ class AntlersDocumentationProviderTest : BasePlatformTestCase() {
     fun testNoDocForPlainVariable() {
         assertNull(docAt("{{ some_random_var<caret> }}"))
     }
+
+    fun testHoverResolvesModifierDocElement() {
+        val text = "{{ title | up<caret>per }}"
+        val caret = text.indexOf("<caret>")
+        myFixture.configureByText("t.antlers.html", text.replace("<caret>", ""))
+        val provider = AntlersDocumentationProvider()
+        val ctx = myFixture.file.findElementAt(caret)
+        val el = provider.getCustomDocumentationElement(myFixture.editor, myFixture.file, ctx, caret)
+        assertNotNull("hover must resolve a documentation element on the modifier", el)
+        val doc = provider.generateDoc(el!!, el)
+        assertNotNull(doc)
+        assertTrue("mentions upper: $doc", doc!!.contains("upper"))
+        assertTrue("links to docs: $doc", doc.contains("statamic.dev"))
+    }
+
+    fun testHoverNoDocElementOnNonIdent() {
+        val text = "{{ title <caret>| upper }}"
+        val caret = text.indexOf("<caret>")
+        myFixture.configureByText("t.antlers.html", text.replace("<caret>", ""))
+        val provider = AntlersDocumentationProvider()
+        val ctx = myFixture.file.findElementAt(caret)
+        assertNull(provider.getCustomDocumentationElement(myFixture.editor, myFixture.file, ctx, caret))
+    }
 }

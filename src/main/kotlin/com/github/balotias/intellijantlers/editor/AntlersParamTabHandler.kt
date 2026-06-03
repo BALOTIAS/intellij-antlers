@@ -46,7 +46,8 @@ class AntlersParamTabHandler(private val original: EditorActionHandler) : Editor
 
         val chars = document.charsSequence
         val before = chars.subSequence(regionStart, offset).toString()
-        val slotEmpty = before.isEmpty() || before.last() == ' '
+        // Condition mode (if/unless/elseif): always jump to the block — never open a param slot.
+        val slotEmpty = session.conditionMode || before.isEmpty() || before.last() == ' '
 
         if (!slotEmpty) {
             // A param ends at/after the caret → open a fresh slot past the end of the current param.
