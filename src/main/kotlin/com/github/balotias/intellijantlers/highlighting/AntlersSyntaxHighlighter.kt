@@ -21,6 +21,7 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         val TAG = TextAttributesKey.createTextAttributesKey("ANTLERS_TAG", DefaultLanguageHighlighterColors.METADATA)
         val KEYWORD = TextAttributesKey.createTextAttributesKey("ANTLERS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD)
         val MODIFIER = TextAttributesKey.createTextAttributesKey("ANTLERS_MODIFIER", DefaultLanguageHighlighterColors.INSTANCE_METHOD)
+        val PARAMETER = TextAttributesKey.createTextAttributesKey("ANTLERS_PARAMETER", DefaultLanguageHighlighterColors.PARAMETER)
 
         private val BRACES_KEYS = arrayOf(BRACES)
         private val IDENTIFIER_KEYS = arrayOf(IDENTIFIER)

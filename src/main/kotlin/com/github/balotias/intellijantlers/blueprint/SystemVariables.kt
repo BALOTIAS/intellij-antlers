@@ -30,6 +30,25 @@ object SystemVariables {
         SystemVariable("current_url", "The current request URL."),
         SystemVariable("current_uri", "The current request URI."),
         SystemVariable("csrf_token", "The CSRF token value."),
-        SystemVariable("environment", "The application environment.")
+        SystemVariable("environment", "The application environment."),
+        SystemVariable("template_content", "The rendered template content (output inside a layout)."),
+        SystemVariable("current_template", "The template actually used to render the page."),
+        SystemVariable("current_layout", "The layout actually used to render the page."),
+        SystemVariable("current_user", "The authenticated user (null if logged out)."),
+        SystemVariable("logged_in", "Whether the visitor is authenticated."),
+        SystemVariable("homepage", "The site's homepage URL."),
+        SystemVariable("is_homepage", "Whether the current URL is the homepage."),
+        SystemVariable("last_segment", "The final segment of the current URL."),
+        SystemVariable("segment_1", "The first URL segment (segment_2, segment_3, … follow)."),
+        SystemVariable("csrf_field", "A hidden input field containing the CSRF token."),
+        SystemVariable("config", "Access Statamic/Laravel configuration values."),
+        SystemVariable("get", "Query-string variables."),
+        SystemVariable("post", "Submitted POST data."),
+        SystemVariable("old", "Old (previous-request) input, for re-populating forms after validation."),
+        SystemVariable("response_code", "The HTTP response code (200 or 404)."),
+        SystemVariable("live_preview", "Whether the page is rendering in Live Preview."),
+        SystemVariable("edit_url", "Control-Panel edit URL for the current content."),
+        SystemVariable("sites", "All configured sites."),
+        SystemVariable("is_entry", "Whether the current content is an entry.")
     )
 }

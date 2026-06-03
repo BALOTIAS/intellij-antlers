@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.balotias.intellijantlers</id>
-    <name>intellij-antlers</name>
+    <name>Antlers</name>
     <vendor>balotias</vendor>
     <description><![CDATA[
         <p>Language support for <b>Statamic Antlers</b> templates (<code>*.antlers.html</code>).</p>

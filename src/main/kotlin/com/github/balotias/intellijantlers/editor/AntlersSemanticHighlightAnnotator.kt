@@ -5,6 +5,7 @@ import com.github.balotias.intellijantlers.highlighting.AntlersSyntaxHighlighter
 import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
 import com.github.balotias.intellijantlers.psi.AntlersModifierMixin
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
+import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.github.balotias.intellijantlers.parser.AntlersParserUtil
 import com.intellij.lang.annotation.AnnotationHolder
@@ -25,6 +26,9 @@ class AntlersSemanticHighlightAnnotator : Annotator {
 
             is AntlersModifierMixin ->
                 firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.MODIFIER) }
+
+            is AntlersParameterMixin ->
+                firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.PARAMETER) }
 
             is AntlersNamePathMixin -> {
                 // Also paints the keyword/tag in a closer's name-path (`{{ /if }}`, `{{ /collection }}`)

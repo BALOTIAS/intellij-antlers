@@ -25,6 +25,12 @@ class AntlersSemanticHighlightTest : BasePlatformTestCase() {
     fun testPlainVariableNotColored() =
         assertNull(keyOver("{{ title }}", "title"))
 
+    fun testParameterNameColored() =
+        assertEquals(AntlersSyntaxHighlighter.PARAMETER, keyOver("{{ collection from=\"x\" }}", "from"))
+
+    fun testBoundParameterNameColored() =
+        assertEquals(AntlersSyntaxHighlighter.PARAMETER, keyOver("{{ partial :src=\"x\" }}", "src"))
+
     /** Count keyword/tag-colored highlights over [token] — used to assert the closer is painted too. */
     private fun coloredCount(text: String, token: String, key: TextAttributesKey): Int {
         myFixture.configureByText("p.antlers.html", text)

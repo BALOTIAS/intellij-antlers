@@ -8,8 +8,9 @@ class AntlersColorSettingsPageTest : BasePlatformTestCase() {
         val keys = AntlersColorSettingsPage().attributeDescriptors.map { it.key }.toSet()
         val expected = setOf(
             AntlersSyntaxHighlighter.BRACES, AntlersSyntaxHighlighter.TAG, AntlersSyntaxHighlighter.KEYWORD,
-            AntlersSyntaxHighlighter.MODIFIER, AntlersSyntaxHighlighter.IDENTIFIER, AntlersSyntaxHighlighter.STRING,
-            AntlersSyntaxHighlighter.NUMBER, AntlersSyntaxHighlighter.COMMENT, AntlersSyntaxHighlighter.OPERATOR,
+            AntlersSyntaxHighlighter.MODIFIER, AntlersSyntaxHighlighter.PARAMETER, AntlersSyntaxHighlighter.IDENTIFIER,
+            AntlersSyntaxHighlighter.STRING, AntlersSyntaxHighlighter.NUMBER, AntlersSyntaxHighlighter.COMMENT,
+            AntlersSyntaxHighlighter.OPERATOR,
         )
         assertEquals(expected, keys)
     }
@@ -19,7 +20,7 @@ class AntlersColorSettingsPageTest : BasePlatformTestCase() {
         assertEquals("Antlers", page.displayName)
         assertTrue("demo text present", page.demoText.isNotBlank())
         assertTrue("reuses the Antlers highlighter", page.highlighter is AntlersSyntaxHighlighter)
-        assertEquals("preview maps the 3 semantic tags", setOf("tag", "kw", "mod"),
+        assertEquals("preview maps the semantic tags", setOf("tag", "kw", "mod", "param"),
             page.additionalHighlightingTagToDescriptorMap!!.keys)
     }
 }
