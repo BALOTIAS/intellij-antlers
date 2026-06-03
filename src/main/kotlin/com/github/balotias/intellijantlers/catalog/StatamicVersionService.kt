@@ -55,9 +55,12 @@ class StatamicVersionService(private val project: Project) {
 
         private val KEY = Key.create<CachedValue<Int>>("antlers.statamicVersion")
         private val JSON_CONSTRAINT = Regex("\"statamic/cms\"\\s*:\\s*\"([^\"]+)\"")
-        // composer.lock: { "name": "statamic/cms", … "version": "v6.1.2" }
+        // composer.lock: { "name": "statamic/cms", … "version": "v6.1.2" }. The tempered `(?!"name")`
+        // skip stops at the next package boundary, so we read statamic/cms's OWN version and never
+        // bleed into a sibling package's version. The closing quote in "statamic/cms" already excludes
+        // prefixed packages like "statamic/cms-eloquent-driver".
         private val LOCK_VERSION =
-            Regex("\"name\"\\s*:\\s*\"statamic/cms\"[\\s\\S]*?\"version\"\\s*:\\s*\"v?(\\d+)")
+            Regex("\"name\"\\s*:\\s*\"statamic/cms\"(?:(?!\"name\")[\\s\\S])*?\"version\"\\s*:\\s*\"v?(\\d+)")
 
         fun getInstance(project: Project): StatamicVersionService = project.service()
     }

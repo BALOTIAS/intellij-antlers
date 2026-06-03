@@ -28,4 +28,21 @@ class StatamicVersionServiceTest : BasePlatformTestCase() {
         )
         assertEquals(5, version())
     }
+
+    fun testLockReadsCmsVersionNotASiblingPackage() {
+        // A cms-prefixed sibling (with a misleading version) precedes the real package; we must read
+        // statamic/cms's own version, not bleed into a neighbour.
+        myFixture.addFileToProject("composer.json", """{ "require": { "laravel/framework": "^12.0" } }""")
+        myFixture.addFileToProject(
+            "composer.lock",
+            """
+            { "packages": [
+                { "name": "statamic/cms-eloquent-driver", "version": "v9.9.9" },
+                { "name": "statamic/cms", "version": "v6.0.4" },
+                { "name": "spatie/something", "version": "v3.0.0" }
+            ] }
+            """.trimIndent(),
+        )
+        assertEquals(6, version())
+    }
 }
