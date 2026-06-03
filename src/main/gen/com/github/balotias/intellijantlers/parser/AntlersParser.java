@@ -347,7 +347,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_PIPE T_IDENT (T_LPAREN argList? T_RPAREN)?
+  // T_PIPE T_IDENT ((T_LPAREN argList? T_RPAREN) | (T_COLON modifierArg_)+)?
   public static boolean modifier(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "modifier")) return false;
     if (!nextTokenIs(builder_, T_PIPE)) return false;
@@ -359,34 +359,102 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // (T_LPAREN argList? T_RPAREN)?
+  // ((T_LPAREN argList? T_RPAREN) | (T_COLON modifierArg_)+)?
   private static boolean modifier_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "modifier_2")) return false;
     modifier_2_0(builder_, level_ + 1);
     return true;
   }
 
-  // T_LPAREN argList? T_RPAREN
+  // (T_LPAREN argList? T_RPAREN) | (T_COLON modifierArg_)+
   private static boolean modifier_2_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "modifier_2_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
+    result_ = modifier_2_0_0(builder_, level_ + 1);
+    if (!result_) result_ = modifier_2_0_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // T_LPAREN argList? T_RPAREN
+  private static boolean modifier_2_0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "modifier_2_0_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, T_LPAREN);
-    result_ = result_ && modifier_2_0_1(builder_, level_ + 1);
+    result_ = result_ && modifier_2_0_0_1(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, T_RPAREN);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
   // argList?
-  private static boolean modifier_2_0_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "modifier_2_0_1")) return false;
+  private static boolean modifier_2_0_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "modifier_2_0_0_1")) return false;
     argList(builder_, level_ + 1);
     return true;
   }
 
+  // (T_COLON modifierArg_)+
+  private static boolean modifier_2_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "modifier_2_0_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = modifier_2_0_1_0(builder_, level_ + 1);
+    while (result_) {
+      int pos_ = current_position_(builder_);
+      if (!modifier_2_0_1_0(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "modifier_2_0_1", pos_)) break;
+    }
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // T_COLON modifierArg_
+  private static boolean modifier_2_0_1_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "modifier_2_0_1_0")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_COLON);
+    result_ = result_ && modifierArg_(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
   /* ********************************************************** */
-  // pathSegment ((T_COLON | T_DOT) pathSegment | bracketAccess)*
+  // T_STRING | T_NUMBER | T_DOLLAR? T_IDENT
+  static boolean modifierArg_(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "modifierArg_")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_STRING);
+    if (!result_) result_ = consumeToken(builder_, T_NUMBER);
+    if (!result_) result_ = modifierArg__2(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // T_DOLLAR? T_IDENT
+  private static boolean modifierArg__2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "modifierArg__2")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = modifierArg__2_0(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, T_IDENT);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // T_DOLLAR?
+  private static boolean modifierArg__2_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "modifierArg__2_0")) return false;
+    consumeToken(builder_, T_DOLLAR);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // pathSegment ((T_COLON pathSegment !T_EQUALS) | T_DOT pathSegment | bracketAccess)*
   public static boolean namePath(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath")) return false;
     boolean result_;
@@ -397,7 +465,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // ((T_COLON | T_DOT) pathSegment | bracketAccess)*
+  // ((T_COLON pathSegment !T_EQUALS) | T_DOT pathSegment | bracketAccess)*
   private static boolean namePath_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath_1")) return false;
     while (true) {
@@ -408,34 +476,48 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (T_COLON | T_DOT) pathSegment | bracketAccess
+  // (T_COLON pathSegment !T_EQUALS) | T_DOT pathSegment | bracketAccess
   private static boolean namePath_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath_1_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = namePath_1_0_0(builder_, level_ + 1);
+    if (!result_) result_ = namePath_1_0_1(builder_, level_ + 1);
     if (!result_) result_ = bracketAccess(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
-  // (T_COLON | T_DOT) pathSegment
+  // T_COLON pathSegment !T_EQUALS
   private static boolean namePath_1_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath_1_0_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = namePath_1_0_0_0(builder_, level_ + 1);
+    result_ = consumeToken(builder_, T_COLON);
     result_ = result_ && pathSegment(builder_, level_ + 1);
+    result_ = result_ && namePath_1_0_0_2(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
-  // T_COLON | T_DOT
-  private static boolean namePath_1_0_0_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "namePath_1_0_0_0")) return false;
+  // !T_EQUALS
+  private static boolean namePath_1_0_0_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "namePath_1_0_0_2")) return false;
     boolean result_;
-    result_ = consumeToken(builder_, T_COLON);
-    if (!result_) result_ = consumeToken(builder_, T_DOT);
+    Marker marker_ = enter_section_(builder_, level_, _NOT_);
+    result_ = !consumeToken(builder_, T_EQUALS);
+    exit_section_(builder_, level_, marker_, result_, false, null);
+    return result_;
+  }
+
+  // T_DOT pathSegment
+  private static boolean namePath_1_0_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "namePath_1_0_1")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_DOT);
+    result_ = result_ && pathSegment(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
