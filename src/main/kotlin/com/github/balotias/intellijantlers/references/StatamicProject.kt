@@ -82,6 +82,19 @@ object StatamicProject {
     /** Taxonomy handles = subdirectory names of `resources/blueprints/taxonomies`. */
     fun listTaxonomyHandles(element: PsiElement): List<String> = blueprintSubdirs(element, "taxonomies")
 
+    /** Form handles = `*.yaml` basenames under `resources/blueprints/forms`. */
+    fun listFormHandles(element: PsiElement): List<String> = blueprintFiles(element, "forms")
+
+    /** Nav handles = `*.yaml` basenames under `resources/blueprints/navigation`. */
+    fun listNavHandles(element: PsiElement): List<String> = blueprintFiles(element, "navigation")
+
+    private fun blueprintFiles(element: PsiElement, kind: String): List<String> {
+        val resources = viewsRoot(element)?.parent ?: return emptyList()
+        val dir = resources.findChild("blueprints")?.findChild(kind) ?: return emptyList()
+        return dir.children.filter { !it.isDirectory && it.name.endsWith(".yaml") }
+            .map { it.name.removeSuffix(".yaml") }
+    }
+
     private fun blueprintSubdirs(element: PsiElement, kind: String): List<String> {
         val resources = viewsRoot(element)?.parent ?: return emptyList()
         val dir = resources.findChild("blueprints")?.findChild(kind) ?: return emptyList()
