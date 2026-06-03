@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.completion
 
+import com.github.balotias.intellijantlers.editor.AntlersParamSession
 import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
@@ -88,5 +89,18 @@ class AntlersKeywordInsertHandler(private val kw: LogicKeyword) : InsertHandler<
         }
         context.editor.caretModel.moveToOffset(paramCaret)
         context.commitDocument()
+
+        // Arm a condition-mode session so Tab jumps into the block (no param-slot repeating).
+        val openTagStart = text.lastIndexOf("{{", nameEnd)
+        if (openTagStart >= 0) {
+            val startMarker = document.createRangeMarker(openTagStart, openTagStart + 2)
+            val endMarker = document.createRangeMarker(openTagCloseStart, openTagCloseStart + 2)
+            startMarker.isGreedyToRight = false
+            endMarker.isGreedyToLeft = false
+            AntlersParamSession.install(
+                context.editor,
+                AntlersParamSession(startMarker, endMarker, isPair = kw.kind == LogicKind.OPENER, conditionMode = true),
+            )
+        }
     }
 }
