@@ -12,7 +12,6 @@ data class FmEntry(
 )
 
 data class FrontMatter(
-    val block: TextSpan,
     val openFence: TextSpan,
     val closeFence: TextSpan,
     val entries: List<FmEntry>
@@ -62,7 +61,7 @@ object ViewFrontMatterScanner {
             entries.add(FmEntry(name, indent, key, value, stripQuotes(valueText)))
         }
 
-        return FrontMatter(TextSpan(0, closeFence.end), openFence, closeFence, entries)
+        return FrontMatter(openFence, closeFence, entries)
     }
 
     private fun stripQuotes(s: String): String =
