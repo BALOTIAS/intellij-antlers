@@ -7,8 +7,6 @@ import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 
-private val PARTIAL_EXTENSIONS = listOf("antlers.html", "html")
-
 /**
  * Resolves a partial path (e.g. "blog/card") to its template file under `resources/views`.
  *
@@ -25,12 +23,8 @@ class AntlersPartialReference(
 ) : PsiReferenceBase<PsiElement>(element, range) {
 
     override fun resolve(): PsiElement? {
-        val root = StatamicProject.viewsRoot(element) ?: return null
-        for (ext in PARTIAL_EXTENSIONS) {
-            val vf = root.findFileByRelativePath("$path.$ext") ?: continue
-            return PsiManager.getInstance(element.project).findFile(vf)
-        }
-        return null
+        val vf = StatamicProject.resolvePartial(element, path) ?: return null
+        return PsiManager.getInstance(element.project).findFile(vf)
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
