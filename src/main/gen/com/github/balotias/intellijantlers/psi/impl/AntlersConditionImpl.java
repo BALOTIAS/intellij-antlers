@@ -27,4 +27,10 @@ public class AntlersConditionImpl extends AntlersConditionMixin implements Antle
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public List<AntlersModifier> getModifierList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AntlersModifier.class);
+  }
+
 }

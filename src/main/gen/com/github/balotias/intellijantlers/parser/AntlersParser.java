@@ -212,7 +212,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // <<atConditionKeyword>> conditionKeyword exprToken_*
+  // <<atConditionKeyword>> conditionKeyword (modifier | exprToken_)*
   public static boolean condition(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "condition")) return false;
     boolean result_;
@@ -224,15 +224,24 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // exprToken_*
+  // (modifier | exprToken_)*
   private static boolean condition_2(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "condition_2")) return false;
     while (true) {
       int pos_ = current_position_(builder_);
-      if (!exprToken_(builder_, level_ + 1)) break;
+      if (!condition_2_0(builder_, level_ + 1)) break;
       if (!empty_element_parsed_guard_(builder_, "condition_2", pos_)) break;
     }
     return true;
+  }
+
+  // modifier | exprToken_
+  private static boolean condition_2_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "condition_2_0")) return false;
+    boolean result_;
+    result_ = modifier(builder_, level_ + 1);
+    if (!result_) result_ = exprToken_(builder_, level_ + 1);
+    return result_;
   }
 
   /* ********************************************************** */
