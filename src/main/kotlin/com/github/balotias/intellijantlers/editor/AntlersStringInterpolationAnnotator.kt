@@ -44,6 +44,8 @@ class AntlersStringInterpolationAnnotator : Annotator {
     }
 
     private fun colorFor(type: IElementType, prev: IElementType?): TextAttributesKey? = when (type) {
+        // Pipe-adjacency heuristic: only the name right after `|` is the modifier. Without PSI inside the
+        // interpolation, modifier *arguments* (`{x | foo:arg}`) stay IDENTIFIER — a deliberate approximation.
         AntlersTypes.T_IDENT ->
             if (prev == AntlersTypes.T_PIPE) AntlersSyntaxHighlighter.MODIFIER else AntlersSyntaxHighlighter.IDENTIFIER
         AntlersTypes.T_DOLLAR -> AntlersSyntaxHighlighter.IDENTIFIER
