@@ -17,6 +17,11 @@ project's blueprints, fieldsets, and collections, so completion and navigation a
 - Syntax highlighting for tags, variables, strings, numbers, comments, operators, and PHP/noparse
   blocks — with customizable colors (*Settings → Editor → Color Scheme → Antlers*).
 - Brace matching (`{{ }}`, comments, noparse, PHP), commenting (`{{# … #}}`), and `{{ }}` auto-insert.
+- **Smart block editing**: completing a tag drops the caret where you'll actually type — a parameter
+  slot for tags that take parameters, or straight into the block for tags that don't. **Tab** walks
+  through further parameter slots (jumping past quoted values) and then into the block, and a single
+  **Enter** inside an empty `{{ tag }}{{ /tag }}` expands it to an indented body with the closing tag on
+  its own line.
 - Code folding for paired tags, conditions, comments, noparse and PHP blocks.
 - A **Structure view** outline of the template's tag/condition nesting and partial includes.
 
@@ -24,6 +29,8 @@ project's blueprints, fieldsets, and collections, so completion and navigation a
 - Tags, tag methods/sub-tags, parameter names, and **parameter values** — partial paths for
   `partial:src=`, collection/taxonomy handles for `from=`/`in=`/…, field names for `sort=`, and
   `true`/`false` for boolean params.
+- Logic keywords (`if`, `unless`, `else`, `elseif`, `endif`) offered inside `{{ }}`, context-aware —
+  the followers (`else`/`elseif`/`endif`) appear only inside the matching open block.
 - Modifiers (after `|`) with their arguments.
 - Variables: blueprint fields, system variables, loop variables, and nav-tree variables — resolved
   for the current scope (inside `{{ collection }}`, `{{ nav }}`, page-mapped templates, etc.).
@@ -48,6 +55,13 @@ project's blueprints, fieldsets, and collections, so completion and navigation a
   *New → Antlers Template* file action.
 - A spacing formatter that normalizes the inside of `{{ }}` delimiters on *Reformat Code*.
 <!-- Plugin description end -->
+
+## Compatibility
+
+- **Statamic 5 and 6.** Antlers syntax is shared across both versions; the bundled tag/modifier catalog
+  is tailored to the version detected in your project's `composer.json` (falling back to the latest when
+  none is found), and custom/addon tags are discovered by scanning your project.
+- IntelliJ-based IDEs on the **2025.2** platform (IntelliJ IDEA, PhpStorm, WebStorm, and friends).
 
 ## Installation
 
