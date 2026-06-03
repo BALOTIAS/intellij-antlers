@@ -9,6 +9,12 @@ class AntlersVariableCompletionTest : BasePlatformTestCase() {
         return myFixture.completeBasic()?.map { it.lookupString } ?: emptyList()
     }
 
+    fun testOffersAddedGlobalSystemVars() {
+        val l = lookups("{{ <caret> }}")
+        assertTrue("offers template_content: $l", l.contains("template_content"))
+        assertTrue("offers current_user: $l", l.contains("current_user"))
+    }
+
     fun testOffersBlueprintFieldsAndSystemVars() {
         myFixture.addFileToProject(
             "resources/blueprints/collections/blog/blog.yaml",

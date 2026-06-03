@@ -17,6 +17,7 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             "tag" to AntlersSyntaxHighlighter.TAG,
             "kw" to AntlersSyntaxHighlighter.KEYWORD,
             "mod" to AntlersSyntaxHighlighter.MODIFIER,
+            "param" to AntlersSyntaxHighlighter.PARAMETER,
         )
     override fun getAttributeDescriptors(): Array<AttributesDescriptor> = DESCRIPTORS
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
@@ -28,6 +29,7 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             AttributesDescriptor("Tag name", AntlersSyntaxHighlighter.TAG),
             AttributesDescriptor("Condition keyword", AntlersSyntaxHighlighter.KEYWORD),
             AttributesDescriptor("Modifier", AntlersSyntaxHighlighter.MODIFIER),
+            AttributesDescriptor("Parameter name", AntlersSyntaxHighlighter.PARAMETER),
             AttributesDescriptor("Identifier", AntlersSyntaxHighlighter.IDENTIFIER),
             AttributesDescriptor("String", AntlersSyntaxHighlighter.STRING),
             AttributesDescriptor("Number", AntlersSyntaxHighlighter.NUMBER),
@@ -37,7 +39,7 @@ class AntlersColorSettingsPage : ColorSettingsPage {
 
         private val DEMO = """
             {{# Featured posts #}}
-            {{ <tag>collection</tag>:blog limit="3" as="posts" }}
+            {{ <tag>collection</tag>:blog <param>limit</param>="3" <param>as</param>="posts" }}
               {{ title | <mod>upper</mod> }}
               {{ <kw>if</kw> count > 0 }}{{ price }}{{ /collection }}
         """.trimIndent()
