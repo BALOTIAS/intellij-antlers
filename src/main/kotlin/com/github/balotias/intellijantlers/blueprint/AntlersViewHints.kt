@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.blueprint
 
+import com.github.balotias.intellijantlers.psi.AntlersFrontMatter
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.github.balotias.intellijantlers.scope.AntlersHintParser
 import com.intellij.psi.PsiComment
@@ -41,8 +42,8 @@ object AntlersViewHints {
      */
     private fun leadingCommentBody(file: PsiFile): String? {
         for (child in file.children) {
-            // Skip whitespace between nodes
-            if (child is PsiWhiteSpace) continue
+            // Skip whitespace between nodes, and leading YAML front matter (it precedes the hint comment).
+            if (child is PsiWhiteSpace || child is AntlersFrontMatter) continue
             // Comment tokens (T_COMMENT_OPEN, T_COMMENT_TEXT, T_COMMENT_CLOSE) are leaves
             if (child is PsiComment) {
                 if (child.node.elementType == AntlersTypes.T_COMMENT_TEXT) return child.text

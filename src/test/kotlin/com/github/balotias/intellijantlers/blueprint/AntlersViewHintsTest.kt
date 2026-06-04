@@ -17,6 +17,28 @@ class AntlersViewHintsTest : BasePlatformTestCase() {
         assertTrue(AntlersViewHints.declaredNamespaces(file).isEmpty())
     }
 
+    fun testFrontMatterBeforeHintIsTransparent() {
+        val file = myFixture.configureByText(
+            "p.antlers.html",
+            "---\ntitle: Hi\n---\n{{# @collection blog #}}\n{{ x }}"
+        )
+        assertEquals(
+            listOf(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "blog")),
+            AntlersViewHints.declaredNamespaces(file)
+        )
+    }
+
+    fun testLoopScopeWinsOverHint() {
+        val text = "{{# @collection blog #}}\n{{ collection:other }}{{ <caret> }}{{ /collection }}"
+        val caret = text.indexOf("<caret>")
+        val file = myFixture.configureByText("p.antlers.html", text.replace("<caret>", ""))
+        val el = file.findElementAt(caret)!!
+        assertEquals(
+            listOf(BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, "other")),
+            AntlersFieldContext.namespacesFor(el)
+        )
+    }
+
     fun testCollectionHintRestrictsFieldsToThatBlueprint() {
         myFixture.addFileToProject(
             "resources/blueprints/collections/blog/blog.yaml",
