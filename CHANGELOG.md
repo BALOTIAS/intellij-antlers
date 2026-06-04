@@ -39,6 +39,11 @@
   on *Reformat Code*.
 - **Statamic 5 & 6 compatibility**: the bundled catalog is a 5∪6 superset, tailored to the major version
   detected from `composer.json` / `composer.lock` (default: latest).
+- `*.antlers.php` is recognized as an Antlers view, and partials/views/blueprints resolve across both the
+  `.antlers.html` and `.antlers.php` extensions.
+- Real PHP is injected into `{{$ … $}}` and `{{? … ?}}` blocks — highlighting, errors/warnings, and PHP
+  completion inside them (requires the JetBrains PHP plugin, i.e. PhpStorm or IDEA Ultimate; no-ops
+  cleanly elsewhere).
 - Formatter opt-out: *Settings → Languages & Frameworks → Antlers* has a "Reformat Antlers code" toggle
   (default on); unchecking it makes Reformat Code leave `.antlers.html` untouched so an external formatter
   (e.g. Prettier with `prettier-plugin-antlers`) can own formatting.
