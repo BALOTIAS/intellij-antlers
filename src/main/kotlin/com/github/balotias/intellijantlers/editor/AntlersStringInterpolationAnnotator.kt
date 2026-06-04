@@ -51,7 +51,8 @@ class AntlersStringInterpolationAnnotator : Annotator {
         AntlersTypes.T_DOLLAR -> AntlersSyntaxHighlighter.IDENTIFIER
         AntlersTypes.T_STRING -> AntlersSyntaxHighlighter.STRING
         AntlersTypes.T_NUMBER -> AntlersSyntaxHighlighter.NUMBER
-        AntlersTypes.T_PIPE, AntlersTypes.T_COLON, AntlersTypes.T_DOT, AntlersTypes.T_OP,
+        AntlersTypes.T_PIPE -> AntlersSyntaxHighlighter.PIPE
+        AntlersTypes.T_COLON, AntlersTypes.T_DOT, AntlersTypes.T_OP,
         AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW, AntlersTypes.T_SLASH,
         AntlersTypes.T_COMMA, AntlersTypes.T_SEMICOLON -> AntlersSyntaxHighlighter.OPERATOR
         AntlersTypes.T_LBRACE, AntlersTypes.T_RBRACE, AntlersTypes.T_LBRACKET, AntlersTypes.T_RBRACKET,
