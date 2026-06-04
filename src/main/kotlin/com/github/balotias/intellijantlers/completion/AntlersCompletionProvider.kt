@@ -18,6 +18,8 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.github.balotias.intellijantlers.psi.AntlersStatement
+import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.github.balotias.intellijantlers.scope.AntlersHintParser
 import com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.codeInsight.lookup.LookupElementBuilder
@@ -31,6 +33,15 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
+        val hintPrefix = commentDirectivePrefix(parameters.position, parameters.offset)
+        if (hintPrefix != null) {
+            val r = result.withPrefixMatcher(hintPrefix)
+            for (name in AntlersHintParser.DIRECTIVE_NAMES) {
+                r.addElement(LookupElementBuilder.create(name).withIcon(AntlersIcons.FILE).withTypeText("Hint"))
+            }
+            return
+        }
+
         val info = AntlersCompletionContext.classify(parameters.position)
         if (info.kind == AntlersCompletionKind.NONE) return
 
@@ -238,6 +249,18 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
             AntlersCompletionKind.NONE -> {}
         }
+    }
+
+    /** When the caret sits in a `{{# … #}}` comment right after `@<word>`, the post-`@` prefix; else null. */
+    private fun commentDirectivePrefix(position: com.intellij.psi.PsiElement, caretOffset: Int): String? {
+        if (position.node.elementType != AntlersTypes.T_COMMENT_TEXT) return null
+        val start = position.textRange.startOffset
+        val end = (caretOffset - start).coerceIn(0, position.text.length)
+        val before = position.text.substring(0, end)
+        val at = before.lastIndexOf('@')
+        if (at < 0) return null
+        val after = before.substring(at + 1)
+        return if (after.all { it.isLetter() }) after else null
     }
 
     /** Inside a quoted value the default prefix includes the opening quote (matching nothing);
