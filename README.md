@@ -18,7 +18,8 @@ navigation are blueprint- and view-aware.
 - Syntax highlighting for tags, variables, strings, numbers, comments, operators, and PHP/noparse
   blocks — with customizable colors (*Settings → Editor → Color Scheme → Antlers*). Antlers
   interpolation inside strings (`"object-position: {logo:focus_css}"`) is highlighted as real Antlers,
-  and a view's `---` … `---` front matter is highlighted YAML-style.
+  and a view's `---` … `---` front matter is a real **YAML** island — comments, highlighting, and YAML
+  errors/warnings/completion all work inside it.
 - Brace matching (`{{ }}`, comments, noparse, PHP), commenting (`{{# … #}}`), and `{{ }}` auto-insert.
 - **Smart block editing**: completing a tag drops the caret where you'll actually type — a parameter
   slot for tags that take parameters, or straight into the block for tags that don't. **Tab** walks
