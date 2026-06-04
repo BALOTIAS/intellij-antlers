@@ -16,7 +16,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- AntlersCatalogService is registered via the @Service annotation, not here. -->
-        <fileType name="Antlers" implementationClass="com.github.balotias.intellijantlers.AntlersFileType" fieldName="INSTANCE" language="Antlers" patterns="*.antlers.html"/>
+        <fileType name="Antlers" implementationClass="com.github.balotias.intellijantlers.AntlersFileType" fieldName="INSTANCE" language="Antlers" patterns="*.antlers.html;*.antlers.php"/>
         
         <lang.parserDefinition language="Antlers" implementationClass="com.github.balotias.intellijantlers.parser.AntlersParserDefinition"/>
         <lang.ast.factory language="Antlers" implementationClass="com.github.balotias.intellijantlers.parser.AntlersASTFactory"/>

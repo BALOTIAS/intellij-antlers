@@ -23,7 +23,7 @@ object PageBlueprintResolver {
     /** "blog/show" from ".../resources/views/blog/show.antlers.html", or null if not under [viewsRoot]. */
     private fun viewPathOf(file: VirtualFile, viewsRoot: VirtualFile): String? {
         val rel = VfsUtilCore.getRelativePath(file, viewsRoot, '/') ?: return null
-        return rel.removeSuffix(".antlers.html")
+        return rel.removeSuffix(".antlers.html").removeSuffix(".antlers.php")
     }
 
     /** Statamic accepts both `blog/show` and `blog.show`; normalize separators to `/`. */

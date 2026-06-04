@@ -51,7 +51,7 @@ object StatamicProject {
     fun resolvePartial(element: PsiElement, rawPath: String): VirtualFile? {
         val root = viewsRoot(element) ?: return null
         val path = rawPath.replace('.', '/')   // Laravel/Statamic dot notation: layouts.default.footer
-        val exts = listOf("antlers.html", "html")
+        val exts = listOf("antlers.html", "antlers.php", "html")
         val names = listOf(path, underscoredPartial(path))   // exact name, then `_basename`
         for (loc in listOf("partials/", "")) {
             for (name in names) {
@@ -105,8 +105,8 @@ object StatamicProject {
         for (child in dir.children) {
             if (child.isDirectory) {
                 collectPartials(root, child, out)
-            } else if (child.name.endsWith(".antlers.html") || child.name.endsWith(".html")) {
-                val rel = relativePath(root, child)?.removeSuffix(".antlers.html")?.removeSuffix(".html") ?: continue
+            } else if (child.name.endsWith(".antlers.html") || child.name.endsWith(".antlers.php") || child.name.endsWith(".html")) {
+                val rel = relativePath(root, child)?.removeSuffix(".antlers.html")?.removeSuffix(".antlers.php")?.removeSuffix(".html") ?: continue
                 // `views/partials/btn` → `btn`; an underscored partial `_btn` → `btn` (referenced w/o `_`).
                 out.add(stripLeadingUnderscore(rel.removePrefix("partials/")))
             }

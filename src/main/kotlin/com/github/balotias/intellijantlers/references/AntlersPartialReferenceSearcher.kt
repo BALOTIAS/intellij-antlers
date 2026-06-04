@@ -19,7 +19,7 @@ class AntlersPartialReferenceSearcher : QueryExecutorBase<PsiReference, Referenc
     override fun processQuery(params: ReferencesSearch.SearchParameters, consumer: Processor<in PsiReference>) {
         val target = params.elementToSearch as? PsiFile ?: return
         val vf = target.virtualFile ?: return
-        if (!vf.name.endsWith(".antlers.html") && !vf.name.endsWith(".html")) return
+        if (!vf.name.endsWith(".antlers.html") && !vf.name.endsWith(".antlers.php") && !vf.name.endsWith(".html")) return
 
         val project = params.project
         val scope = params.effectiveSearchScope as? GlobalSearchScope
