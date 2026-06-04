@@ -32,7 +32,7 @@ import com.intellij.psi.TokenType;
 
 WS=\s+
 NL=\r\n|\n|\r
-IDENT=[a-zA-Z_][a-zA-Z_0-9\-]*
+IDENT=[a-zA-Z_]([a-zA-Z_0-9]|-[a-zA-Z_0-9])*
 NUMBER=[0-9]+(\.[0-9]+)?
 STRING=\"([^\"\\]|\\.)*\"|'([^'\\]|\\.)*'
 NOPARSE_OPEN="{{"[ \t]*"noparse"[ \t]*"}}"

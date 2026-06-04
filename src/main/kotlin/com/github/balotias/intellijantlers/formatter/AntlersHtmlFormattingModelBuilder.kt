@@ -1,8 +1,12 @@
 package com.github.balotias.intellijantlers.formatter
 
 import com.github.balotias.intellijantlers.parser.AntlersFile
+import com.github.balotias.intellijantlers.settings.AntlersFormatterSettings
 import com.intellij.formatting.Alignment
 import com.intellij.formatting.Block
+import com.intellij.formatting.FormattingContext
+import com.intellij.formatting.FormattingModel
+import com.intellij.formatting.FormattingModelProvider
 import com.intellij.formatting.Indent
 import com.intellij.formatting.Spacing
 import com.intellij.formatting.Wrap
@@ -10,6 +14,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.CodeStyleSettings
+import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.formatter.xml.XmlFormattingPolicy
 import com.intellij.psi.templateLanguages.OuterLanguageElement
 import com.intellij.psi.xml.XmlElement
@@ -51,6 +56,16 @@ class AntlersHtmlFormattingModelBuilder : AbstractXmlTemplateFormattingModelBuil
     override fun isMarkupLanguageElement(element: PsiElement?): Boolean =
         element is XmlElement && element !is OuterLanguageElement
 
+    override fun createModel(formattingContext: FormattingContext): FormattingModel {
+        val file = formattingContext.containingFile
+        if (!AntlersFormatterSettings.getInstance(file.project).reformatEnabled) {
+            return FormattingModelProvider.createFormattingModelForPsiFile(
+                file, AntlersNoopBlock(file.node), formattingContext.codeStyleSettings
+            )
+        }
+        return super.createModel(formattingContext)
+    }
+
     override fun createTemplateLanguageBlock(
         node: ASTNode,
         settings: CodeStyleSettings,
@@ -59,6 +74,14 @@ class AntlersHtmlFormattingModelBuilder : AbstractXmlTemplateFormattingModelBuil
         alignment: Alignment?,
         wrap: Wrap?
     ): Block = AntlersTemplateBlock(this, node, wrap, alignment, settings, xmlFormattingPolicy, indent)
+
+    /** Whole-file leaf block -> Reformat Code makes no changes (used when Antlers reformatting is off). */
+    private class AntlersNoopBlock(node: ASTNode) : AbstractBlock(node, null, null) {
+        override fun buildChildren(): List<Block> = emptyList()
+        override fun getSpacing(child1: Block?, child2: Block): Spacing? = null
+        override fun isLeaf(): Boolean = true
+        override fun getIndent(): Indent = Indent.getNoneIndent()
+    }
 
     private class AntlersTemplateBlock(
         builder: AbstractXmlTemplateFormattingModelBuilder,

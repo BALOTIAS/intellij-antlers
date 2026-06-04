@@ -112,4 +112,35 @@ class LexerTest {
         // `---` mid-file is plain content, not front matter.
         assertEquals(listOf(AntlersTypes.T_OUTER_HTML), types("x\n---\ny"))
     }
+
+    @Test fun compoundMinusAssignIsNotEatenByIdent() {
+        // #138: `foo-=3` must lex as foo / -= / 3, not `foo-` / = / 3.
+        assertEquals(
+            listOf(
+                AntlersTypes.T_LDOUBLE, AntlersTypes.T_WS,
+                AntlersTypes.T_IDENT, AntlersTypes.T_OP, AntlersTypes.T_NUMBER,
+                AntlersTypes.T_WS, AntlersTypes.T_RDOUBLE
+            ),
+            types("{{ foo-=3 }}")
+        )
+    }
+
+    @Test fun trailingHyphenIsAnOperator() {
+        assertEquals(
+            listOf(AntlersTypes.T_LDOUBLE, AntlersTypes.T_WS, AntlersTypes.T_IDENT, AntlersTypes.T_OP,
+                AntlersTypes.T_WS, AntlersTypes.T_RDOUBLE),
+            types("{{ foo- }}")
+        )
+    }
+
+    @Test fun kebabIdentifiersArePreserved() {
+        // hyphens BETWEEN identifier chars stay part of the identifier
+        for (name in listOf("a-b", "meta-title", "my-field-name", "count-1")) {
+            val ts = types("{{ $name }}")
+            assertEquals("$name should be one T_IDENT, got $ts",
+                listOf(AntlersTypes.T_LDOUBLE, AntlersTypes.T_WS, AntlersTypes.T_IDENT,
+                    AntlersTypes.T_WS, AntlersTypes.T_RDOUBLE),
+                ts)
+        }
+    }
 }
