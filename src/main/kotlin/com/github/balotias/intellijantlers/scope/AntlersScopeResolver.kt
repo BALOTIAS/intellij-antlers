@@ -41,9 +41,7 @@ object AntlersScopeResolver {
         val project = element.project
         val catalog = if (project.isDefault) null else AntlersCatalogService.getInstance(project)
 
-        val statements = PsiTreeUtil.findChildrenOfType(file, AntlersStatement::class.java)
-            .filter { it.textRange.endOffset <= caret }
-            .sortedBy { it.textRange.startOffset }
+        val statements = AntlersStatements.sortedIn(file).filter { it.textRange.endOffset <= caret }
 
         val stack = ArrayDeque<Frame>()
         for (stmt in statements) {

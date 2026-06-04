@@ -7,6 +7,7 @@ import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 
 /** One paired tag/condition: its opener, matched closer (null = unclosed), and nested children. */
@@ -37,14 +38,18 @@ object AntlersNestingTreeBuilder {
 
     private class Frame(val name: String, val opener: AntlersStatement, val children: MutableList<NestingNode> = mutableListOf())
 
+    /** Cached sorted statements when [root] is a file (the usual case); a direct traversal otherwise. */
+    private fun cachedStatements(root: PsiElement): List<AntlersStatement> =
+        (root as? PsiFile)?.let { AntlersStatements.sortedIn(it) }
+            ?: PsiTreeUtil.findChildrenOfType(root, AntlersStatement::class.java).sortedBy { it.textRange.startOffset }
+
     fun build(root: PsiElement, project: Project): NestingTree {
         val catalog = if (project.isDefault) null else AntlersCatalogService.getInstance(project)
         val roots = mutableListOf<NestingNode>()
         val unmatched = mutableListOf<AntlersStatement>()
         val stack = ArrayDeque<Frame>()
 
-        val statements = PsiTreeUtil.findChildrenOfType(root, AntlersStatement::class.java)
-            .sortedBy { it.textRange.startOffset }
+        val statements = cachedStatements(root)
         for (stmt in statements) {
             val closing = stmt.closingTag
             if (closing != null) {
@@ -83,9 +88,7 @@ object AntlersNestingTreeBuilder {
     fun nearestUnclosedAt(root: PsiElement, beforeOffset: Int, project: Project): String? {
         val catalog = if (project.isDefault) null else AntlersCatalogService.getInstance(project)
         val stack = ArrayDeque<String>()
-        val statements = PsiTreeUtil.findChildrenOfType(root, AntlersStatement::class.java)
-            .filter { it.textRange.startOffset < beforeOffset }
-            .sortedBy { it.textRange.startOffset }
+        val statements = cachedStatements(root).filter { it.textRange.startOffset < beforeOffset }
         for (stmt in statements) {
             val closing = stmt.closingTag
             if (closing != null) {
