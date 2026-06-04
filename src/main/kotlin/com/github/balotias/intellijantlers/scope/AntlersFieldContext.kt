@@ -3,13 +3,14 @@ package com.github.balotias.intellijantlers.scope
 import com.github.balotias.intellijantlers.blueprint.BlueprintField
 import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
+import com.github.balotias.intellijantlers.blueprint.AntlersViewHints
 import com.github.balotias.intellijantlers.blueprint.PageBlueprintResolver
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 
 /**
  * The single authority for which blueprint namespaces/fields apply at an element.
- * Precedence: E1 loop scope (innermost first) -> E2 page mapping -> global.
+ * Precedence: E1 loop scope (innermost first) -> hint comment -> E2 page mapping -> global.
  */
 object AntlersFieldContext {
 
@@ -20,6 +21,8 @@ object AntlersFieldContext {
     fun namespacesFor(element: PsiElement): List<BlueprintNamespace>? {
         val scopes = AntlersScopeResolver.scopesAt(element)
         if (scopes.isNotEmpty()) return scopes.map { it.namespace }
+        val hints = element.containingFile?.let { AntlersViewHints.declaredNamespaces(it) }
+        if (!hints.isNullOrEmpty()) return hints
         val page = PageBlueprintResolver.namespacesFor(element)
         if (page.isNotEmpty()) return page
         return null
