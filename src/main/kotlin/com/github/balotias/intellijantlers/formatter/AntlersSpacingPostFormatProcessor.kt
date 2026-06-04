@@ -3,6 +3,7 @@ package com.github.balotias.intellijantlers.formatter
 import com.github.balotias.intellijantlers.AntlersLanguage
 import com.github.balotias.intellijantlers.parser.AntlersFile
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.github.balotias.intellijantlers.settings.AntlersFormatterSettings
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -22,9 +23,8 @@ class AntlersSpacingPostFormatProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
+        if (!AntlersFormatterSettings.getInstance(source.project).reformatEnabled) return rangeToReformat
         val antlers = source.viewProvider.getPsi(AntlersLanguage.INSTANCE) as? AntlersFile ?: return rangeToReformat
-        if (!com.github.balotias.intellijantlers.settings.AntlersFormatterSettings.getInstance(source.project).reformatEnabled)
-            return rangeToReformat
         val document = source.viewProvider.document ?: return rangeToReformat
 
         // All leaves of the Antlers tree, in document order.

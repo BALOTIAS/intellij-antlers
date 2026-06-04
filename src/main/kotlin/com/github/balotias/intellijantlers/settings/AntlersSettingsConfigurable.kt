@@ -26,7 +26,7 @@ class AntlersSettingsConfigurable(private val project: Project) : Configurable {
     }
 
     override fun isModified(): Boolean =
-        reformatCheckbox?.isSelected != AntlersFormatterSettings.getInstance(project).reformatEnabled
+        reformatCheckbox?.let { it.isSelected != AntlersFormatterSettings.getInstance(project).reformatEnabled } ?: false
 
     override fun apply() {
         AntlersFormatterSettings.getInstance(project).reformatEnabled = reformatCheckbox?.isSelected ?: true

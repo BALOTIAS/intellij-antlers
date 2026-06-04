@@ -4,6 +4,7 @@ import com.github.balotias.intellijantlers.AntlersLanguage
 import com.github.balotias.intellijantlers.parser.AntlersFile
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.github.balotias.intellijantlers.settings.AntlersFormatterSettings
 import com.intellij.application.options.CodeStyle
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
@@ -26,6 +27,7 @@ class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
+        if (!AntlersFormatterSettings.getInstance(source.project).reformatEnabled) return rangeToReformat
         val document = source.viewProvider.document ?: return rangeToReformat
         // A prior PostFormatProcessor (the spacing pass) can edit the document WITHOUT committing PSI;
         // re-sync so AntlersStatement / T_STRING text ranges match the current document text. Without
@@ -33,8 +35,6 @@ class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
         // just collapsed — leaving its params un-indented until a second reformat.
         PsiDocumentManager.getInstance(source.project).commitDocument(document)
         val antlers = source.viewProvider.getPsi(AntlersLanguage.INSTANCE) as? AntlersFile ?: return rangeToReformat
-        if (!com.github.balotias.intellijantlers.settings.AntlersFormatterSettings.getInstance(source.project).reformatEnabled)
-            return rangeToReformat
 
         val opts = CodeStyle.getIndentOptions(source)
         val unit = if (opts.USE_TAB_CHARACTER) "\t" else " ".repeat(opts.INDENT_SIZE)
