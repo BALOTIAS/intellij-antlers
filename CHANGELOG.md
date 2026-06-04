@@ -39,4 +39,12 @@
   on *Reformat Code*.
 - **Statamic 5 & 6 compatibility**: the bundled catalog is a 5∪6 superset, tailored to the major version
   detected from `composer.json` / `composer.lock` (default: latest).
+- Formatter opt-out: *Settings → Languages & Frameworks → Antlers* has a "Reformat Antlers code" toggle
+  (default on); unchecking it makes Reformat Code leave `.antlers.html` untouched so an external formatter
+  (e.g. Prettier with `prettier-plugin-antlers`) can own formatting.
+- Plugin icon, author metadata (Matthias Balota), and an MIT license.
 - Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+
+### Fixed
+- Identifiers no longer swallow a trailing hyphen, so compound operators lex correctly (`{{ foo-=3 }}`
+  is `foo` `-=` `3`); kebab-case names like `meta-title` / `count-1` are still single identifiers.
