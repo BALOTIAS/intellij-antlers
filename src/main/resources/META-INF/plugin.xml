@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>com.github.balotias.intellijantlers</id>
     <name>Antlers</name>
-    <vendor>balotias</vendor>
+    <vendor email="balotamatthias@gmail.com" url="https://github.com/BALOTIAS/intellij-antlers">Matthias Balota</vendor>
     <description><![CDATA[
         <p>Language support for <b>Statamic Antlers</b> templates (<code>*.antlers.html</code>).</p>
         <p>Provides syntax highlighting, an HTML-aware parser, and context-aware completion for Antlers
