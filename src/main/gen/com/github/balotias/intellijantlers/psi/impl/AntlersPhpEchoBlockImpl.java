@@ -11,14 +11,14 @@ import static com.github.balotias.intellijantlers.psi.AntlersTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.github.balotias.intellijantlers.psi.*;
 
-public class AntlersPhpBlockImpl extends ASTWrapperPsiElement implements AntlersPhpBlock {
+public class AntlersPhpEchoBlockImpl extends ASTWrapperPsiElement implements AntlersPhpEchoBlock {
 
-  public AntlersPhpBlockImpl(@NotNull ASTNode node) {
+  public AntlersPhpEchoBlockImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AntlersVisitor visitor) {
-    visitor.visitPhpBlock(this);
+    visitor.visitPhpEchoBlock(this);
   }
 
   @Override
@@ -29,14 +29,8 @@ public class AntlersPhpBlockImpl extends ASTWrapperPsiElement implements Antlers
 
   @Override
   @Nullable
-  public AntlersPhpEchoBlock getPhpEchoBlock() {
-    return findChildByClass(AntlersPhpEchoBlock.class);
-  }
-
-  @Override
-  @Nullable
-  public AntlersPhpRawBlock getPhpRawBlock() {
-    return findChildByClass(AntlersPhpRawBlock.class);
+  public AntlersPhpBlockBody getPhpBlockBody() {
+    return findChildByClass(AntlersPhpBlockBody.class);
   }
 
 }
