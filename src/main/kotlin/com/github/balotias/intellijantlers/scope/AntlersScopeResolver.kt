@@ -11,7 +11,12 @@ import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.PsiTreeUtil
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Reconstructs the enclosing iterating-tag scope at a caret. The Antlers grammar is flat — an opener
@@ -38,12 +43,21 @@ object AntlersScopeResolver {
     fun scopesAt(element: PsiElement): List<BlueprintScope> {
         val file = element.containingFile ?: return emptyList()
         val caret = element.textRange.startOffset
-        val project = element.project
+        // Memoize per caret offset: completion resolves the scope at the same position several times
+        // (directly + via AntlersFieldContext.fieldsInScope), and each call replayed every statement.
+        val memo = CachedValuesManager.getCachedValue(file) {
+            CachedValueProvider.Result.create(
+                ConcurrentHashMap<Int, List<BlueprintScope>>(),
+                PsiModificationTracker.MODIFICATION_COUNT
+            )
+        }
+        return memo.computeIfAbsent(caret) { computeScopesAt(file, caret, element.project) }
+    }
+
+    private fun computeScopesAt(file: PsiFile, caret: Int, project: com.intellij.openapi.project.Project): List<BlueprintScope> {
         val catalog = if (project.isDefault) null else AntlersCatalogService.getInstance(project)
 
-        val statements = PsiTreeUtil.findChildrenOfType(file, AntlersStatement::class.java)
-            .filter { it.textRange.endOffset <= caret }
-            .sortedBy { it.textRange.startOffset }
+        val statements = AntlersStatements.sortedIn(file).filter { it.textRange.endOffset <= caret }
 
         val stack = ArrayDeque<Frame>()
         for (stmt in statements) {
