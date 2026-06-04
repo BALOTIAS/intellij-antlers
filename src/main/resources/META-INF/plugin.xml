@@ -59,6 +59,7 @@
         <internalFileTemplate name="Antlers Template"/>
         <lang.elementManipulator forClass="com.github.balotias.intellijantlers.psi.AntlersFrontMatterBody"
             implementationClass="com.github.balotias.intellijantlers.editor.AntlersFrontMatterBodyManipulator"/>
+        <multiHostInjector implementation="com.github.balotias.intellijantlers.injection.AntlersYamlInjector"/>
     </extensions>
 
     <actions>
