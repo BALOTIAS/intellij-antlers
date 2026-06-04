@@ -1,9 +1,22 @@
 package com.github.balotias.intellijantlers.scope
 
+import com.github.balotias.intellijantlers.AntlersLanguage
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 class AntlersStatementsTest : BasePlatformTestCase() {
+
+    fun testScopesAtMemoizedAtSameOffset() {
+        val file = myFixture.configureByText(
+            "p.antlers.html",
+            "{{ collection:blog as=\"posts\" }}{{ posts:tit<caret>le }}{{ /collection }}"
+        )
+        val antlers = file.viewProvider.getPsi(AntlersLanguage.INSTANCE)
+        val el = antlers.findElementAt(myFixture.caretOffset)!!
+        val a = AntlersScopeResolver.scopesAt(el)
+        // Same offset within one modification generation -> the memoized List instance is reused.
+        assertSame("scopesAt is memoized per caret offset", a, AntlersScopeResolver.scopesAt(el))
+    }
 
     fun testSortedAndCachedWithinOneModification() {
         val file = myFixture.configureByText("p.antlers.html", "{{ a }}{{ if x }}{{ b }}{{ /if }}")
