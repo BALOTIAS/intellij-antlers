@@ -23,6 +23,8 @@ class AntlersSpacingPostFormatProcessor : PostFormatProcessor {
 
     override fun processText(source: PsiFile, rangeToReformat: TextRange, settings: CodeStyleSettings): TextRange {
         val antlers = source.viewProvider.getPsi(AntlersLanguage.INSTANCE) as? AntlersFile ?: return rangeToReformat
+        if (!com.github.balotias.intellijantlers.settings.AntlersFormatterSettings.getInstance(source.project).reformatEnabled)
+            return rangeToReformat
         val document = source.viewProvider.document ?: return rangeToReformat
 
         // All leaves of the Antlers tree, in document order.
