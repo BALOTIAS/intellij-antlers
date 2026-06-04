@@ -57,6 +57,8 @@
         <liveTemplateContext contextId="ANTLERS" implementation="com.github.balotias.intellijantlers.template.AntlersTemplateContextType"/>
         <defaultLiveTemplates file="liveTemplates/Antlers"/>
         <internalFileTemplate name="Antlers Template"/>
+        <lang.elementManipulator forClass="com.github.balotias.intellijantlers.psi.AntlersFrontMatterBody"
+            implementationClass="com.github.balotias.intellijantlers.editor.AntlersFrontMatterBodyManipulator"/>
     </extensions>
 
     <actions>

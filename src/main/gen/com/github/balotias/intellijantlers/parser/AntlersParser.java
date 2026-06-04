@@ -36,13 +36,31 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // node_*
+  // frontMatter? node_*
   static boolean antlersFile(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "antlersFile")) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = antlersFile_0(builder_, level_ + 1);
+    result_ = result_ && antlersFile_1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // frontMatter?
+  private static boolean antlersFile_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "antlersFile_0")) return false;
+    frontMatter(builder_, level_ + 1);
+    return true;
+  }
+
+  // node_*
+  private static boolean antlersFile_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "antlersFile_1")) return false;
     while (true) {
       int pos_ = current_position_(builder_);
       if (!node_(builder_, level_ + 1)) break;
-      if (!empty_element_parsed_guard_(builder_, "antlersFile", pos_)) break;
+      if (!empty_element_parsed_guard_(builder_, "antlersFile_1", pos_)) break;
     }
     return true;
   }
@@ -325,6 +343,51 @@ public class AntlersParser implements PsiParser, LightPsiParser {
       if (!empty_element_parsed_guard_(builder_, "expr__1", pos_)) break;
     }
     exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  /* ********************************************************** */
+  // T_FRONTMATTER_FENCE frontMatterBody? T_FRONTMATTER_FENCE?
+  public static boolean frontMatter(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "frontMatter")) return false;
+    if (!nextTokenIs(builder_, T_FRONTMATTER_FENCE)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_FRONTMATTER_FENCE);
+    result_ = result_ && frontMatter_1(builder_, level_ + 1);
+    result_ = result_ && frontMatter_2(builder_, level_ + 1);
+    exit_section_(builder_, marker_, FRONT_MATTER, result_);
+    return result_;
+  }
+
+  // frontMatterBody?
+  private static boolean frontMatter_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "frontMatter_1")) return false;
+    frontMatterBody(builder_, level_ + 1);
+    return true;
+  }
+
+  // T_FRONTMATTER_FENCE?
+  private static boolean frontMatter_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "frontMatter_2")) return false;
+    consumeToken(builder_, T_FRONTMATTER_FENCE);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // T_FRONTMATTER_TEXT+
+  public static boolean frontMatterBody(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "frontMatterBody")) return false;
+    if (!nextTokenIs(builder_, T_FRONTMATTER_TEXT)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_FRONTMATTER_TEXT);
+    while (result_) {
+      int pos_ = current_position_(builder_);
+      if (!consumeToken(builder_, T_FRONTMATTER_TEXT)) break;
+      if (!empty_element_parsed_guard_(builder_, "frontMatterBody", pos_)) break;
+    }
+    exit_section_(builder_, marker_, FRONT_MATTER_BODY, result_);
     return result_;
   }
 

@@ -4,6 +4,7 @@ package com.github.balotias.intellijantlers.psi;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiLanguageInjectionHost;
 
 public class AntlersVisitor extends PsiElementVisitor {
 
@@ -21,6 +22,14 @@ public class AntlersVisitor extends PsiElementVisitor {
 
   public void visitCondition(@NotNull AntlersCondition o) {
     visitPsiElement(o);
+  }
+
+  public void visitFrontMatter(@NotNull AntlersFrontMatter o) {
+    visitPsiElement(o);
+  }
+
+  public void visitFrontMatterBody(@NotNull AntlersFrontMatterBody o) {
+    visitPsiLanguageInjectionHost(o);
   }
 
   public void visitModifier(@NotNull AntlersModifier o) {
@@ -49,6 +58,10 @@ public class AntlersVisitor extends PsiElementVisitor {
 
   public void visitStatement(@NotNull AntlersStatement o) {
     visitPsiElement(o);
+  }
+
+  public void visitPsiLanguageInjectionHost(@NotNull PsiLanguageInjectionHost o) {
+    visitElement(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {
