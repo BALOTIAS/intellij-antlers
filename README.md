@@ -92,6 +92,10 @@ navigation are blueprint- and view-aware.
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 
+## License
+
+Released under the [MIT License](LICENSE) © Matthias Balota.
+
 ---
 Plugin based on the [IntelliJ Platform Plugin Template][template].
 
