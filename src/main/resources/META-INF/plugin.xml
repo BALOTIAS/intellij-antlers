@@ -12,6 +12,7 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- AntlersCatalogService is registered via the @Service annotation, not here. -->
