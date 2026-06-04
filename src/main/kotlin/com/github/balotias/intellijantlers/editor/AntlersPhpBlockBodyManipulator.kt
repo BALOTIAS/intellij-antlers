@@ -20,8 +20,9 @@ class AntlersPhpBlockBodyManipulator : AbstractElementManipulator<AntlersPhpBloc
     ): AntlersPhpBlockBody {
         val old = element.text
         val body = old.substring(0, range.startOffset) + newContent + old.substring(range.endOffset)
+        // No padding around $body — the body keeps its own surrounding spaces, so the reparse round-trips.
         val dummy = PsiFileFactory.getInstance(element.project)
-            .createFileFromText("_php.antlers.html", AntlersFileType.INSTANCE, "{{? $body ?}}")
+            .createFileFromText("_php.antlers.html", AntlersFileType.INSTANCE, "{{?$body?}}")
         val newBody = PsiTreeUtil.findChildOfType(dummy, AntlersPhpBlockBody::class.java) ?: return element
         if (newBody.text != body) return element
         return element.replace(newBody) as AntlersPhpBlockBody

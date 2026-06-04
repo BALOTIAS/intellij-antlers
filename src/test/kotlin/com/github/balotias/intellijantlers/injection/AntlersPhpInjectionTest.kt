@@ -3,6 +3,8 @@ package com.github.balotias.intellijantlers.injection
 import com.github.balotias.intellijantlers.AntlersLanguage
 import com.github.balotias.intellijantlers.psi.AntlersPhpBlockBody
 import com.intellij.lang.injection.InjectedLanguageManager
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
@@ -28,5 +30,23 @@ class AntlersPhpInjectionTest : BasePlatformTestCase() {
         val antlers = myFixture.file.viewProvider.getPsi(AntlersLanguage.INSTANCE)
         val ilm = InjectedLanguageManager.getInstance(project)
         assertNull(ilm.findInjectedElementAt(antlers, antlers.text.indexOf("\$x")))
+    }
+
+    /** Injected-fragment write-back (PsiLanguageInjectionHost.updateText -> the manipulator). */
+    private fun updateBody(text: String, newContent: String): String {
+        val body = phpBody(text)
+        return WriteCommandAction.runWriteCommandAction<PsiLanguageInjectionHost>(project) {
+            body.updateText(newContent)
+        }.text
+    }
+
+    fun testWriteBackReplacesBody() {
+        // Would silently no-op if the synthetic template padded $body with spaces (the round-trip guard).
+        assertEquals(" \$y = 2; ", updateBody("{{? \$x = 1; ?}}", " \$y = 2; "))
+    }
+
+    fun testWriteBackBailsWhenContentWouldCloseTheBlock() {
+        // New content containing `?}}` would re-close the synthetic block early -> bail, leave body intact.
+        assertEquals(" \$x = 1; ", updateBody("{{? \$x = 1; ?}}", "\$a ?}} \$b"))
     }
 }
