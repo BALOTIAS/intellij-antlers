@@ -30,8 +30,8 @@ class AntlersStringInterpolationHighlightTest : BasePlatformTestCase() {
         assertEquals(AntlersSyntaxHighlighter.MODIFIER,
             keyOver("{{ \"{title | upper}\" }}", "upper"))
 
-    fun testInterpolatedPipeIsOperator() =
-        assertEquals(AntlersSyntaxHighlighter.OPERATOR,
+    fun testInterpolatedPipeUsesPipeColor() =
+        assertEquals(AntlersSyntaxHighlighter.PIPE,
             keyOver("{{ \"{title | upper}\" }}", "|"))
 
     fun testArrayBracketColored() =

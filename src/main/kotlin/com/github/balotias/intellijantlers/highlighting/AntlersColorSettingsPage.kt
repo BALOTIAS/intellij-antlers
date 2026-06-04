@@ -19,6 +19,7 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             "mod" to AntlersSyntaxHighlighter.MODIFIER,
             "param" to AntlersSyntaxHighlighter.PARAMETER,
             "fmfence" to AntlersSyntaxHighlighter.FRONTMATTER_FENCE,
+            "pipe" to AntlersSyntaxHighlighter.PIPE,
         )
     override fun getAttributeDescriptors(): Array<AttributesDescriptor> = DESCRIPTORS
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
@@ -36,6 +37,7 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             AttributesDescriptor("Number", AntlersSyntaxHighlighter.NUMBER),
             AttributesDescriptor("Comment", AntlersSyntaxHighlighter.COMMENT),
             AttributesDescriptor("Operator", AntlersSyntaxHighlighter.OPERATOR),
+            AttributesDescriptor("Modifier pipe", AntlersSyntaxHighlighter.PIPE),
             AttributesDescriptor("Front matter//Fence", AntlersSyntaxHighlighter.FRONTMATTER_FENCE),
         )
 
@@ -45,7 +47,7 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             <fmfence>---</fmfence>
             {{# Featured posts #}}
             {{ <tag>collection</tag>:blog <param>limit</param>="3" <param>as</param>="posts" }}
-              {{ title | <mod>upper</mod> }}
+              {{ title <pipe>|</pipe> <mod>upper</mod> }}
               {{ <kw>if</kw> count > 0 }}{{ price }}{{ /collection }}
         """.trimIndent()
     }

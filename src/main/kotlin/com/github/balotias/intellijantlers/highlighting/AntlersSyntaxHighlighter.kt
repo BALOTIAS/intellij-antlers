@@ -5,6 +5,7 @@ import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.intellij.lexer.FlexAdapter
 import com.intellij.lexer.Lexer
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
+import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
@@ -25,12 +26,16 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
 
         val FRONTMATTER_FENCE = TextAttributesKey.createTextAttributesKey("ANTLERS_FRONTMATTER_FENCE", DefaultLanguageHighlighterColors.METADATA)
 
+        /** The modifier `|` separator. Defaults to plain text (white, like a comma); separately themeable. */
+        val PIPE = TextAttributesKey.createTextAttributesKey("ANTLERS_PIPE", HighlighterColors.TEXT)
+
         private val BRACES_KEYS = arrayOf(BRACES)
         private val IDENTIFIER_KEYS = arrayOf(IDENTIFIER)
         private val STRING_KEYS = arrayOf(STRING)
         private val NUMBER_KEYS = arrayOf(NUMBER)
         private val COMMENT_KEYS = arrayOf(COMMENT)
         private val OPERATOR_KEYS = arrayOf(OPERATOR)
+        private val PIPE_KEYS = arrayOf(PIPE)
         private val FRONTMATTER_FENCE_KEYS = arrayOf(FRONTMATTER_FENCE)
         private val EMPTY_KEYS = arrayOf<TextAttributesKey>()
     }
@@ -49,7 +54,9 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
             AntlersTypes.T_NUMBER -> NUMBER_KEYS
             AntlersTypes.T_COMMENT_OPEN, AntlersTypes.T_COMMENT_CLOSE, AntlersTypes.T_COMMENT_TEXT -> COMMENT_KEYS
 
-            AntlersTypes.T_OP, AntlersTypes.T_PIPE, AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW,
+            AntlersTypes.T_PIPE -> PIPE_KEYS
+
+            AntlersTypes.T_OP, AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW,
             AntlersTypes.T_COLON, AntlersTypes.T_SLASH, AntlersTypes.T_DOT -> OPERATOR_KEYS
 
             AntlersTypes.T_FRONTMATTER_FENCE -> FRONTMATTER_FENCE_KEYS
