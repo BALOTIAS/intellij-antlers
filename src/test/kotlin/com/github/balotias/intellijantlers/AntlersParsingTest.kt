@@ -19,6 +19,7 @@ class AntlersParsingTest : ParsingTestCase("parsing", "antlers.html", AntlersPar
     fun testBoundParam() = doTest(true)
     fun testBracketAccess() = doTest(true)
     fun testPhpBlock() = doTest(true)
+    fun testPhpEchoBlock() = doTest(true)
     fun testNoparseBlock() = doTest(true)
     fun testMultiLineTag() = doTest(true)
     fun testConditionModifier() = doTest(true)

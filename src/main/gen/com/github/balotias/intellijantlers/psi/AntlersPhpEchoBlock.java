@@ -5,12 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface AntlersPhpBlock extends PsiElement {
+public interface AntlersPhpEchoBlock extends PsiElement {
 
   @Nullable
-  AntlersPhpEchoBlock getPhpEchoBlock();
-
-  @Nullable
-  AntlersPhpRawBlock getPhpRawBlock();
+  AntlersPhpBlockBody getPhpBlockBody();
 
 }

@@ -20,6 +20,9 @@ public interface AntlersTypes {
   IElementType OUTER_HTML = new AntlersElementType("OUTER_HTML");
   IElementType PARAMETER = new AntlersElementType("PARAMETER");
   IElementType PHP_BLOCK = new AntlersElementType("PHP_BLOCK");
+  IElementType PHP_BLOCK_BODY = new AntlersElementType("PHP_BLOCK_BODY");
+  IElementType PHP_ECHO_BLOCK = new AntlersElementType("PHP_ECHO_BLOCK");
+  IElementType PHP_RAW_BLOCK = new AntlersElementType("PHP_RAW_BLOCK");
   IElementType STATEMENT = new AntlersElementType("STATEMENT");
 
   IElementType T_ARROW = new AntlersTokenType("=>");
@@ -98,6 +101,15 @@ public interface AntlersTypes {
       }
       else if (type == PHP_BLOCK) {
         return new AntlersPhpBlockImpl(node);
+      }
+      else if (type == PHP_BLOCK_BODY) {
+        return new AntlersPhpBlockBodyImpl(node);
+      }
+      else if (type == PHP_ECHO_BLOCK) {
+        return new AntlersPhpEchoBlockImpl(node);
+      }
+      else if (type == PHP_RAW_BLOCK) {
+        return new AntlersPhpRawBlockImpl(node);
       }
       else if (type == STATEMENT) {
         return new AntlersStatementImpl(node);

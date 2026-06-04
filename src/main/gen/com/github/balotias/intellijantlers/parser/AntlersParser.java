@@ -724,54 +724,74 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_PHP_RAW_OPEN T_PHP_TEXT? T_PHP_RAW_CLOSE
-  //            | T_PHP_ECHO_OPEN T_PHP_TEXT? T_PHP_ECHO_CLOSE
+  // phpRawBlock | phpEchoBlock
   public static boolean phpBlock(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "phpBlock")) return false;
     if (!nextTokenIs(builder_, "<php block>", T_PHP_ECHO_OPEN, T_PHP_RAW_OPEN)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, PHP_BLOCK, "<php block>");
-    result_ = phpBlock_0(builder_, level_ + 1);
-    if (!result_) result_ = phpBlock_1(builder_, level_ + 1);
+    result_ = phpRawBlock(builder_, level_ + 1);
+    if (!result_) result_ = phpEchoBlock(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
 
-  // T_PHP_RAW_OPEN T_PHP_TEXT? T_PHP_RAW_CLOSE
-  private static boolean phpBlock_0(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "phpBlock_0")) return false;
+  /* ********************************************************** */
+  // T_PHP_TEXT+
+  public static boolean phpBlockBody(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpBlockBody")) return false;
+    if (!nextTokenIs(builder_, T_PHP_TEXT)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, T_PHP_RAW_OPEN);
-    result_ = result_ && phpBlock_0_1(builder_, level_ + 1);
-    result_ = result_ && consumeToken(builder_, T_PHP_RAW_CLOSE);
-    exit_section_(builder_, marker_, null, result_);
+    result_ = consumeToken(builder_, T_PHP_TEXT);
+    while (result_) {
+      int pos_ = current_position_(builder_);
+      if (!consumeToken(builder_, T_PHP_TEXT)) break;
+      if (!empty_element_parsed_guard_(builder_, "phpBlockBody", pos_)) break;
+    }
+    exit_section_(builder_, marker_, PHP_BLOCK_BODY, result_);
     return result_;
   }
 
-  // T_PHP_TEXT?
-  private static boolean phpBlock_0_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "phpBlock_0_1")) return false;
-    consumeToken(builder_, T_PHP_TEXT);
-    return true;
-  }
-
-  // T_PHP_ECHO_OPEN T_PHP_TEXT? T_PHP_ECHO_CLOSE
-  private static boolean phpBlock_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "phpBlock_1")) return false;
+  /* ********************************************************** */
+  // T_PHP_ECHO_OPEN phpBlockBody? T_PHP_ECHO_CLOSE
+  public static boolean phpEchoBlock(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpEchoBlock")) return false;
+    if (!nextTokenIs(builder_, T_PHP_ECHO_OPEN)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, T_PHP_ECHO_OPEN);
-    result_ = result_ && phpBlock_1_1(builder_, level_ + 1);
+    result_ = result_ && phpEchoBlock_1(builder_, level_ + 1);
     result_ = result_ && consumeToken(builder_, T_PHP_ECHO_CLOSE);
-    exit_section_(builder_, marker_, null, result_);
+    exit_section_(builder_, marker_, PHP_ECHO_BLOCK, result_);
     return result_;
   }
 
-  // T_PHP_TEXT?
-  private static boolean phpBlock_1_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "phpBlock_1_1")) return false;
-    consumeToken(builder_, T_PHP_TEXT);
+  // phpBlockBody?
+  private static boolean phpEchoBlock_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpEchoBlock_1")) return false;
+    phpBlockBody(builder_, level_ + 1);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // T_PHP_RAW_OPEN  phpBlockBody? T_PHP_RAW_CLOSE
+  public static boolean phpRawBlock(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpRawBlock")) return false;
+    if (!nextTokenIs(builder_, T_PHP_RAW_OPEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_PHP_RAW_OPEN);
+    result_ = result_ && phpRawBlock_1(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, T_PHP_RAW_CLOSE);
+    exit_section_(builder_, marker_, PHP_RAW_BLOCK, result_);
+    return result_;
+  }
+
+  // phpBlockBody?
+  private static boolean phpRawBlock_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpRawBlock_1")) return false;
+    phpBlockBody(builder_, level_ + 1);
     return true;
   }
 

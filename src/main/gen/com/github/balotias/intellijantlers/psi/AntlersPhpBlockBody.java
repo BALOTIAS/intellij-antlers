@@ -4,13 +4,8 @@ package com.github.balotias.intellijantlers.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiLanguageInjectionHost;
 
-public interface AntlersPhpBlock extends PsiElement {
-
-  @Nullable
-  AntlersPhpEchoBlock getPhpEchoBlock();
-
-  @Nullable
-  AntlersPhpRawBlock getPhpRawBlock();
+public interface AntlersPhpBlockBody extends PsiLanguageInjectionHost {
 
 }

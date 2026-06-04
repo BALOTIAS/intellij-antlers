@@ -85,3 +85,14 @@ open class AntlersFrontMatterBodyMixin(node: ASTNode) : ASTWrapperPsiElement(nod
     override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost> =
         LiteralTextEscaper.createSimple(this)
 }
+
+/** PHP block body (`T_PHP_TEXT+`) as a PHP injection host — same shape as the front-matter body. */
+open class AntlersPhpBlockBodyMixin(node: ASTNode) : ASTWrapperPsiElement(node), PsiLanguageInjectionHost {
+    override fun isValidHost(): Boolean = true
+
+    override fun updateText(text: String): PsiLanguageInjectionHost =
+        ElementManipulators.handleContentChange(this, text) as PsiLanguageInjectionHost
+
+    override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost> =
+        LiteralTextEscaper.createSimple(this)
+}

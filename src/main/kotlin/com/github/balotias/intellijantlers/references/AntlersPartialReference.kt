@@ -60,14 +60,14 @@ class AntlersPartialReference(
     }
 
     private fun stripPartialExtensions(name: String): String =
-        name.removeSuffix(".antlers.html").removeSuffix(".html")
+        name.removeSuffix(".antlers.html").removeSuffix(".antlers.php").removeSuffix(".html")
 
     private fun relativePathMinusExt(
         root: com.intellij.openapi.vfs.VirtualFile,
         vf: com.intellij.openapi.vfs.VirtualFile
     ): String? {
         val rel = getRelativePath(root, vf) ?: return null
-        return rel.removeSuffix(".antlers.html").removeSuffix(".html")
+        return rel.removeSuffix(".antlers.html").removeSuffix(".antlers.php").removeSuffix(".html")
     }
 
     override fun getVariants(): Array<Any> =
