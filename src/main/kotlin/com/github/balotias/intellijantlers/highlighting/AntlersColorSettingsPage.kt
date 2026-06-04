@@ -19,8 +19,6 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             "mod" to AntlersSyntaxHighlighter.MODIFIER,
             "param" to AntlersSyntaxHighlighter.PARAMETER,
             "fmfence" to AntlersSyntaxHighlighter.FRONTMATTER_FENCE,
-            "fmkey" to AntlersSyntaxHighlighter.FRONTMATTER_KEY,
-            "fmval" to AntlersSyntaxHighlighter.FRONTMATTER_VALUE,
         )
     override fun getAttributeDescriptors(): Array<AttributesDescriptor> = DESCRIPTORS
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
@@ -39,13 +37,11 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             AttributesDescriptor("Comment", AntlersSyntaxHighlighter.COMMENT),
             AttributesDescriptor("Operator", AntlersSyntaxHighlighter.OPERATOR),
             AttributesDescriptor("Front matter//Fence", AntlersSyntaxHighlighter.FRONTMATTER_FENCE),
-            AttributesDescriptor("Front matter//Key", AntlersSyntaxHighlighter.FRONTMATTER_KEY),
-            AttributesDescriptor("Front matter//Value", AntlersSyntaxHighlighter.FRONTMATTER_VALUE),
         )
 
         private val DEMO = """
             <fmfence>---</fmfence>
-            <fmkey>title</fmkey>: <fmval>"My Page"</fmval>
+            title: "My Page"
             <fmfence>---</fmfence>
             {{# Featured posts #}}
             {{ <tag>collection</tag>:blog <param>limit</param>="3" <param>as</param>="posts" }}
