@@ -29,6 +29,8 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         /** The modifier `|` separator. Defaults to plain text (white, like a comma); separately themeable. */
         val PIPE = TextAttributesKey.createTextAttributesKey("ANTLERS_PIPE", HighlighterColors.TEXT)
 
+        val HINT = TextAttributesKey.createTextAttributesKey("ANTLERS_HINT", DefaultLanguageHighlighterColors.DOC_COMMENT_TAG)
+
         private val BRACES_KEYS = arrayOf(BRACES)
         private val IDENTIFIER_KEYS = arrayOf(IDENTIFIER)
         private val STRING_KEYS = arrayOf(STRING)
