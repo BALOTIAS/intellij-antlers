@@ -85,4 +85,31 @@ class LexerTest {
         assert(ts.contains(AntlersTypes.T_EQUALS))
         assert(ts.contains(AntlersTypes.T_STRING))
     }
+
+    @Test fun frontMatterAtStartIsCarvedOut() {
+        assertEquals(
+            listOf(
+                AntlersTypes.T_FRONTMATTER_FENCE,   // "---\n"
+                AntlersTypes.T_FRONTMATTER_TEXT,    // "name: ''\n"
+                AntlersTypes.T_FRONTMATTER_TEXT,    // "filled: false\n"
+                AntlersTypes.T_FRONTMATTER_FENCE,   // "---\n"
+                AntlersTypes.T_LDOUBLE, AntlersTypes.T_WS, AntlersTypes.T_IDENT,
+                AntlersTypes.T_WS, AntlersTypes.T_RDOUBLE
+            ),
+            types("---\nname: ''\nfilled: false\n---\n{{ title }}")
+        )
+    }
+
+    @Test fun noLeadingFenceLexesAsBefore() {
+        assertEquals(
+            listOf(AntlersTypes.T_OUTER_HTML, AntlersTypes.T_LDOUBLE, AntlersTypes.T_WS,
+                AntlersTypes.T_IDENT, AntlersTypes.T_WS, AntlersTypes.T_RDOUBLE),
+            types("<div>{{ title }}")
+        )
+    }
+
+    @Test fun dashesNotAtFileStartAreOuterHtml() {
+        // `---` mid-file is plain content, not front matter.
+        assertEquals(listOf(AntlersTypes.T_OUTER_HTML), types("x\n---\ny"))
+    }
 }
