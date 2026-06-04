@@ -70,7 +70,10 @@ navigation are blueprint- and view-aware.
 - **Statamic 5 and 6.** Antlers syntax is shared across both versions; the bundled tag/modifier catalog
   is tailored to the version detected in your project's `composer.json` (falling back to the latest when
   none is found), and custom/addon tags are discovered by scanning your project.
-- IntelliJ-based IDEs on the **2025.2** platform (IntelliJ IDEA, PhpStorm, WebStorm, and friends).
+- Both `*.antlers.html` and `*.antlers.php` views.
+- IntelliJ-based IDEs on the **2025.2** platform (IntelliJ IDEA, PhpStorm, WebStorm, and friends). PHP
+  inside `{{$ … $}}` / `{{? … ?}}` blocks is highlighted where the JetBrains PHP plugin is available
+  (PhpStorm / IDEA Ultimate); everything else works everywhere.
 
 ## Installation
 
