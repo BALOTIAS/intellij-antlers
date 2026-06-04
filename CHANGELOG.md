@@ -9,8 +9,9 @@
 - Syntax highlighting (tags, variables, strings, numbers, comments, operators, PHP/noparse blocks) with
   a configurable color settings page, plus semantic highlighting of tag heads, condition keywords,
   modifier names, and closing-tag heads. Antlers interpolation inside string literals
-  (`"…{logo:focus_css}…"`) is highlighted as Antlers, and a view's `---`…`---` front matter is
-  highlighted YAML-style (configurable fence/key/value colors).
+  (`"…{logo:focus_css}…"`) is highlighted as Antlers, and a view's `---`…`---` front matter is a real
+  **YAML** language island (injected) — comments, highlighting, and YAML errors/warnings/completion
+  inside the block.
 - Brace matching, line/block commenting, `{{ }}` auto-insert, and code folding for paired tags,
   conditions, comments, noparse, and PHP blocks.
 - Structure view of tag/condition nesting and partial includes.
