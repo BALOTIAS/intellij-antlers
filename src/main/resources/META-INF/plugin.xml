@@ -61,6 +61,7 @@
         <lang.elementManipulator forClass="com.github.balotias.intellijantlers.psi.AntlersPhpBlockBody"
             implementationClass="com.github.balotias.intellijantlers.editor.AntlersPhpBlockBodyManipulator"/>
         <multiHostInjector implementation="com.github.balotias.intellijantlers.injection.AntlersYamlInjector"/>
+        <multiHostInjector implementation="com.github.balotias.intellijantlers.injection.AntlersPhpInjector"/>
 
         <projectConfigurable parentId="language"
             id="com.github.balotias.intellijantlers.settings.AntlersSettingsConfigurable"
