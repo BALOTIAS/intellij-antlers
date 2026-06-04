@@ -20,6 +20,8 @@ object AntlersFieldContext {
     fun namespacesFor(element: PsiElement): List<BlueprintNamespace>? {
         val scopes = AntlersScopeResolver.scopesAt(element)
         if (scopes.isNotEmpty()) return scopes.map { it.namespace }
+        val hints = element.containingFile?.let { com.github.balotias.intellijantlers.blueprint.AntlersViewHints.declaredNamespaces(it) }
+        if (!hints.isNullOrEmpty()) return hints
         val page = PageBlueprintResolver.namespacesFor(element)
         if (page.isNotEmpty()) return page
         return null
