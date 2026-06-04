@@ -11,8 +11,7 @@ class AntlersColorSettingsPageTest : BasePlatformTestCase() {
             AntlersSyntaxHighlighter.MODIFIER, AntlersSyntaxHighlighter.PARAMETER, AntlersSyntaxHighlighter.IDENTIFIER,
             AntlersSyntaxHighlighter.STRING, AntlersSyntaxHighlighter.NUMBER, AntlersSyntaxHighlighter.COMMENT,
             AntlersSyntaxHighlighter.OPERATOR,
-            AntlersSyntaxHighlighter.FRONTMATTER_FENCE, AntlersSyntaxHighlighter.FRONTMATTER_KEY,
-            AntlersSyntaxHighlighter.FRONTMATTER_VALUE,
+            AntlersSyntaxHighlighter.FRONTMATTER_FENCE,
         )
         assertEquals(expected, keys)
     }
@@ -22,7 +21,7 @@ class AntlersColorSettingsPageTest : BasePlatformTestCase() {
         assertEquals("Antlers", page.displayName)
         assertTrue("demo text present", page.demoText.isNotBlank())
         assertTrue("reuses the Antlers highlighter", page.highlighter is AntlersSyntaxHighlighter)
-        assertEquals("preview maps the semantic tags", setOf("tag", "kw", "mod", "param", "fmfence", "fmkey", "fmval"),
+        assertEquals("preview maps the semantic tags", setOf("tag", "kw", "mod", "param", "fmfence"),
             page.additionalHighlightingTagToDescriptorMap!!.keys)
     }
 }

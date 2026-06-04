@@ -22,4 +22,5 @@ class AntlersParsingTest : ParsingTestCase("parsing", "antlers.html", AntlersPar
     fun testNoparseBlock() = doTest(true)
     fun testMultiLineTag() = doTest(true)
     fun testConditionModifier() = doTest(true)
+    fun testFrontMatter() = doTest(true)
 }

@@ -2,7 +2,10 @@ package com.github.balotias.intellijantlers.psi
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
+import com.intellij.psi.ElementManipulators
+import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.util.PsiTreeUtil
 
 open class AntlersClosingTagMixin(node: ASTNode) : ASTWrapperPsiElement(node) {
@@ -67,4 +70,18 @@ open class AntlersModifierMixin(node: ASTNode) : ASTWrapperPsiElement(node) {
     /** Modifier name after the pipe, e.g. "upper". */
     val modifierName: String
         get() = node.findChildByType(AntlersTypes.T_IDENT)?.text ?: ""
+}
+
+/**
+ * Front-matter body (`T_FRONTMATTER_TEXT+`) as a YAML injection host. The body text is the verbatim YAML
+ * between the `---` fences, so the escaper is trivial and the injected range is the whole element.
+ */
+open class AntlersFrontMatterBodyMixin(node: ASTNode) : ASTWrapperPsiElement(node), PsiLanguageInjectionHost {
+    override fun isValidHost(): Boolean = true
+
+    override fun updateText(text: String): PsiLanguageInjectionHost =
+        ElementManipulators.handleContentChange(this, text) as PsiLanguageInjectionHost
+
+    override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost> =
+        LiteralTextEscaper.createSimple(this)
 }

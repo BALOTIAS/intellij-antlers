@@ -12,6 +12,7 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- AntlersCatalogService is registered via the @Service annotation, not here. -->
@@ -37,7 +38,6 @@
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersBalanceAnnotator"/>
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersSemanticHighlightAnnotator"/>
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersStringInterpolationAnnotator"/>
-        <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersFrontMatterHighlightAnnotator"/>
         <localInspection language="Antlers"
                          implementationClass="com.github.balotias.intellijantlers.inspection.AntlersUnknownModifierInspection"
                          shortName="AntlersUnknownModifier" displayName="Unknown Antlers modifier"
@@ -56,6 +56,9 @@
         <liveTemplateContext contextId="ANTLERS" implementation="com.github.balotias.intellijantlers.template.AntlersTemplateContextType"/>
         <defaultLiveTemplates file="liveTemplates/Antlers"/>
         <internalFileTemplate name="Antlers Template"/>
+        <lang.elementManipulator forClass="com.github.balotias.intellijantlers.psi.AntlersFrontMatterBody"
+            implementationClass="com.github.balotias.intellijantlers.editor.AntlersFrontMatterBodyManipulator"/>
+        <multiHostInjector implementation="com.github.balotias.intellijantlers.injection.AntlersYamlInjector"/>
     </extensions>
 
     <actions>

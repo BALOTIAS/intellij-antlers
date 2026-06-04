@@ -12,6 +12,8 @@ public interface AntlersTypes {
   IElementType CLOSING_TAG = new AntlersElementType("CLOSING_TAG");
   IElementType COMMENT = new AntlersElementType("COMMENT");
   IElementType CONDITION = new AntlersElementType("CONDITION");
+  IElementType FRONT_MATTER = new AntlersElementType("FRONT_MATTER");
+  IElementType FRONT_MATTER_BODY = new AntlersElementType("FRONT_MATTER_BODY");
   IElementType MODIFIER = new AntlersElementType("MODIFIER");
   IElementType NAME_PATH = new AntlersElementType("NAME_PATH");
   IElementType NOPARSE_BLOCK = new AntlersElementType("NOPARSE_BLOCK");
@@ -30,6 +32,8 @@ public interface AntlersTypes {
   IElementType T_DOLLAR = new AntlersTokenType("$");
   IElementType T_DOT = new AntlersTokenType(".");
   IElementType T_EQUALS = new AntlersTokenType("=");
+  IElementType T_FRONTMATTER_FENCE = new AntlersTokenType("T_FRONTMATTER_FENCE");
+  IElementType T_FRONTMATTER_TEXT = new AntlersTokenType("T_FRONTMATTER_TEXT");
   IElementType T_IDENT = new AntlersTokenType("T_IDENT");
   IElementType T_LBRACE = new AntlersTokenType("{");
   IElementType T_LBRACKET = new AntlersTokenType("[");
@@ -70,6 +74,12 @@ public interface AntlersTypes {
       }
       else if (type == CONDITION) {
         return new AntlersConditionImpl(node);
+      }
+      else if (type == FRONT_MATTER) {
+        return new AntlersFrontMatterImpl(node);
+      }
+      else if (type == FRONT_MATTER_BODY) {
+        return new AntlersFrontMatterBodyImpl(node);
       }
       else if (type == MODIFIER) {
         return new AntlersModifierImpl(node);

@@ -14,6 +14,8 @@
 
   tokens = [
     T_OUTER_HTML="T_OUTER_HTML"
+    T_FRONTMATTER_FENCE="T_FRONTMATTER_FENCE"
+    T_FRONTMATTER_TEXT="T_FRONTMATTER_TEXT"
     T_LDOUBLE="{{"
     T_RDOUBLE="}}"
     T_COMMENT_OPEN="{{#"
@@ -51,7 +53,13 @@
   ]
 }
 
-antlersFile ::= node_*
+antlersFile ::= frontMatter? node_*
+
+frontMatter ::= T_FRONTMATTER_FENCE frontMatterBody? T_FRONTMATTER_FENCE?
+frontMatterBody ::= T_FRONTMATTER_TEXT+ {
+  mixin="com.github.balotias.intellijantlers.psi.AntlersFrontMatterBodyMixin"
+  implements="com.intellij.psi.PsiLanguageInjectionHost"
+}
 
 private node_ ::= comment | phpBlock | noparseBlock | statement | outerHtml
 

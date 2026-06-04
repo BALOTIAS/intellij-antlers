@@ -24,8 +24,6 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         val PARAMETER = TextAttributesKey.createTextAttributesKey("ANTLERS_PARAMETER", DefaultLanguageHighlighterColors.PARAMETER)
 
         val FRONTMATTER_FENCE = TextAttributesKey.createTextAttributesKey("ANTLERS_FRONTMATTER_FENCE", DefaultLanguageHighlighterColors.METADATA)
-        val FRONTMATTER_KEY = TextAttributesKey.createTextAttributesKey("ANTLERS_FRONTMATTER_KEY", DefaultLanguageHighlighterColors.KEYWORD)
-        val FRONTMATTER_VALUE = TextAttributesKey.createTextAttributesKey("ANTLERS_FRONTMATTER_VALUE", DefaultLanguageHighlighterColors.STRING)
 
         private val BRACES_KEYS = arrayOf(BRACES)
         private val IDENTIFIER_KEYS = arrayOf(IDENTIFIER)
@@ -33,6 +31,7 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         private val NUMBER_KEYS = arrayOf(NUMBER)
         private val COMMENT_KEYS = arrayOf(COMMENT)
         private val OPERATOR_KEYS = arrayOf(OPERATOR)
+        private val FRONTMATTER_FENCE_KEYS = arrayOf(FRONTMATTER_FENCE)
         private val EMPTY_KEYS = arrayOf<TextAttributesKey>()
     }
 
@@ -52,6 +51,8 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
 
             AntlersTypes.T_OP, AntlersTypes.T_PIPE, AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW,
             AntlersTypes.T_COLON, AntlersTypes.T_SLASH, AntlersTypes.T_DOT -> OPERATOR_KEYS
+
+            AntlersTypes.T_FRONTMATTER_FENCE -> FRONTMATTER_FENCE_KEYS
 
             else -> EMPTY_KEYS
         }

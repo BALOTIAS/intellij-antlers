@@ -27,8 +27,11 @@ import com.intellij.psi.TokenType;
 %state PHP_RAW
 %state PHP_ECHO
 %state NOPARSE
+%state CONTENT
+%state FRONTMATTER
 
 WS=\s+
+NL=\r\n|\n|\r
 IDENT=[a-zA-Z_][a-zA-Z_0-9\-]*
 NUMBER=[0-9]+(\.[0-9]+)?
 STRING=\"([^\"\\]|\\.)*\"|'([^'\\]|\\.)*'
@@ -39,6 +42,18 @@ OP="==="|"!=="|"<=>"|"=="|"!="|">="|"<="|">"|"<"|"&&"|"||"|"!"|"???"|"??"|"?="|"
 %%
 
 <YYINITIAL> {
+  "---" [ \t]* {NL}   { yybegin(FRONTMATTER); return AntlersTypes.T_FRONTMATTER_FENCE; }
+  [^]                 { yybegin(CONTENT); yypushback(1); }
+}
+
+<FRONTMATTER> {
+  "---" [ \t]* {NL}   { yybegin(CONTENT); return AntlersTypes.T_FRONTMATTER_FENCE; }
+  "---" [ \t]*        { yybegin(CONTENT); return AntlersTypes.T_FRONTMATTER_FENCE; }
+  [^\r\n]* {NL}       { return AntlersTypes.T_FRONTMATTER_TEXT; }
+  [^\r\n]+            { return AntlersTypes.T_FRONTMATTER_TEXT; }
+}
+
+<CONTENT> {
   {NOPARSE_OPEN}      { yybegin(NOPARSE); return AntlersTypes.T_NOPARSE_OPEN; }
   "@{{"               { return AntlersTypes.T_OUTER_HTML; }
   "{{#"               { yybegin(COMMENT);  return AntlersTypes.T_COMMENT_OPEN; }
@@ -51,7 +66,7 @@ OP="==="|"!=="|"<=>"|"=="|"!="|">="|"<="|">"|"<"|"&&"|"||"|"!"|"???"|"??"|"?="|"
 }
 
 <EXPR> {
-  "}}"                { yybegin(YYINITIAL); return AntlersTypes.T_RDOUBLE; }
+  "}}"                { yybegin(CONTENT); return AntlersTypes.T_RDOUBLE; }
   {WS}                { return AntlersTypes.T_WS; }
   {STRING}            { return AntlersTypes.T_STRING; }
   {NUMBER}            { return AntlersTypes.T_NUMBER; }
@@ -77,25 +92,25 @@ OP="==="|"!=="|"<=>"|"=="|"!="|">="|"<="|">"|"<"|"&&"|"||"|"!"|"???"|"??"|"?="|"
 }
 
 <COMMENT> {
-  "#}}"               { yybegin(YYINITIAL); return AntlersTypes.T_COMMENT_CLOSE; }
+  "#}}"               { yybegin(CONTENT); return AntlersTypes.T_COMMENT_CLOSE; }
   [^#]+               { return AntlersTypes.T_COMMENT_TEXT; }
   "#"                 { return AntlersTypes.T_COMMENT_TEXT; }
 }
 
 <PHP_RAW> {
-  "?}}"               { yybegin(YYINITIAL); return AntlersTypes.T_PHP_RAW_CLOSE; }
+  "?}}"               { yybegin(CONTENT); return AntlersTypes.T_PHP_RAW_CLOSE; }
   [^?]+               { return AntlersTypes.T_PHP_TEXT; }
   "?"                 { return AntlersTypes.T_PHP_TEXT; }
 }
 
 <PHP_ECHO> {
-  "$}}"               { yybegin(YYINITIAL); return AntlersTypes.T_PHP_ECHO_CLOSE; }
+  "$}}"               { yybegin(CONTENT); return AntlersTypes.T_PHP_ECHO_CLOSE; }
   [^$]+               { return AntlersTypes.T_PHP_TEXT; }
   "$"                 { return AntlersTypes.T_PHP_TEXT; }
 }
 
 <NOPARSE> {
-  {NOPARSE_CLOSE}     { yybegin(YYINITIAL); return AntlersTypes.T_NOPARSE_CLOSE; }
+  {NOPARSE_CLOSE}     { yybegin(CONTENT); return AntlersTypes.T_NOPARSE_CLOSE; }
   [^{]+               { return AntlersTypes.T_NOPARSE_TEXT; }
   "{"                 { return AntlersTypes.T_NOPARSE_TEXT; }
 }
