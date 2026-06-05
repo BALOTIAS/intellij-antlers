@@ -36,4 +36,46 @@ class AntlersBlockIndentTest : BasePlatformTestCase() {
             out
         )
     }
+
+    fun testCollectionPairTagBodyIndented() {
+        // `collection` opens because the catalog marks it isPair (the project service is available in tests).
+        val out = reformat("{{ collection:blog }}\n{{ title }}\n{{ /collection }}")
+        val u = unit()
+        assertEquals("{{ collection:blog }}\n${u}{{ title }}\n{{ /collection }}", out)
+    }
+
+    fun testHtmlBodyLineShiftsAtLeastOneLevel() {
+        // The HTML formatter owns the HTML line's base; we only assert it gains the Antlers level and that
+        // the opener/closer stay put — exact column is HTML-formatter dependent (documented).
+        val out = reformat("{{ if x }}\n<span>hi</span>\n{{ /if }}")
+        val u = unit()
+        val lines = out.split("\n")
+        assertEquals("{{ if x }}", lines[0])
+        assertTrue("html body indented at least one level, got: <${lines[1]}>", lines[1].startsWith(u))
+        assertTrue("html body content present", lines[1].trim() == "<span>hi</span>")
+        assertEquals("{{ /if }}", lines.last())
+    }
+
+    fun testMultilineParamInsideBlockComposes() {
+        // A multi-line opener inside a pair: block sets the opener line indent, multiline indents its params
+        // one level under that — they must compound.
+        val out = reformat("{{ if x }}\n{{ collection:blog\nlimit=\"3\"\n}}\n{{ /if }}")
+        val u = unit()
+        assertEquals(
+            "{{ if x }}\n${u}{{ collection:blog\n${u}${u}limit=\"3\"\n${u}}}\n{{ /if }}",
+            out
+        )
+    }
+
+    fun testIdempotentAntlers() {
+        val once = reformat("{{ if a }}\n{{ if b }}\n{{ title }}\n{{ /if }}\n{{ /if }}")
+        val twice = reformat(once)
+        assertEquals(once, twice)
+    }
+
+    fun testIdempotentMixedHtml() {
+        val once = reformat("{{ collection:blog }}\n<article>\n<h2>{{ title }}</h2>\n</article>\n{{ /collection }}")
+        val twice = reformat(once)
+        assertEquals("reformat must be a fixed point (no runaway), got:\n$twice", once, twice)
+    }
 }
