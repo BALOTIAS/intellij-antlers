@@ -76,4 +76,14 @@ class AntlersPhpInjectionTest : BasePlatformTestCase() {
     fun testWriteBackReplacesTagBody() {
         assertEquals(" \$y = 2; ", updateBody("<?php \$x = 1; ?>", " \$y = 2; "))
     }
+
+    fun testWriteBackBailsWhenTagContentWouldCloseTheBlock() {
+        // New content containing `?>` would re-close the literal tag early -> bail, leave body intact.
+        assertEquals(" \$x = 1; ", updateBody("<?php \$x = 1; ?>", "\$a ?> \$b"))
+    }
+
+    fun testWriteBackBailsWhenEchoContentWouldCloseTheBlock() {
+        // `{{$ $}}`'s close is `$}}` (not `?}}`); editing in a `$}}` must bail, not corrupt the block.
+        assertEquals(" \$x ", updateBody("{{\$ \$x \$}}", "\$a \$}} \$b"))
+    }
 }
