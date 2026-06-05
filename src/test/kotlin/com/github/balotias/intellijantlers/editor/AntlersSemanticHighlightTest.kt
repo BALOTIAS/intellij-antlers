@@ -16,6 +16,15 @@ class AntlersSemanticHighlightTest : BasePlatformTestCase() {
     fun testTagHeadColored() =
         assertEquals(AntlersSyntaxHighlighter.TAG, keyOver("{{ collection:blog }}", "collection"))
 
+    // An inline tag call `{tag param=…}` (e.g. `href = {obfuscate_link …}`) leaves the tag name as a bare
+    // T_IDENT, not wrapped in a NAME_PATH. Color it like any other tag head.
+    fun testInlineTagHeadColored() =
+        assertEquals(AntlersSyntaxHighlighter.TAG, keyOver("{{ a = {collection from=\"blog\"} }}", "collection"))
+
+    // …but an array key that happens to share a tag's name (`{collection: 'y'}`) must NOT be tag-colored.
+    fun testInlineArrayKeyNotColoredAsTag() =
+        assertNull(keyOver("{{ a = {collection: 'y'} }}", "collection"))
+
     fun testConditionKeywordColored() =
         assertEquals(AntlersSyntaxHighlighter.KEYWORD, keyOver("{{ if count > 0 }}{{ /if }}", "if"))
 
