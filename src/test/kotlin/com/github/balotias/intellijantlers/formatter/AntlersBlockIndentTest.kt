@@ -78,4 +78,34 @@ class AntlersBlockIndentTest : BasePlatformTestCase() {
         val twice = reformat(once)
         assertEquals("reformat must be a fixed point (no runaway), got:\n$twice", once, twice)
     }
+
+    fun testOptOutLeavesBodyUntouched() {
+        val settings = com.github.balotias.intellijantlers.settings.AntlersFormatterSettings.getInstance(project)
+        val prev = settings.reformatEnabled
+        settings.reformatEnabled = false
+        try {
+            val src = "{{ if x }}\n{{ title }}\n{{ /if }}"
+            assertEquals(src, reformat(src))
+        } finally {
+            settings.reformatEnabled = prev
+        }
+    }
+
+    fun testTopLevelContentUntouched() {
+        // No paired block → processor is a no-op; a plain {{ }} + text keep column 0.
+        val out = reformat("{{ title }}\nplain text")
+        assertEquals("{{ title }}\nplain text", out)
+    }
+
+    fun testUnclosedIfDoesNotCrashAndIndentsBody() {
+        val out = reformat("{{ if x }}\n{{ title }}")
+        val u = unit()
+        assertEquals("{{ if x }}\n${u}{{ title }}", out)
+    }
+
+    fun testStrayCloserDoesNotCrash() {
+        // An unmatched closer contributes no depth; surrounding content is untouched, no exception.
+        val out = reformat("{{ /collection }}\n{{ title }}")
+        assertEquals("{{ /collection }}\n{{ title }}", out)
+    }
 }
