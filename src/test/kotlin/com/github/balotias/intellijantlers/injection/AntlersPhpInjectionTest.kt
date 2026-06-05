@@ -24,6 +24,14 @@ class AntlersPhpInjectionTest : BasePlatformTestCase() {
         assertEquals("<?php ", AntlersPhpInjector.prefixFor(phpBody("{{? \$x = 1; ?}}")))
     }
 
+    fun testTagBlockUsesPhpOpenPrefix() {
+        assertEquals("<?php ", AntlersPhpInjector.prefixFor(phpBody("<?php \$x = 1; ?>")))
+    }
+
+    fun testEchoTagBlockUsesShortEchoPrefix() {
+        assertEquals("<?= ", AntlersPhpInjector.prefixFor(phpBody("<?= \$name ?>")))
+    }
+
     fun testNoInjectionWithoutPhpPlugin() {
         // CI (IDEA Community) has no PHP plugin -> the injector no-ops gracefully (no crash, no injection).
         myFixture.configureByText("p.antlers.html", "{{? \$x = 1; ?}}")
