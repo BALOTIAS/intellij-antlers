@@ -57,4 +57,23 @@ class AntlersPhpInjectionTest : BasePlatformTestCase() {
         // New content containing `?}}` would re-close the synthetic block early -> bail, leave body intact.
         assertEquals(" \$x = 1; ", updateBody("{{? \$x = 1; ?}}", "\$a ?}} \$b"))
     }
+
+    fun testEmptyTagHasNoBody() {
+        // `<?php?>` (no inner text) -> no T_PHP_TEXT -> no host -> nothing to inject.
+        myFixture.configureByText("p.antlers.html", "<?php?>")
+        val antlers = myFixture.file.viewProvider.getPsi(AntlersLanguage.INSTANCE)
+        assertNull(PsiTreeUtil.findChildOfType(antlers, AntlersPhpBlockBody::class.java))
+    }
+
+    fun testUnclosedTagStillHasBody() {
+        assertEquals(" \$x = 1;", phpBody("<?php \$x = 1;").text)
+    }
+
+    fun testMultiStatementTagBodyIsOneHost() {
+        assertEquals(" \$a = 1; \$b = 2; ", phpBody("<?php \$a = 1; \$b = 2; ?>").text)
+    }
+
+    fun testWriteBackReplacesTagBody() {
+        assertEquals(" \$y = 2; ", updateBody("<?php \$x = 1; ?>", " \$y = 2; "))
+    }
 }
