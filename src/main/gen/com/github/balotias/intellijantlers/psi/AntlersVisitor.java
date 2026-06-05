@@ -64,7 +64,15 @@ public class AntlersVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitPhpEchoTagBlock(@NotNull AntlersPhpEchoTagBlock o) {
+    visitPsiElement(o);
+  }
+
   public void visitPhpRawBlock(@NotNull AntlersPhpRawBlock o) {
+    visitPsiElement(o);
+  }
+
+  public void visitPhpTagBlock(@NotNull AntlersPhpTagBlock o) {
     visitPsiElement(o);
   }
 

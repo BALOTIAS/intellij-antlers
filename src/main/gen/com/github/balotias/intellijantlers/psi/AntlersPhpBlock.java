@@ -11,6 +11,12 @@ public interface AntlersPhpBlock extends PsiElement {
   AntlersPhpEchoBlock getPhpEchoBlock();
 
   @Nullable
+  AntlersPhpEchoTagBlock getPhpEchoTagBlock();
+
+  @Nullable
   AntlersPhpRawBlock getPhpRawBlock();
+
+  @Nullable
+  AntlersPhpTagBlock getPhpTagBlock();
 
 }

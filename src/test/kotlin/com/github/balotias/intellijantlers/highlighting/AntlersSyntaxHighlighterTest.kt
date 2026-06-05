@@ -18,4 +18,11 @@ class AntlersSyntaxHighlighterTest {
         assertTrue(hl.getTokenHighlights(AntlersTypes.T_COLON).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
         assertTrue(hl.getTokenHighlights(AntlersTypes.T_DOT).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
     }
+
+    @Test fun phpTagDelimitersAreBraces() {
+        for (t in listOf(AntlersTypes.T_PHP_TAG_OPEN, AntlersTypes.T_PHP_ECHO_TAG_OPEN, AntlersTypes.T_PHP_TAG_CLOSE)) {
+            assertTrue("$t should be brace-colored",
+                hl.getTokenHighlights(t).toList().contains(AntlersSyntaxHighlighter.BRACES))
+        }
+    }
 }

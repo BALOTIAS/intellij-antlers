@@ -2,6 +2,7 @@ package com.github.balotias.intellijantlers.injection
 
 import com.github.balotias.intellijantlers.psi.AntlersPhpBlockBody
 import com.github.balotias.intellijantlers.psi.AntlersPhpEchoBlock
+import com.github.balotias.intellijantlers.psi.AntlersPhpEchoTagBlock
 import com.intellij.lang.Language
 import com.intellij.lang.injection.MultiHostInjector
 import com.intellij.lang.injection.MultiHostRegistrar
@@ -31,6 +32,6 @@ class AntlersPhpInjector : MultiHostInjector {
     companion object {
         /** `<?= ` for an echo block (a PHP expression) else `<?php ` (raw block statements). */
         fun prefixFor(body: AntlersPhpBlockBody): String =
-            if (body.parent is AntlersPhpEchoBlock) "<?= " else "<?php "
+            if (body.parent is AntlersPhpEchoBlock || body.parent is AntlersPhpEchoTagBlock) "<?= " else "<?php "
     }
 }

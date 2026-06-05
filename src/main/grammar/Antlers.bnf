@@ -26,6 +26,9 @@
     T_PHP_ECHO_OPEN="{{$"
     T_PHP_ECHO_CLOSE="$}}"
     T_PHP_TEXT="T_PHP_TEXT"
+    T_PHP_TAG_OPEN="<?php"
+    T_PHP_ECHO_TAG_OPEN="<?="
+    T_PHP_TAG_CLOSE="?>"
     T_NOPARSE_OPEN="T_NOPARSE_OPEN"
     T_NOPARSE_CLOSE="T_NOPARSE_CLOSE"
     T_NOPARSE_TEXT="T_NOPARSE_TEXT"
@@ -67,9 +70,11 @@ outerHtml ::= T_OUTER_HTML
 
 comment ::= T_COMMENT_OPEN T_COMMENT_TEXT? T_COMMENT_CLOSE { pin=1 }
 
-phpBlock ::= phpRawBlock | phpEchoBlock
-phpRawBlock  ::= T_PHP_RAW_OPEN  phpBlockBody? T_PHP_RAW_CLOSE
-phpEchoBlock ::= T_PHP_ECHO_OPEN phpBlockBody? T_PHP_ECHO_CLOSE
+phpBlock ::= phpRawBlock | phpEchoBlock | phpTagBlock | phpEchoTagBlock
+phpRawBlock     ::= T_PHP_RAW_OPEN       phpBlockBody? T_PHP_RAW_CLOSE
+phpEchoBlock    ::= T_PHP_ECHO_OPEN      phpBlockBody? T_PHP_ECHO_CLOSE
+phpTagBlock     ::= T_PHP_TAG_OPEN       phpBlockBody? T_PHP_TAG_CLOSE?
+phpEchoTagBlock ::= T_PHP_ECHO_TAG_OPEN  phpBlockBody? T_PHP_TAG_CLOSE?
 phpBlockBody ::= T_PHP_TEXT+ {
   mixin="com.github.balotias.intellijantlers.psi.AntlersPhpBlockBodyMixin"
   implements="com.intellij.psi.PsiLanguageInjectionHost"
