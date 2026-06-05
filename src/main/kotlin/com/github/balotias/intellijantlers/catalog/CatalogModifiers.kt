@@ -219,7 +219,7 @@ object CatalogModifiers {
         ModifierDef(name = "floor", description = "Round down.", docUrl = "https://statamic.dev/modifiers/floor"),
         ModifierDef(name = "format_number", description = "Localized number.", takesArguments = true,
             parameters = listOf(
-                ModifierParam("precision", "Decimal places.", optional = true, default = "0"),
+                ModifierParam("precision", "Number of decimal places."),
             ),
             docUrl = "https://statamic.dev/modifiers/format_number"),
         ModifierDef(name = "format_translated", description = "Translated date format.", takesArguments = true,
