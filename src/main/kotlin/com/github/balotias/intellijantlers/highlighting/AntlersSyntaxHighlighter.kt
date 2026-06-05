@@ -49,6 +49,7 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
             AntlersTypes.T_LDOUBLE, AntlersTypes.T_RDOUBLE,
             AntlersTypes.T_PHP_RAW_OPEN, AntlersTypes.T_PHP_RAW_CLOSE,
             AntlersTypes.T_PHP_ECHO_OPEN, AntlersTypes.T_PHP_ECHO_CLOSE,
+            AntlersTypes.T_PHP_TAG_OPEN, AntlersTypes.T_PHP_ECHO_TAG_OPEN, AntlersTypes.T_PHP_TAG_CLOSE,
             AntlersTypes.T_NOPARSE_OPEN, AntlersTypes.T_NOPARSE_CLOSE -> BRACES_KEYS
 
             AntlersTypes.T_IDENT, AntlersTypes.T_DOLLAR -> IDENTIFIER_KEYS
