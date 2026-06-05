@@ -4,6 +4,8 @@ import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.catalog.FieldtypeProperties
+import com.github.balotias.intellijantlers.catalog.ModifierDef
+import com.github.balotias.intellijantlers.catalog.ModifierSignature
 import com.github.balotias.intellijantlers.catalog.ParamDef
 import com.github.balotias.intellijantlers.catalog.TagDef
 import com.github.balotias.intellijantlers.psi.AntlersModifierMixin
@@ -32,11 +34,7 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         PsiTreeUtil.getParentOfType(ident, AntlersModifierMixin::class.java)?.let { mod ->
             if (mod.modifierName == name) {
                 val def = catalog.modifiers().firstOrNull { it.name == name } ?: return null
-                return section(
-                    "Antlers modifier <b>${esc(name)}</b>",
-                    def.description,
-                    def.docUrl
-                )
+                return modifierDoc(def)
             }
         }
 
@@ -135,6 +133,29 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         val statement = PsiTreeUtil.getParentOfType(ident, AntlersStatement::class.java) ?: return null
         val head = PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)?.head ?: return null
         return catalog.tag(head)
+    }
+
+    private fun modifierDoc(def: ModifierDef): String {
+        val sb = StringBuilder()
+        sb.append(DocumentationMarkup.DEFINITION_START)
+        sb.append("Antlers modifier <b>${esc(ModifierSignature.render(def))}</b>")
+        sb.append(DocumentationMarkup.DEFINITION_END)
+        sb.append(DocumentationMarkup.CONTENT_START)
+        sb.append(esc(def.description))
+        if (def.parameters.isNotEmpty()) {
+            sb.append("<br/><br/><b>Parameters</b><br/>")
+            for (p in def.parameters) {
+                val opt = when {
+                    !p.optional -> ""
+                    p.default.isNotBlank() -> " <i>(optional, default: ${esc(p.default)})</i>"
+                    else -> " <i>(optional)</i>"
+                }
+                sb.append("<code>${esc(p.name)}</code> — ${esc(p.description)}$opt<br/>")
+            }
+        }
+        sb.append(DocumentationMarkup.CONTENT_END)
+        appendDocUrl(sb, def.docUrl)
+        return sb.toString()
     }
 
     private fun tagDoc(tag: TagDef): String {

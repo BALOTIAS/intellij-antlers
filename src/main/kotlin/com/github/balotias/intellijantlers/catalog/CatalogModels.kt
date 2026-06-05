@@ -22,11 +22,20 @@ data class ParamDef(
     val required: Boolean = false
 )
 
+/** One positional argument of a modifier. [default] is shown only when [optional]. */
+data class ModifierParam(
+    val name: String,
+    val description: String = "",
+    val optional: Boolean = false,
+    val default: String = "",
+)
+
 data class ModifierDef(
     val name: String,
     val description: String = "",
     val docUrl: String = "",
     val takesArguments: Boolean = false,
+    val parameters: List<ModifierParam> = emptyList(),
     val introducedIn: Int? = null,
     val removedIn: Int? = null,
 ) {

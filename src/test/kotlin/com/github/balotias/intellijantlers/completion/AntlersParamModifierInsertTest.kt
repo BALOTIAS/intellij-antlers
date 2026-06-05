@@ -1,9 +1,15 @@
 package com.github.balotias.intellijantlers.completion
 
 import com.intellij.codeInsight.lookup.Lookup
+import com.intellij.codeInsight.template.impl.TemplateManagerImpl
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 class AntlersParamModifierInsertTest : BasePlatformTestCase() {
+
+    override fun setUp() {
+        super.setUp()
+        TemplateManagerImpl.setTemplateTesting(testRootDisposable)
+    }
 
     private fun completeItem(textWithCaret: String, predicate: (String) -> Boolean): Boolean {
         myFixture.configureByText("p.antlers.html", textWithCaret)
@@ -27,10 +33,9 @@ class AntlersParamModifierInsertTest : BasePlatformTestCase() {
 
     fun testModifierCaretInsideParens() {
         assertTrue("truncate modifier offered", completeItem("{{ title | <caret> }}") { it == "truncate" })
+        // truncate has one required param (length): a live template (length) is started; finish it.
+        TemplateManagerImpl.getTemplateState(myFixture.editor)?.gotoEnd(false)
         val text = myFixture.file.text
-        val caret = myFixture.caretOffset
-        assertTrue("inserted (): $text", text.contains("truncate()"))
-        assertEquals('(', text[caret - 1])
-        assertEquals(')', text[caret])
+        assertTrue("inserted required param: $text", text.contains("truncate(length)"))
     }
 }
