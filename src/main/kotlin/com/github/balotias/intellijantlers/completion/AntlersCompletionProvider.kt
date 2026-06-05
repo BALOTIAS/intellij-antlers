@@ -9,6 +9,7 @@ import com.github.balotias.intellijantlers.references.StatamicProject
 import com.github.balotias.intellijantlers.scope.FormVariables
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
 import com.github.balotias.intellijantlers.catalog.FieldtypeProperties
+import com.github.balotias.intellijantlers.catalog.ModifierSignature
 import com.github.balotias.intellijantlers.scope.AntlersFieldContext
 import com.github.balotias.intellijantlers.scope.AntlersMemberResolver
 import com.github.balotias.intellijantlers.scope.AntlersScopeResolver
@@ -227,12 +228,14 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
             AntlersCompletionKind.MODIFIER ->
                 for (mod in catalog.modifiers()) {
+                    val args = ModifierSignature.render(mod).removePrefix(mod.name)   // "(p1, p2)" or ""
+                    val desc = if (mod.description.isNotBlank()) "  ${mod.description}" else ""
                     result.addElement(
                         LookupElementBuilder.create(mod.name)
                             .withIcon(AntlersIcons.FILE)
                             .withTypeText("Modifier")
-                            .withTailText(if (mod.description.isNotBlank()) "  ${mod.description}" else null, true)
-                            .withInsertHandler(ModifierInsertHandler(mod.takesArguments))
+                            .withTailText(args + desc, true)
+                            .withInsertHandler(ModifierInsertHandler(mod))
                     )
                 }
 
