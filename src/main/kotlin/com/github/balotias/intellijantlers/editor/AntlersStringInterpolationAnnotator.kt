@@ -7,6 +7,7 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.lexer.FlexAdapter
+import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
@@ -20,13 +21,25 @@ import com.intellij.psi.tree.IElementType
  */
 class AntlersStringInterpolationAnnotator : Annotator {
 
+    companion object {
+        /**
+         * Braces, parens and operators inside the interpolation. We paint these as an annotation *overlay*
+         * on top of the green T_STRING base, so the key MUST carry an explicit foreground: an inherited-
+         * foreground key (BRACES / OPERATION_SIGN) is a no-op as an overlay in color schemes that don't set
+         * those foregrounds, leaving the string-green to bleed through (observed in PhpStorm; runIde's
+         * default scheme hides it). HighlighterColors.TEXT carries the scheme's default foreground — the
+         * same reason the modifier pipe uses it.
+         */
+        private val STRUCTURAL: TextAttributesKey = HighlighterColors.TEXT
+    }
+
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         if (element.node.elementType != AntlersTypes.T_STRING) return
         val text = element.text
         val base = element.textRange.startOffset
         for (span in AntlersInterpolationScanner.scan(text)) {
-            paint(holder, base + span.openBrace, base + span.openBrace + 1, AntlersSyntaxHighlighter.BRACES)
-            paint(holder, base + span.closeBrace, base + span.closeBrace + 1, AntlersSyntaxHighlighter.BRACES)
+            paint(holder, base + span.openBrace, base + span.openBrace + 1, STRUCTURAL)
+            paint(holder, base + span.closeBrace, base + span.closeBrace + 1, STRUCTURAL)
             if (span.contentStart < span.contentEnd) lexInner(text, span, base, holder)
         }
     }
@@ -54,9 +67,9 @@ class AntlersStringInterpolationAnnotator : Annotator {
         AntlersTypes.T_PIPE -> AntlersSyntaxHighlighter.PIPE
         AntlersTypes.T_COLON, AntlersTypes.T_DOT, AntlersTypes.T_OP,
         AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW, AntlersTypes.T_SLASH,
-        AntlersTypes.T_COMMA, AntlersTypes.T_SEMICOLON -> AntlersSyntaxHighlighter.OPERATOR
+        AntlersTypes.T_COMMA, AntlersTypes.T_SEMICOLON,
         AntlersTypes.T_LBRACE, AntlersTypes.T_RBRACE, AntlersTypes.T_LBRACKET, AntlersTypes.T_RBRACKET,
-        AntlersTypes.T_LPAREN, AntlersTypes.T_RPAREN, AntlersTypes.T_AT -> AntlersSyntaxHighlighter.BRACES
+        AntlersTypes.T_LPAREN, AntlersTypes.T_RPAREN, AntlersTypes.T_AT -> STRUCTURAL
         else -> null   // T_WS, BAD_CHARACTER, etc. → leave the STRING base color
     }
 
