@@ -22,7 +22,9 @@ public interface AntlersTypes {
   IElementType PHP_BLOCK = new AntlersElementType("PHP_BLOCK");
   IElementType PHP_BLOCK_BODY = new AntlersElementType("PHP_BLOCK_BODY");
   IElementType PHP_ECHO_BLOCK = new AntlersElementType("PHP_ECHO_BLOCK");
+  IElementType PHP_ECHO_TAG_BLOCK = new AntlersElementType("PHP_ECHO_TAG_BLOCK");
   IElementType PHP_RAW_BLOCK = new AntlersElementType("PHP_RAW_BLOCK");
+  IElementType PHP_TAG_BLOCK = new AntlersElementType("PHP_TAG_BLOCK");
   IElementType STATEMENT = new AntlersElementType("STATEMENT");
 
   IElementType T_ARROW = new AntlersTokenType("=>");
@@ -50,8 +52,11 @@ public interface AntlersTypes {
   IElementType T_OUTER_HTML = new AntlersTokenType("T_OUTER_HTML");
   IElementType T_PHP_ECHO_CLOSE = new AntlersTokenType("$}}");
   IElementType T_PHP_ECHO_OPEN = new AntlersTokenType("{{$");
+  IElementType T_PHP_ECHO_TAG_OPEN = new AntlersTokenType("<?=");
   IElementType T_PHP_RAW_CLOSE = new AntlersTokenType("?}}");
   IElementType T_PHP_RAW_OPEN = new AntlersTokenType("{{?");
+  IElementType T_PHP_TAG_CLOSE = new AntlersTokenType("?>");
+  IElementType T_PHP_TAG_OPEN = new AntlersTokenType("<?php");
   IElementType T_PHP_TEXT = new AntlersTokenType("T_PHP_TEXT");
   IElementType T_PIPE = new AntlersTokenType("|");
   IElementType T_RBRACE = new AntlersTokenType("}");
@@ -108,8 +113,14 @@ public interface AntlersTypes {
       else if (type == PHP_ECHO_BLOCK) {
         return new AntlersPhpEchoBlockImpl(node);
       }
+      else if (type == PHP_ECHO_TAG_BLOCK) {
+        return new AntlersPhpEchoTagBlockImpl(node);
+      }
       else if (type == PHP_RAW_BLOCK) {
         return new AntlersPhpRawBlockImpl(node);
+      }
+      else if (type == PHP_TAG_BLOCK) {
+        return new AntlersPhpTagBlockImpl(node);
       }
       else if (type == STATEMENT) {
         return new AntlersStatementImpl(node);

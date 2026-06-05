@@ -724,14 +724,15 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // phpRawBlock | phpEchoBlock
+  // phpRawBlock | phpEchoBlock | phpTagBlock | phpEchoTagBlock
   public static boolean phpBlock(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "phpBlock")) return false;
-    if (!nextTokenIs(builder_, "<php block>", T_PHP_ECHO_OPEN, T_PHP_RAW_OPEN)) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NONE_, PHP_BLOCK, "<php block>");
     result_ = phpRawBlock(builder_, level_ + 1);
     if (!result_) result_ = phpEchoBlock(builder_, level_ + 1);
+    if (!result_) result_ = phpTagBlock(builder_, level_ + 1);
+    if (!result_) result_ = phpEchoTagBlock(builder_, level_ + 1);
     exit_section_(builder_, level_, marker_, result_, false, null);
     return result_;
   }
@@ -754,7 +755,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_PHP_ECHO_OPEN phpBlockBody? T_PHP_ECHO_CLOSE
+  // T_PHP_ECHO_OPEN      phpBlockBody? T_PHP_ECHO_CLOSE
   public static boolean phpEchoBlock(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "phpEchoBlock")) return false;
     if (!nextTokenIs(builder_, T_PHP_ECHO_OPEN)) return false;
@@ -775,7 +776,35 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_PHP_RAW_OPEN  phpBlockBody? T_PHP_RAW_CLOSE
+  // T_PHP_ECHO_TAG_OPEN  phpBlockBody? T_PHP_TAG_CLOSE?
+  public static boolean phpEchoTagBlock(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpEchoTagBlock")) return false;
+    if (!nextTokenIs(builder_, T_PHP_ECHO_TAG_OPEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_PHP_ECHO_TAG_OPEN);
+    result_ = result_ && phpEchoTagBlock_1(builder_, level_ + 1);
+    result_ = result_ && phpEchoTagBlock_2(builder_, level_ + 1);
+    exit_section_(builder_, marker_, PHP_ECHO_TAG_BLOCK, result_);
+    return result_;
+  }
+
+  // phpBlockBody?
+  private static boolean phpEchoTagBlock_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpEchoTagBlock_1")) return false;
+    phpBlockBody(builder_, level_ + 1);
+    return true;
+  }
+
+  // T_PHP_TAG_CLOSE?
+  private static boolean phpEchoTagBlock_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpEchoTagBlock_2")) return false;
+    consumeToken(builder_, T_PHP_TAG_CLOSE);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // T_PHP_RAW_OPEN       phpBlockBody? T_PHP_RAW_CLOSE
   public static boolean phpRawBlock(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "phpRawBlock")) return false;
     if (!nextTokenIs(builder_, T_PHP_RAW_OPEN)) return false;
@@ -792,6 +821,34 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   private static boolean phpRawBlock_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "phpRawBlock_1")) return false;
     phpBlockBody(builder_, level_ + 1);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // T_PHP_TAG_OPEN       phpBlockBody? T_PHP_TAG_CLOSE?
+  public static boolean phpTagBlock(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpTagBlock")) return false;
+    if (!nextTokenIs(builder_, T_PHP_TAG_OPEN)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_PHP_TAG_OPEN);
+    result_ = result_ && phpTagBlock_1(builder_, level_ + 1);
+    result_ = result_ && phpTagBlock_2(builder_, level_ + 1);
+    exit_section_(builder_, marker_, PHP_TAG_BLOCK, result_);
+    return result_;
+  }
+
+  // phpBlockBody?
+  private static boolean phpTagBlock_1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpTagBlock_1")) return false;
+    phpBlockBody(builder_, level_ + 1);
+    return true;
+  }
+
+  // T_PHP_TAG_CLOSE?
+  private static boolean phpTagBlock_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "phpTagBlock_2")) return false;
+    consumeToken(builder_, T_PHP_TAG_CLOSE);
     return true;
   }
 
