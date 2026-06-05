@@ -1,6 +1,7 @@
 package com.github.balotias.intellijantlers.editor
 
 import com.github.balotias.intellijantlers.highlighting.AntlersSyntaxHighlighter
+import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
@@ -22,9 +23,22 @@ class AntlersStringInterpolationHighlightTest : BasePlatformTestCase() {
         assertEquals(AntlersSyntaxHighlighter.IDENTIFIER,
             keyOver("{{ \"object-position: {logo:focus_css}\" }}", "focus_css"))
 
-    fun testInterpolationBraceColored() =
-        assertEquals(AntlersSyntaxHighlighter.BRACES,
+    // Structural tokens (braces, parens, operators) inside interpolation must use an explicit-foreground
+    // key. As an annotation *overlay* on the green T_STRING base, an inherited-foreground key (BRACES /
+    // OPERATION_SIGN) is a no-op in schemes that don't set those foregrounds, so the string-green bleeds
+    // through (reproduced in PhpStorm). HighlighterColors.TEXT carries the scheme's default foreground and
+    // overrides the green — same fix as the modifier pipe.
+    fun testInterpolationBraceUsesPlainText() =
+        assertEquals(HighlighterColors.TEXT,
             keyOver("{{ \"object-position: {logo:focus_css}\" }}", "{"))
+
+    fun testInterpolationColonUsesPlainText() =
+        assertEquals(HighlighterColors.TEXT,
+            keyOver("{{ \"{view:href | replace('mailto:', '')}\" }}", ":"))
+
+    fun testInterpolationParenUsesPlainText() =
+        assertEquals(HighlighterColors.TEXT,
+            keyOver("{{ \"{view:href | replace('mailto:', '')}\" }}", "("))
 
     fun testInterpolatedModifierColored() =
         assertEquals(AntlersSyntaxHighlighter.MODIFIER,
@@ -34,8 +48,8 @@ class AntlersStringInterpolationHighlightTest : BasePlatformTestCase() {
         assertEquals(AntlersSyntaxHighlighter.PIPE,
             keyOver("{{ \"{title | upper}\" }}", "|"))
 
-    fun testArrayBracketColored() =
-        assertEquals(AntlersSyntaxHighlighter.BRACES,
+    fun testArrayBracketUsesPlainText() =
+        assertEquals(HighlighterColors.TEXT,
             keyOver("{{ \"{['a', view:class] | classes}\" }}", "["))
 
     fun testArrayModifierColored() =
