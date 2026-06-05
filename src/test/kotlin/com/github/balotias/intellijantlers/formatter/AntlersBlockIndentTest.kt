@@ -65,6 +65,7 @@ class AntlersBlockIndentTest : BasePlatformTestCase() {
             "{{ if x }}\n${u}{{ collection:blog\n${u}${u}limit=\"3\"\n${u}}}\n{{ /if }}",
             out
         )
+        assertEquals("multiline-in-pair reformat is a fixed point", out, reformat(out))
     }
 
     fun testIdempotentAntlers() {
