@@ -1,0 +1,7 @@
+Antlers File(0,12)
+  AntlersPhpBlockImpl(PHP_BLOCK)(0,12)
+    AntlersPhpEchoTagBlockImpl(PHP_ECHO_TAG_BLOCK)(0,12)
+      PsiElement(AntlersTokenType.<?=)('<?=')(0,3)
+      AntlersPhpBlockBodyImpl(PHP_BLOCK_BODY)(3,10)
+        PsiElement(AntlersTokenType.T_PHP_TEXT)(' $name ')(3,10)
+      PsiElement(AntlersTokenType.?>)('?>')(10,12)
