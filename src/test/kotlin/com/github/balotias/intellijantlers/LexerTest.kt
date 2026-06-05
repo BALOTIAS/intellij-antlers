@@ -143,4 +143,35 @@ class LexerTest {
                 ts)
         }
     }
+
+    @Test fun phpTagBlockTokens() {
+        assertEquals(
+            listOf(AntlersTypes.T_PHP_TAG_OPEN, AntlersTypes.T_PHP_TEXT, AntlersTypes.T_PHP_TAG_CLOSE),
+            types("<?php echo 1; ?>")
+        )
+    }
+
+    @Test fun phpEchoTagTokens() {
+        assertEquals(
+            listOf(AntlersTypes.T_PHP_ECHO_TAG_OPEN, AntlersTypes.T_PHP_TEXT, AntlersTypes.T_PHP_TAG_CLOSE),
+            types("<?= \$x ?>")
+        )
+    }
+
+    @Test fun unclosedPhpTagHasNoClose() {
+        val ts = types("<?php \$x = 1;")
+        assertEquals(AntlersTypes.T_PHP_TAG_OPEN, ts.first())
+        assert(ts.none { it == AntlersTypes.T_PHP_TAG_CLOSE }) { "unclosed tag should have no close: $ts" }
+    }
+
+    @Test fun bareProcessingInstructionStaysHtml() {
+        val ts = types("<?xml version=\"1.0\"?>")
+        assert(ts.all { it == AntlersTypes.T_OUTER_HTML }) { "<?xml must stay outer HTML: $ts" }
+    }
+
+    @Test fun normalHtmlAroundTagStillOpens() {
+        val ts = types("<div>{{ x }}</div>")
+        assert(ts.contains(AntlersTypes.T_LDOUBLE)) { "the {{ tag must still open inside HTML: $ts" }
+        assert(ts.none { it == AntlersTypes.T_PHP_TAG_OPEN }) { "no PHP tag in plain HTML: $ts" }
+    }
 }

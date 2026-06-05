@@ -26,6 +26,7 @@ import com.intellij.psi.TokenType;
 %state COMMENT
 %state PHP_RAW
 %state PHP_ECHO
+%state PHP_TAG
 %state NOPARSE
 %state CONTENT
 %state FRONTMATTER
@@ -54,15 +55,18 @@ OP="==="|"!=="|"<=>"|"=="|"!="|">="|"<="|">"|"<"|"&&"|"||"|"!"|"???"|"??"|"?="|"
 }
 
 <CONTENT> {
-  {NOPARSE_OPEN}      { yybegin(NOPARSE); return AntlersTypes.T_NOPARSE_OPEN; }
-  "@{{"               { return AntlersTypes.T_OUTER_HTML; }
-  "{{#"               { yybegin(COMMENT);  return AntlersTypes.T_COMMENT_OPEN; }
-  "{{?"               { yybegin(PHP_RAW);  return AntlersTypes.T_PHP_RAW_OPEN; }
-  "{{$"               { yybegin(PHP_ECHO); return AntlersTypes.T_PHP_ECHO_OPEN; }
-  "{{"                { yybegin(EXPR);     return AntlersTypes.T_LDOUBLE; }
-  [^{@]+              { return AntlersTypes.T_OUTER_HTML; }
-  "@"                 { return AntlersTypes.T_OUTER_HTML; }
-  "{"                 { return AntlersTypes.T_OUTER_HTML; }
+  {NOPARSE_OPEN}            { yybegin(NOPARSE); return AntlersTypes.T_NOPARSE_OPEN; }
+  "@{{"                     { return AntlersTypes.T_OUTER_HTML; }
+  "{{#"                     { yybegin(COMMENT);  return AntlersTypes.T_COMMENT_OPEN; }
+  "{{?"                     { yybegin(PHP_RAW);  return AntlersTypes.T_PHP_RAW_OPEN; }
+  "{{$"                     { yybegin(PHP_ECHO); return AntlersTypes.T_PHP_ECHO_OPEN; }
+  "{{"                      { yybegin(EXPR);     return AntlersTypes.T_LDOUBLE; }
+  "<?php"                   { yybegin(PHP_TAG);  return AntlersTypes.T_PHP_TAG_OPEN; }
+  "<?="                     { yybegin(PHP_TAG);  return AntlersTypes.T_PHP_ECHO_TAG_OPEN; }
+  ( [^{@<] | "<" [^?{@<] )+ { return AntlersTypes.T_OUTER_HTML; }
+  "<"                       { return AntlersTypes.T_OUTER_HTML; }
+  "@"                       { return AntlersTypes.T_OUTER_HTML; }
+  "{"                       { return AntlersTypes.T_OUTER_HTML; }
 }
 
 <EXPR> {
@@ -107,6 +111,12 @@ OP="==="|"!=="|"<=>"|"=="|"!="|">="|"<="|">"|"<"|"&&"|"||"|"!"|"???"|"??"|"?="|"
   "$}}"               { yybegin(CONTENT); return AntlersTypes.T_PHP_ECHO_CLOSE; }
   [^$]+               { return AntlersTypes.T_PHP_TEXT; }
   "$"                 { return AntlersTypes.T_PHP_TEXT; }
+}
+
+<PHP_TAG> {
+  "?>"                { yybegin(CONTENT); return AntlersTypes.T_PHP_TAG_CLOSE; }
+  [^?]+               { return AntlersTypes.T_PHP_TEXT; }
+  "?"                 { return AntlersTypes.T_PHP_TEXT; }
 }
 
 <NOPARSE> {
