@@ -25,6 +25,7 @@
         <editorHighlighterProvider filetype="Antlers" implementationClass="com.github.balotias.intellijantlers.highlighting.AntlersEditorHighlighterProvider"/>
         <lang.fileViewProviderFactory language="Antlers" implementationClass="com.github.balotias.intellijantlers.template.AntlersFileViewProviderFactory"/>
         <completion.contributor language="Antlers" implementationClass="com.github.balotias.intellijantlers.completion.AntlersCompletionContributor"/>
+        <codeInsight.parameterInfo language="Antlers" implementationClass="com.github.balotias.intellijantlers.completion.AntlersModifierParameterInfoHandler"/>
 
         <lang.braceMatcher language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersBraceMatcher"/>
         <lang.commenter language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersCommenter"/>
