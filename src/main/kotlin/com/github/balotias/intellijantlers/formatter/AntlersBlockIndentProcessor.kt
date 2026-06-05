@@ -59,6 +59,11 @@ class AntlersBlockIndentProcessor : PostFormatProcessor {
 
         fun walk(node: NestingNode, d: Int, base: String) {
             val oLine = openerLine(node)
+            // Skip unclosed multiline-opener statements (e.g. {{ collection:blog\nlimit="3"\n}} with no
+            // {{ /collection }}): they are self-contained tags, not block openers, so their "body" lines
+            // (the continuation params and whatever follows) must not be indented as a block body.
+            val openerELine = document.getLineNumber(node.opener.textRange.endOffset - 1)
+            if (node.closer == null && openerELine > oLine) return
             val cLine = node.closer?.let { document.getLineNumber(it.textRange.startOffset) }
             val bodyEnd = if (cLine != null) cLine - 1 else lineCount - 1
             for (l in (oLine + 1)..bodyEnd) if (l in 0 until lineCount) {
