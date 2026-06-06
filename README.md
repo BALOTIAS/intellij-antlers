@@ -1,8 +1,8 @@
 # intellij-antlers
 
 ![Build](https://github.com/BALOTIAS/intellij-antlers/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/32139-antlers.svg)](https://plugins.jetbrains.com/plugin/32139-antlers)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/32139-antlers.svg)](https://plugins.jetbrains.com/plugin/32139-antlers)
 
 <!-- Plugin description -->
 Language support for **[Statamic](https://statamic.dev) Antlers** templates (`*.antlers.html` and
