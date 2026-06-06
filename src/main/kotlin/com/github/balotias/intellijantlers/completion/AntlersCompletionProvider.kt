@@ -5,6 +5,8 @@ import com.github.balotias.intellijantlers.blueprint.BlueprintField
 import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 import com.github.balotias.intellijantlers.blueprint.BlueprintService
 import com.github.balotias.intellijantlers.blueprint.SystemVariables
+import com.github.balotias.intellijantlers.references.AntlersPartialParams
+import com.github.balotias.intellijantlers.references.AntlersPartialReferenceHelper
 import com.github.balotias.intellijantlers.references.StatamicProject
 import com.github.balotias.intellijantlers.scope.FormVariables
 import com.github.balotias.intellijantlers.catalog.AntlersCatalogService
@@ -215,16 +217,31 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                 AntlersMemberResolver.resolveField(parameters.position, info.pathPrefix, project)
                     ?.let { offerMembers(it, project, result) }
 
-            AntlersCompletionKind.PARAMETER ->
-                catalog.tag(info.tagHead ?: "")?.parameters?.forEach { p ->
-                    result.addElement(
-                        LookupElementBuilder.create(p.name)
-                            .withIcon(AntlersIcons.FILE)
-                            .withTypeText(if (p.required) "Param*" else "Param")
-                            .withTailText(if (p.description.isNotBlank()) "  ${p.description}" else null, true)
-                            .withInsertHandler(ParameterInsertHandler)
-                    )
+            AntlersCompletionKind.PARAMETER -> {
+                // Use the original (non-completion-modified) PSI so the dummy identifier injected by the
+                // completion framework does not corrupt `extractPartialPath` (which would otherwise
+                // append "IntellijIdeaRulezzz" to the resolved partial path).
+                val origPos = parameters.originalPosition ?: parameters.position
+                val partialStmt = if (info.tagHead == "partial")
+                    PsiTreeUtil.getParentOfType(origPos, AntlersStatement::class.java) else null
+
+                // Params declared by the included partial via `{{# @param … #}}`.
+                partialStmt?.let { stmt ->
+                    AntlersPartialReferenceHelper.includedPartialFile(stmt)?.let { pf ->
+                        for (p in AntlersPartialParams.of(pf))
+                            result.addElement(paramElement(p.name, p.required, p.description))
+                    }
                 }
+
+                // Catalog params (e.g. partial's `src`). Suppressed for the colon form so it shows only
+                // the component's own params.
+                val suppressCatalog = partialStmt?.let { AntlersPartialReferenceHelper.hasColonPath(it) } == true
+                if (!suppressCatalog) {
+                    catalog.tag(info.tagHead ?: "")?.parameters?.forEach { p ->
+                        result.addElement(paramElement(p.name, p.required, p.description))
+                    }
+                }
+            }
 
             AntlersCompletionKind.MODIFIER ->
                 for (mod in catalog.modifiers()) {
@@ -280,6 +297,14 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
             .replace(com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED, "")
         return result.withPrefixMatcher(inner)
     }
+
+    /** A parameter-name lookup element (shared by catalog params and partial `@param`s). */
+    private fun paramElement(name: String, required: Boolean, description: String) =
+        LookupElementBuilder.create(name)
+            .withIcon(AntlersIcons.FILE)
+            .withTypeText(if (required) "Param*" else "Param")
+            .withTailText(if (description.isNotBlank()) "  $description" else null, true)
+            .withInsertHandler(ParameterInsertHandler)
 
     private fun addLogic(result: CompletionResultSet, kw: LogicKeyword) {
         result.addElement(
