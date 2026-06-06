@@ -121,4 +121,22 @@ class AntlersBlockIndentTest : BasePlatformTestCase() {
         val u = unit()
         assertEquals("{{ if x }}\n${u}{{ a }}\n{{ elseif y }}\n${u}{{ b }}\n{{ /if }}", out)
     }
+
+    fun testTemplateTagAttributesAndBodyIndent() {
+        val out = reformat("<{{ html_tag }}\n{{ x | attribute:y }}\n>\nbody\n</{{ html_tag }}>")
+        val u = unit()
+        assertEquals(
+            "<{{ html_tag }}\n${u}{{ x | attribute:y }}\n>\n${u}body\n</{{ html_tag }}>",
+            out
+        )
+    }
+
+    fun testIfInsideTemplateBodyCompounds() {
+        val out = reformat("<{{ html_tag }}\n>\n{{ if a }}\n{{ b }}\n{{ /if }}\n</{{ html_tag }}>")
+        val u = unit()
+        assertEquals(
+            "<{{ html_tag }}\n>\n${u}{{ if a }}\n${u}${u}{{ b }}\n${u}{{ /if }}\n</{{ html_tag }}>",
+            out
+        )
+    }
 }

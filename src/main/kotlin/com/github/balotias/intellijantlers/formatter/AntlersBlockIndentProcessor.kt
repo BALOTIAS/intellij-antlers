@@ -39,7 +39,8 @@ class AntlersBlockIndentProcessor : PostFormatProcessor {
         val antlers = source.viewProvider.getPsi(AntlersLanguage.INSTANCE) as? AntlersFile ?: return rangeToReformat
 
         val tree = AntlersNestingTreeBuilder.build(antlers, source.project)
-        if (tree.roots.isEmpty()) return rangeToReformat               // no paired blocks → nothing to do
+        val templateElements = AntlersTemplateTags.elements(document.text)
+        if (tree.roots.isEmpty() && templateElements.isEmpty()) return rangeToReformat  // nothing to do
 
         val opts = CodeStyle.getIndentOptions(source)
         val unit = if (opts.USE_TAB_CHARACTER) "\t" else " ".repeat(opts.INDENT_SIZE)
@@ -90,11 +91,25 @@ class AntlersBlockIndentProcessor : PostFormatProcessor {
             it.node?.elementType == AntlersTypes.T_STRING
         }.map { it.textRange }
 
+        // Template-named HTML tags (`<{{ … }}>` … `</{{ … }}>`): invisible to the HTML parser, so contribute
+        // their attribute/body indent here. Attribute lines (between `<{{` and its `>`) and body lines
+        // (between `>` and `</{{`) get +1; boundary lines (`<{{`, the `>`, `</{{`) stay at the element level.
+        val templateDepth = IntArray(lineCount)
+        val templateOwned = BooleanArray(lineCount)
+        for (e in templateElements) {
+            val end = e.closeLine ?: (lineCount - 1)
+            for (l in e.openStartLine..end) if (l in 0 until lineCount) templateOwned[l] = true
+            for (l in (e.openStartLine + 1) until (e.closeLine ?: lineCount)) {
+                if (l != e.openEndLine && l in 0 until lineCount) templateDepth[l]++
+            }
+        }
+
         val edits = mutableListOf<Pair<TextRange, String>>()
         for (line in 0 until lineCount) {
             val lineStart = document.getLineStartOffset(line)
             if (lineStart < rangeToReformat.startOffset || lineStart > rangeToReformat.endOffset) continue
-            if (continuation[line] || !touched[line]) continue         // multiline-owned, or top-level (leave it)
+            if (continuation[line]) continue                            // multiline-owned
+            if (!touched[line] && !templateOwned[line]) continue        // top-level (leave it)
             if (stringSpans.any { it.startOffset < lineStart && lineStart < it.endOffset }) continue
 
             val lineEnd = document.getLineEndOffset(line)
@@ -107,10 +122,11 @@ class AntlersBlockIndentProcessor : PostFormatProcessor {
             val contentOffset = lineStart + firstNonWs
             val currentIndent = lineText.substring(0, firstNonWs)
             val base = baseOf[line] ?: ""
-            val d = depth[line]
+            val c = depth[line] + templateDepth[line]
             val next = lineText.getOrNull(firstNonWs + 1)
-            val isHtmlTag = lineText[firstNonWs] == '<' && (next != null && (next.isLetter() || next == '/'))
-            val target = if (isHtmlTag) currentIndent + unit.repeat(d) else base + unit.repeat(d)
+            val isHtmlTag = lineText[firstNonWs] == '<' && next != null &&
+                (next.isLetter() || (next == '/' && lineText.getOrNull(firstNonWs + 2)?.isLetter() == true))
+            val target = if (isHtmlTag) currentIndent + unit.repeat(c) else base + unit.repeat(c)
 
             val indentRange = TextRange(lineStart, contentOffset)
             if (document.getText(indentRange) != target) edits.add(indentRange to target)
