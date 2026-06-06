@@ -4,6 +4,25 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-06-06
+
+### Fixed
+- Closing tags with slash-separated paths (`{{ /partial:components/notification }}`) no longer report a
+  parse error; the closer now accepts the same `/segment` path tail as the opening form.
+- The `%` tag-disambiguation prefix (`{{ %form:fields }}` / `{{ /%form:fields }}`) parses correctly —
+  bare `%` is now its own token (modulo `%`/`%=` are unaffected) and is allowed before a tag name in
+  expressions and closing tags.
+- Paired tags such as `{{ if … }}` and `{{ form:create … }}` are no longer falsely flagged as "never
+  closed" when their body contains a slash-path closer or a `%`-prefixed tag (those parse errors used to
+  cascade and corrupt tag-balance recovery).
+- Interpolated HTML tag names (`<{{ as or 'h2' }}> … </{{ as or 'h2' }}>`) no longer raise a spurious
+  "Closing tag matches nothing" error; genuine unmatched closing tags are still reported.
+
+### Known limitations
+- When an HTML tag name is itself an Antlers interpolation, HTML attribute/value coloring on that element
+  can be lost (the layered HTML highlighter re-lexes each segment independently). The `{{ }}` themselves
+  are still parsed and highlighted. See the README for details.
+
 ## [1.0.0] - 2026-06-06
 First public release.
 
