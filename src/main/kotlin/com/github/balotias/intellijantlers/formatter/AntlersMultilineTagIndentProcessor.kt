@@ -13,6 +13,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.impl.source.codeStyle.PostFormatProcessor
+import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
 
 /**
@@ -23,6 +24,13 @@ import com.intellij.psi.util.PsiTreeUtil
  * [AntlersSpacingPostFormatProcessor]. Never throws.
  */
 class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
+
+    companion object {
+        private val BRACKET_DELTAS: Map<IElementType, Int> = mapOf(
+            AntlersTypes.T_LBRACE to 1, AntlersTypes.T_LBRACKET to 1, AntlersTypes.T_LPAREN to 1,
+            AntlersTypes.T_RBRACE to -1, AntlersTypes.T_RBRACKET to -1, AntlersTypes.T_RPAREN to -1,
+        )
+    }
 
     override fun processElement(source: PsiElement, settings: CodeStyleSettings): PsiElement = source
 
@@ -51,7 +59,6 @@ class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
             if (closerLine == openerLine) continue                       // single-line tag → skip
 
             val openerIndent = leadingWhitespace(document, openerLine)
-            val contIndent = openerIndent + unit
             // `}}` token start, or -1 when the tag is unclosed (the pin=1 grammar allows a missing closer).
             val lastLeaf = PsiTreeUtil.getDeepestLast(stmt)
             val rdoubleStart =
@@ -61,6 +68,13 @@ class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
             val stringSpans = PsiTreeUtil.collectElements(stmt) {
                 it.node?.elementType == AntlersTypes.T_STRING
             }.map { it.textRange }
+
+            // Bracket tokens within the statement ( [ { = +1, ) ] } = -1 ). Antlers strings are single
+            // T_STRING tokens, so brackets *inside* strings are naturally excluded from the count.
+            val brackets = PsiTreeUtil.collectElements(stmt) { el ->
+                val t = el.node?.elementType
+                t != null && BRACKET_DELTAS.containsKey(t)
+            }.map { it.textRange.startOffset to BRACKET_DELTAS.getValue(it.node!!.elementType) }
 
             for (line in (openerLine + 1)..closerLine) {
                 val lineStart = document.getLineStartOffset(line)
@@ -74,7 +88,11 @@ class AntlersMultilineTagIndentProcessor : PostFormatProcessor {
                 val target = when {
                     firstNonWs < 0 -> ""                                  // blank line → strip
                     line == closerLine && contentOffset == rdoubleStart -> openerIndent  // `}}` on its own line
-                    else -> contIndent                                    // param / content line
+                    else -> {                                             // interior: one level + bracket depth
+                        val openBefore = brackets.filter { it.first < contentOffset }.sumOf { it.second }
+                        val closesFirst = if (lineText[firstNonWs] in "])}") 1 else 0
+                        openerIndent + unit.repeat(maxOf(1, 1 + openBefore - closesFirst))
+                    }
                 }
                 val indentRange = TextRange(lineStart, contentOffset)
                 if (document.getText(indentRange) != target) edits.add(indentRange to target)

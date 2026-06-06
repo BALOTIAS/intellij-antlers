@@ -88,4 +88,20 @@ class AntlersMultilineFormatTest : BasePlatformTestCase() {
         val out = reformat("{{ partial:src=\"a\nb\" }}")
         assertTrue("multi-line string content preserved, got:\n$out", out.contains("\"a\nb\""))
     }
+
+    fun testMultilineBracketNesting() {
+        val out = reformat("{{\n[\n'a' => 1,\n'b' => 2,\n] | classes\n}}")
+        val u = unit()
+        assertEquals(
+            "{{\n${u}[\n${u}${u}'a' => 1,\n${u}${u}'b' => 2,\n${u}] | classes\n}}",
+            out
+        )
+    }
+
+    fun testBracketCharInsideStringDoesNotShiftDepth() {
+        // The `[` inside the string must NOT count toward bracket depth.
+        val out = reformat("{{\nx = \"a[b\",\ny = 2\n}}")
+        val u = unit()
+        assertEquals("{{\n${u}x = \"a[b\",\n${u}y = 2\n}}", out)
+    }
 }
