@@ -50,6 +50,9 @@ or an `@collection`-hinted view).
 - Variables: blueprint fields, system variables, loop, nav-tree, and form variables — resolved
   for the current scope (inside `{{ collection }}`, `{{ nav }}`, `{{ form }}`, page-mapped templates, etc.).
 - **View front matter**: keys declared in a view's `---` … `---` block are completed after `{{ view: }}`.
+- **Partial parameters**: at a partial include (`{{ partial:components/button … }}`), the parameters the
+  partial declares with `{{# @param* label … #}}` directive comments are completed by name (required ones
+  marked `*`), and hovering a param name shows its `@param` description.
 - Member/relationship completion when dotting into grid/group fields and related entries.
 
 **Navigation & docs**
@@ -58,7 +61,8 @@ or an `@collection`-hinted view).
   to its front-matter key, and from a custom tag/modifier name to its PHP class — including tags used
   in the inline form (`{{ x = {your_tag …} }}`).
 - Quick documentation (hover) for tags, modifiers, parameters, and variables (including `view:` keys),
-  and **parameter info** (Ctrl/⌘P) for modifier arguments.
+  and for partial-include parameters (from the partial's `@param` hints); plus **parameter info**
+  (Ctrl/⌘P) for modifier arguments.
 
 **Diagnostics**
 - A tag-balance annotator (unclosed/stray conditions and paired tags) that leaves unknown/addon tags
