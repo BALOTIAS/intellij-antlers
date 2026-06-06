@@ -1,145 +1,119 @@
-# Full Structural Indentation Engine — Design
+# Structural Indentation — Decomposed; Sub-project 1: Antlers-Side (conditionals + multi-line expressions)
 
 **Date:** 2026-06-06
 **Branch:** `antlers-structural-formatter`
-**Status:** Approved approach, pending spec review
+**Status:** Approved approach (decomposed), pending spec review
 
-## Goal
+## Context & decomposition
 
-Reformat Code produces correct combined **HTML + Antlers** indentation: HTML elements and multi-line tag
-attributes indent one level per enclosing `{{ if }}` / HTML tag, and Antlers blocks indent inside HTML —
-all idempotently and **without ever inserting or removing line breaks** (indentation-only → safe to use
-alongside Prettier). This replaces the current "HTML-reuse + additive block-indent", whose combined indent
-was approximate and content-dependent.
+The original goal — full combined HTML+Antlers structural indentation on Reformat (indentation only, no
+reflow, Prettier-safe) — decomposes into ~4 layers. Building all at once is high-risk in this
+historically-fragile area, so it is split into sequential, independently-shippable sub-projects:
 
-## Scope decisions (from brainstorming)
+1. **Antlers conditionals** — `else`/`elseif` dedent to the `{{ if }}` opener level. *(this sub-project)*
+2. **Multi-line `{{ … }}` expression nesting** — indent expression lines by bracket depth (`[ ( {`).
+   *(this sub-project)*
+3. **Combined HTML element nesting** — HTML indenting inside Antlers blocks and vice-versa, via a custom
+   HTML tokenizer (void/raw-text/comments/quotes). *(deferred follow-up)*
+4. **Multi-line + template-named HTML tags** (`<{{ html_tag }} … >`). *(deferred follow-up, depends on 3)*
 
-- **Indentation only.** Never reflow/break/join lines (that is Prettier's job and the part that conflicts
-  with it). `<span>x</span>` stays on its line; only its leading indent changes.
-- **`else`/`elseif` dedent** to the `{{ if }}` opener level; the branch content under them is `+1`.
-- The lone `>` (or `/>`) closing a **multi-line HTML tag** aligns with its `<` (the opener line's indent).
-- Single-line constructs (`{{ if x }}…{{ /if }}` on one line, `<span>…</span>` on one line) stay one line.
-- The existing **reformat-off setting is preserved** (Prettier users disable Antlers reformatting).
+**This sub-project = layers 1 + 2**, implemented as surgical extensions to the two existing post-format
+processors (no HTML reimplementation, no model-builder change, minimal regression churn). Indentation
+only; the reformat-off setting (Prettier opt-out) is unchanged.
 
-## Architecture
+## Current behavior (what we extend)
 
-One **line-based indentation pass** computes each line's indent from a single **open-container stack** that
-mixes HTML elements and Antlers blocks. Because each line's indent is set absolutely from its container
-depth (never read from its own prior indent), the pass is idempotent by construction. The pass **owns all
-indentation**; we stop relying on IntelliJ's HTML formatter for indentation (it was the source of the
-content-dependent inconsistency).
-
-Implemented as a `PostFormatProcessor` (same mechanism as today's processors), `AntlersFormatIndentProcessor`,
-which **replaces** both `AntlersBlockIndentProcessor` and `AntlersMultilineTagIndentProcessor` (it subsumes
-their behavior). The in-`{{ }}` spacing pass (`AntlersSpacingPostFormatProcessor`) is unchanged. The
-HTML-reuse model builder (`AntlersHtmlFormattingModelBuilder`) becomes **indent-neutral** so IntelliJ's
-HTML formatter no longer fights this pass; the model builder still provides the formatting model required
-for Reformat to run and keeps the reformat-off no-op block.
+- `AntlersBlockIndentProcessor` indents paired-tag/condition bodies one level per enclosing pair. `else`/
+  `elseif` currently land at **body level** (they are ordinary body lines in its depth walk).
+- `AntlersMultilineTagIndentProcessor` indents the param lines of a multi-line `{{ … }}` **one flat level**
+  under `{{` (no bracket-depth nesting), and keeps `}}` at the opener indent.
 
 ## Components
 
-### A. `formatter/AntlersStructuralIndent` (pure, the depth model)
+### A. `else`/`elseif` dedent — `formatter/AntlersBlockIndentProcessor`
 
-A pure, IntelliJ-light object that, given the document text + the Antlers statement ranges + the indent
-unit, returns the target indent string for every line. Pure so the depth logic is unit-testable directly.
+In the depth walk, a body line that begins an `else`/`elseif` statement renders at the **enclosing node's
+depth** (the `{{ if }}` level), not the body depth. Detection: a statement whose
+`AntlersConditionMixin.keyword` is `"else"` or `"elseif"` (the only keywords inside an `if`/`unless` body
+that act as branch markers).
 
-`fun indents(text: String, antlers: AntlersFile, unit: String): Map<Int, String>` (line → target indent).
+Mechanics: precompute `elseLines` = the set of lines whose statement is an `else`/`elseif`. In `walk`, when
+assigning the node's body lines `depth = d + 1`, assign `depth = d` for any line in `elseLines`. The lines
+*after* an `else`/`elseif` remain body lines (`d + 1`), so each branch's content stays indented `+1`.
 
-The single scan tracks a `stack` of open containers. For each line it records `depth = stack.size` at the
-line's start, applies the closer/else dedent, computes the target indent, and updates the stack from the
-line's tokens.
+Result for `{{ if x }} … {{ else }} … {{ /if }}`: `{{ if }}`, `{{ else }}`, `{{ /if }}` align at the
+opener level; both branches' content is `+1`.
 
-Container kinds and stack transitions:
-- **Antlers pair**: an Antlers `{{ … }}` statement that the shared `AntlersNestingTreeBuilder` marks as a
-  paired opener (catalog `isPair` tags + `if`/`unless`) pushes; its matching closer (`{{ /x }}`,
-  `endif`/`endunless`) pops. `else`/`elseif` are rendered at the opener depth and do not change the stack
-  (the branch content after them is the body, `depth+1`).
-- **HTML element**: scanning the outer-HTML text, an open tag `<name …>` pushes a frame **unless** it is a
-  void element, self-closing (`… />`), or closed on the same line (`<name …>…</name>`). `</name>` pops.
-  **Template-named tags** `<{{ … }} …>` and `</{{ … }}>` are treated as a matched container pair (the
-  scanner keys them by position/`html_tag`-text where possible; a `</{{ … }}>` pops the nearest
-  template-named frame).
-- **Multi-line opener**: an Antlers `{{ …` whose `}}` is on a later line, or an HTML `<name …` whose `>` /
-  `/>` is on a later line, pushes a **continuation** frame. Its interior lines (params/attributes) are
-  `depth+1`; the terminator line (`}}`, `>`, `/>`) is rendered at the opener depth and pops the frame.
+### B. Multi-line expression bracket nesting — `formatter/AntlersMultilineTagIndentProcessor`
 
-Indent rules per line (first non-whitespace token decides closer/else):
-- A line whose first token closes a container (`{{ /x }}`, `</name>`, a bare `>` / `/>` / `}}` terminating
-  a multi-line opener, or `else`/`elseif`) renders at `depth − 1` (the container's own level).
-- Otherwise the line renders at `depth`.
-- Blank lines → empty. Lines inside a raw-text element or an Antlers string spanning newlines are left
-  untouched.
+Within a multi-line `{{ … }}` statement, replace the single flat `openerIndent + unit` for every interior
+line with a **bracket-depth-aware** indent:
 
-### B. HTML tokenization rules (the main correctness surface)
+```
+interiorIndent(line) = openerIndent + (1 + openBefore(line) − closesFirst(line)) * unit
+```
+- `openBefore(line)` = net count of `[ ( {` minus `] ) }` in the statement text **before** the line's first
+  content char, counting only brackets **outside Antlers strings** (skip chars inside `T_STRING` spans —
+  the processor already collects these).
+- `closesFirst(line)` = 1 if the line's first non-whitespace char is `]`, `)`, or `}` (so a closing bracket
+  dedents to its opener's level), else 0.
+- The `}}` terminator line stays at `openerIndent` (unchanged).
 
-The scan over `T_OUTER_HTML` regions recognizes, in priority order:
-- **Comments** `<!-- … -->` (may span lines; contents untouched, not containers).
-- **Raw-text elements** `<script>`, `<style>`, `<pre>`, `<textarea>` — push a container but their inner
-  content lines are **left untouched** until the matching close tag (no reindent inside `<pre>` etc.).
-- **Void elements** (`area base br col embed hr img input link meta param source track wbr`) — never push.
-- **Self-closing** `<name … />` — never push.
-- **Same-line open+close** `<name …>…</name>` — net zero (don't push).
-- **Quotes**: `<`/`>` inside attribute values (`"…"`/`'…'`) are not tag boundaries.
-- **Template-named** `<{{ … }} …>` / `</{{ … }}>` — matched container pair (paragraph A).
+Result for the multi-line array:
+```
+{{
+    [
+        'btn' => …,
+        …
+    ] | filter_empty | classes | attribute:class
+}}
+```
+— `[` at `+1`, elements at `+2`, the `]`-line back at `+1`, `}}` at the opener.
 
-`AntlersInterpolationScanner`-style care is taken with quotes/escapes; the `{{ }}` regions inside an HTML
-tag are skipped as opaque (they are Antlers, handled by the Antlers side).
+### Composition
 
-### C. `formatter/AntlersFormatIndentProcessor` (the `PostFormatProcessor`)
-
-Mirrors the existing post-processor shape: honors `AntlersFormatterSettings.reformatEnabled`, commits the
-document (re-sync after the spacing pass), fetches the `AntlersFile`, calls
-`AntlersStructuralIndent.indents(...)`, and applies the per-line indent edits within `rangeToReformat`
-(end-to-start, `distinct()`), returning the range widened by the net delta. Never throws.
-
-### D. `AntlersHtmlFormattingModelBuilder` → indent-neutral
-
-Keep `createModel`'s reformat-off no-op path. Otherwise return a model whose blocks carry
-`Indent.getNoneIndent()` (or a minimal whole-file block) so IntelliJ performs no HTML indentation — this
-pass owns it. `getSpacing` stays null (spacing is the separate processor). Plugin.xml: remove the two
-superseded `<postFormatProcessor>` registrations (block-indent, multiline) and register
-`AntlersFormatIndentProcessor` after the spacing processor.
+`else`/`elseif` (A) is block-level; bracket nesting (B) is within-statement. They compose exactly as the
+block + multiline processors already compose (block sets the opener/closer/body lines; multiline owns the
+continuation lines of a multi-line statement). Processor order is unchanged (spacing → block-indent →
+multiline). Both keep their `reformatEnabled` opt-out, document-commit re-sync, and never-throw behavior.
 
 ## Data flow
 
-Reformat → spacing pass → **structural indent pass**: scan lines → open-container stack (HTML + Antlers +
-multi-line openers) → per-line target indent → document edits. The model builder contributes no
-indentation. Front matter (YAML) is left untouched (it is its own injected region, not part of the
-container scan).
+Reformat → spacing → block-indent (now dedents `else`/`elseif`) → multiline (now bracket-depth-aware for
+multi-line `{{ … }}`). HTML lines keep today's behavior (the combined-HTML rewrite is the deferred
+follow-up).
 
 ## Error handling / edge cases
 
-- **Reformat disabled** → whole pass no-ops (defer to Prettier).
-- **Unbalanced HTML / Antlers** (stray close, unclosed open) → the stack tolerates it (a pop with an empty
-  or mismatched stack is ignored; unclosed openers indent their body to EOF). Never throws.
-- **Raw-text / `<pre>`** → inner lines untouched.
-- **Front matter** and **newline-containing Antlers strings** → lines inside are skipped.
-- **Template-named tags** with mismatched `html_tag` text → fall back to nearest-frame popping; worst case
-  a cosmetic off-by-one, never runaway (depth is bounded by real nesting).
-- **Idempotency** → indents are absolute from container depth; reformatting an already-formatted file is a
-  no-op (pinned by reformat-twice tests).
+- **Reformat disabled** → both passes no-op (Prettier).
+- **`else`/`elseif` with no enclosing `if`** (stray) → not inside any node's body → unaffected (no dedent).
+- **Brackets inside strings** (`{{ x = "a[b" }}`) → skipped via the string spans, so they don't shift the
+  depth.
+- **Unbalanced brackets** in a malformed expression → depth clamps at ≥ 1 (never negative); never throws.
+- **Single-line `{{ … }}`** → not a multi-line statement → bracket logic doesn't apply.
+- **Idempotency** → both indents are absolute (block from node depth + opener anchor; multiline from the
+  opener indent + bracket depth), so reformat-twice is a fixed point.
 
 ## Testing
 
-- **Golden file:** the user's component template (front matter + assignments + if/elseif/else + the
-  multi-line `<{{ html_tag }} … >` tag + nested HTML/Antlers) reformats to the agreed indentation
-  (else/elseif dedented, `>` aligned with `<`, no reflow). Pinned as an exact before→after test.
-- **Focused unit tests** on `AntlersStructuralIndent.indents` (pure): nested `{{ if }}` bodies; `else`/
-  `elseif` dedent + branch `+1`; HTML element nesting; HTML inside Antlers and Antlers inside HTML
-  (compounding); void elements / self-closing / same-line open+close don't indent; raw-text `<pre>`/`<script>`
-  inner lines untouched; comment spanning lines; multi-line `{{ … }}` params `+1` and `}}` aligned;
-  multi-line `<tag …>` attributes `+1` and `>` aligned; template-named `<{{ x }}>…</{{ x }}>` container.
-- **Idempotency:** reformat-twice is a fixed point for the golden file and the mixed cases.
+- **`else`/`elseif`:** `{{ if x }}\n{{ a }}\n{{ else }}\n{{ b }}\n{{ /if }}` → `{{ if }}`/`{{ else }}`/
+  `{{ /if }}` at col 0, `{{ a }}`/`{{ b }}` at `+1`; an `{{ elseif }}` chain dedents likewise; nested
+  `if`/`else` compounds.
+- **Bracket nesting:** the multi-line array example indents elements by bracket depth (`[`→`+1`,
+  elements→`+2`, `]`→`+1`); nested `[ [ … ] ]`; a `(` group; a bracket char inside a string does not shift
+  depth; the `}}` stays at the opener.
+- **Composition:** a multi-line `{{ [ … ] }}` inside an `{{ if }}` block compounds (block `+1`, then bracket
+  depth on top).
+- **Idempotency:** reformat-twice is a fixed point for both.
 - **Opt-out:** reformat-off leaves the file untouched.
-- **No regression:** existing formatter tests (`AntlersHtmlFormatTest`, `AntlersMultilineFormatTest`,
-  `AntlersSpacingFormatterTest`, `AntlersFormatterOptOutTest`, `AntlersBlockIndent*`) are migrated to the
-  new engine's behavior — where the new (correct, combined) indentation differs from the old approximate
-  output, the expectation is updated with the before→after recorded; the spacing/opt-out tests stay green
-  unchanged. Full-suite gate.
+- **No regression:** existing `AntlersBlockIndent*`, `AntlersMultilineFormatTest`, `AntlersHtmlFormatTest`,
+  `AntlersSpacingFormatterTest`, `AntlersFormatterOptOutTest` stay green — where the new (correct) `else`/
+  bracket output differs from a pinned old expectation, that expectation is re-recorded with before→after.
+  Full-suite gate.
 
-## Out of scope
+## Out of scope (deferred follow-ups)
 
-- Reflow / line breaking / joining, attribute wrapping (Prettier's job; conflicts with it).
+- **Combined HTML element nesting** (layer 3) and **multi-line / template-named HTML tags** (layer 4) — the
+  custom HTML tokenizer; their own spec/plan/build once this Antlers-side layer is proven stable.
+- Reflow / line breaking (Prettier's job).
 - In-`{{ }}` spacing (owned by `AntlersSpacingPostFormatProcessor`).
-- Formatting the contents of `<script>`/`<style>` (left untouched).
-- A configurable indent style beyond the IDE's existing indent-size/tab setting.
