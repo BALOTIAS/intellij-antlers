@@ -10,6 +10,7 @@ import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
+import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.CachedValueProvider
@@ -39,10 +40,15 @@ object AntlersScopeResolver {
         val navMeta: Boolean = false      // true for nav scopes (offer nav-tree variables)
     )
 
+    /** The injection host in the outer file for an injected element, else the element itself. */
+    fun hostOrSelf(element: PsiElement): PsiElement =
+        InjectedLanguageManager.getInstance(element.project).getInjectionHost(element) ?: element
+
     /** BlueprintScopes enclosing [element], innermost first. Empty = top level (global fallback). */
     fun scopesAt(element: PsiElement): List<BlueprintScope> {
-        val file = element.containingFile ?: return emptyList()
-        val caret = element.textRange.startOffset
+        val target = hostOrSelf(element)
+        val file = target.containingFile ?: return emptyList()
+        val caret = target.textRange.startOffset
         // Memoize per caret offset: completion resolves the scope at the same position several times
         // (directly + via AntlersFieldContext.fieldsInScope), and each call replayed every statement.
         val memo = CachedValuesManager.getCachedValue(file) {
@@ -51,7 +57,7 @@ object AntlersScopeResolver {
                 PsiModificationTracker.MODIFICATION_COUNT
             )
         }
-        return memo.computeIfAbsent(caret) { computeScopesAt(file, caret, element.project) }
+        return memo.computeIfAbsent(caret) { computeScopesAt(file, caret, target.project) }
     }
 
     private fun computeScopesAt(file: PsiFile, caret: Int, project: com.intellij.openapi.project.Project): List<BlueprintScope> {
