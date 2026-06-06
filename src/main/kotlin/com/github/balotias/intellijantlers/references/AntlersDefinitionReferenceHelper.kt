@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.references
 
+import com.github.balotias.intellijantlers.psi.AntlersInlineTags
 import com.github.balotias.intellijantlers.psi.AntlersModifierMixin
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersTypes
@@ -18,6 +19,13 @@ object AntlersDefinitionReferenceHelper {
                 mod.node.findChildByType(AntlersTypes.T_IDENT)?.psi == element) {
                 return arrayOf(AntlersPhpClassReference(element, name, isModifier = true))
             }
+        }
+
+        // Inline tag call `{tag …}` (e.g. `href = {obfuscate_link …}`): the tag name is a bare T_IDENT,
+        // not a NAME_PATH head, so attach the PHP-class reference here too (mirrors the inline-tag coloring,
+        // sharing AntlersInlineTags.isInlineTagHead). Tags only — modifiers are never inline-call syntax.
+        if (AntlersInlineTags.isInlineTagHead(element)) {
+            return arrayOf(AntlersPhpClassReference(element, name, isModifier = false))
         }
 
         // Tag head: element must be the first T_IDENT child of an AntlersNamePathMixin
