@@ -19,11 +19,15 @@ object AntlersFieldContext {
      * non-null -> restrict to these namespaces, most-specific first.
      */
     fun namespacesFor(element: PsiElement): List<BlueprintNamespace>? {
-        val scopes = AntlersScopeResolver.scopesAt(element)
+        // Inside string interpolation the element lives in an injected fragment with no enclosing loop;
+        // resolve scope against the injection host in the outer file so loop/hint/page all see the real
+        // surrounding context. For a non-injected element this is a no-op (hostOrSelf returns it).
+        val target = AntlersScopeResolver.hostOrSelf(element)
+        val scopes = AntlersScopeResolver.scopesAt(target)
         if (scopes.isNotEmpty()) return scopes.map { it.namespace }
-        val hints = element.containingFile?.let { AntlersViewHints.declaredNamespaces(it) }
+        val hints = target.containingFile?.let { AntlersViewHints.declaredNamespaces(it) }
         if (!hints.isNullOrEmpty()) return hints
-        val page = PageBlueprintResolver.namespacesFor(element)
+        val page = PageBlueprintResolver.namespacesFor(target)
         if (page.isNotEmpty()) return page
         return null
     }
