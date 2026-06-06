@@ -13,6 +13,8 @@ import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.github.balotias.intellijantlers.references.AntlersPartialParams
+import com.github.balotias.intellijantlers.references.AntlersPartialReferenceHelper
 import com.github.balotias.intellijantlers.scope.AntlersFieldContext
 import com.github.balotias.intellijantlers.scope.AntlersMemberResolver
 import com.intellij.lang.documentation.AbstractDocumentationProvider
@@ -38,9 +40,11 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
             }
         }
 
-        // Parameter: the identifier is the parameter name of a known tag.
+        // Parameter: the identifier is the parameter name of a known tag, or a partial include param.
         PsiTreeUtil.getParentOfType(ident, AntlersParameterMixin::class.java)?.let { param ->
             if (param.parameterName == name) {
+                // Partial include param: doc comes from the included partial's `{{# @param … #}}`.
+                partialParamDoc(ident, name)?.let { return it }
                 val tag = enclosingTag(ident, catalog) ?: return null
                 val p = tag.parameters.firstOrNull { it.name == name } ?: return null
                 val type = if (p.type.isNotBlank()) " : ${esc(p.type)}" else ""
@@ -127,6 +131,20 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         val kind = ns.kind.name.lowercase()
         val pathSuffix = if (ns.path.isEmpty()) "" else " › " + ns.path.joinToString(" › ") { esc(it) }
         return " · ${esc(kind)}: ${esc(ns.handle)}$pathSuffix"
+    }
+
+    /** Quick-doc for a `{{ partial:… }}` include parameter, from the partial's `@param` hints; null if N/A. */
+    private fun partialParamDoc(ident: PsiElement, name: String): String? {
+        val statement = PsiTreeUtil.getParentOfType(ident, AntlersStatement::class.java) ?: return null
+        if (PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)?.head != "partial") return null
+        val partial = AntlersPartialReferenceHelper.includedPartialFile(statement) ?: return null
+        val pp = AntlersPartialParams.of(partial).firstOrNull { it.name == name } ?: return null
+        val req = if (pp.required) " (required)" else " (optional)"
+        return section(
+            "Parameter <b>${esc(name)}</b>$req — partial <code>${esc(partial.name)}</code>",
+            pp.description,
+            ""
+        )
     }
 
     private fun enclosingTag(ident: PsiElement, catalog: AntlersCatalogService): TagDef? {

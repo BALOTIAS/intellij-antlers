@@ -4,3 +4,5 @@
 .intellijPlatform
 .kotlin
 build
+chain.crt
+private.pem
