@@ -6,6 +6,8 @@ import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiReference
 import com.intellij.psi.util.PsiTreeUtil
 
@@ -76,6 +78,26 @@ object AntlersPartialReferenceHelper {
         )
     }
 
+    /** True when the include uses the colon/slash path form (`{{ partial:components/button }}`). */
+    fun hasColonPath(statement: AntlersStatement): Boolean = extractPartialPath(statement) != null
+
+    /**
+     * The PsiFile of the partial that [statement] includes — from the colon/slash path or a `src=` value,
+     * resolved via [StatamicProject.resolvePartial]. Null when there is no path or it does not resolve.
+     */
+    fun includedPartialFile(statement: AntlersStatement): PsiFile? {
+        val path = extractPartialPath(statement) ?: srcParamValue(statement) ?: return null
+        val vf = StatamicProject.resolvePartial(statement, path) ?: return null
+        return PsiManager.getInstance(statement.project).findFile(vf)
+    }
+
+    private fun srcParamValue(statement: AntlersStatement): String? {
+        val param = PsiTreeUtil.getChildrenOfTypeAsList(statement, AntlersParameterMixin::class.java)
+            .firstOrNull { it.parameterName == "src" } ?: return null
+        val raw = param.valueElement?.text ?: return null
+        return raw.removeSurrounding("\"").removeSurrounding("'").ifBlank { null }
+    }
+
     /** True when [element] is the LAST identifier of a colon-form partial path (the renamable segment). */
     private fun isTailPathIdent(element: PsiElement, namePath: AntlersNamePathMixin): Boolean {
         // The path's last ident is the last loose T_IDENT after the namePath, or (if none) the last
@@ -118,7 +140,7 @@ object AntlersPartialReferenceHelper {
         return false
     }
 
-    private fun extractPartialPath(statement: AntlersStatement): String? {
+    fun extractPartialPath(statement: AntlersStatement): String? {
         val namePath = PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)
             ?: return null
         // Only the `:path` form reaches here (the `src="..."` form is handled by refsForString).
