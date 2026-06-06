@@ -2,6 +2,7 @@ package com.github.balotias.intellijantlers.formatter
 
 import com.github.balotias.intellijantlers.AntlersLanguage
 import com.github.balotias.intellijantlers.parser.AntlersFile
+import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.github.balotias.intellijantlers.scope.AntlersNestingTreeBuilder
@@ -57,6 +58,16 @@ class AntlersBlockIndentProcessor : PostFormatProcessor {
 
         fun openerLine(n: NestingNode) = document.getLineNumber(n.opener.textRange.startOffset)
 
+        // Lines whose statement is an `else`/`elseif` branch marker — they render at their {{ if }}'s
+        // depth (one less than the body), so each branch's content stays indented +1 under them.
+        val elseLines: Set<Int> = PsiTreeUtil.findChildrenOfType(antlers, AntlersStatement::class.java)
+            .filter {
+                val kw = (it.condition as? AntlersConditionMixin)?.keyword
+                kw == "else" || kw == "elseif"
+            }
+            .map { document.getLineNumber(it.textRange.startOffset) }
+            .toSet()
+
         fun walk(node: NestingNode, d: Int, base: String) {
             val oLine = openerLine(node)
             // Skip unclosed multiline-opener statements (e.g. {{ collection:blog\nlimit="3"\n}} with no
@@ -67,7 +78,7 @@ class AntlersBlockIndentProcessor : PostFormatProcessor {
             val cLine = node.closer?.let { document.getLineNumber(it.textRange.startOffset) }
             val bodyEnd = if (cLine != null) cLine - 1 else lineCount - 1
             for (l in (oLine + 1)..bodyEnd) if (l in 0 until lineCount) {
-                depth[l] = d + 1; touched[l] = true; baseOf[l] = base
+                depth[l] = if (l in elseLines) d else d + 1; touched[l] = true; baseOf[l] = base
             }
             if (cLine != null && cLine in 0 until lineCount) { depth[cLine] = d; touched[cLine] = true; baseOf[cLine] = base }
             if (oLine in 0 until lineCount) { depth[oLine] = d; touched[oLine] = true; baseOf[oLine] = base }

@@ -109,4 +109,16 @@ class AntlersBlockIndentTest : BasePlatformTestCase() {
         val out = reformat("{{ /collection }}\n{{ title }}")
         assertEquals("{{ /collection }}\n{{ title }}", out)
     }
+
+    fun testElseDedentsToOpener() {
+        val out = reformat("{{ if x }}\n{{ a }}\n{{ else }}\n{{ b }}\n{{ /if }}")
+        val u = unit()
+        assertEquals("{{ if x }}\n${u}{{ a }}\n{{ else }}\n${u}{{ b }}\n{{ /if }}", out)
+    }
+
+    fun testElseifDedentsToOpener() {
+        val out = reformat("{{ if x }}\n{{ a }}\n{{ elseif y }}\n{{ b }}\n{{ /if }}")
+        val u = unit()
+        assertEquals("{{ if x }}\n${u}{{ a }}\n{{ elseif y }}\n${u}{{ b }}\n{{ /if }}", out)
+    }
 }
