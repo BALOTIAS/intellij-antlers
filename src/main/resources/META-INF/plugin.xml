@@ -4,11 +4,65 @@
     <name>Antlers</name>
     <vendor email="balotamatthias@gmail.com" url="https://github.com/BALOTIAS/intellij-antlers">Matthias Balota</vendor>
     <description><![CDATA[
-        <p>Language support for <b>Statamic Antlers</b> templates (<code>*.antlers.html</code>).</p>
-        <p>Provides syntax highlighting, an HTML-aware parser, and context-aware completion for Antlers
-        tags, tag methods, parameters, and modifiers — alongside the regular HTML and CSS completion in
-        the surrounding markup. Tag and modifier completion is backed by a bundled Statamic catalog and
-        is extended by custom tags/modifiers discovered in your project.</p>
+        <p>Full language support for <b>Statamic Antlers</b> templates
+        (<code>*.antlers.html</code> and <code>*.antlers.php</code>) in IntelliJ-based IDEs.</p>
+
+        <p>Antlers is parsed as a template language layered over HTML/CSS, so you get real Antlers
+        intelligence inside <code>{{ }}</code> while keeping the regular HTML and CSS tooling in the
+        surrounding markup. The plugin reads your project's <b>blueprints, fieldsets, collections,
+        taxonomies, navigations, forms,</b> and a view's <b>YAML front matter</b>, so completion,
+        navigation, and documentation are blueprint- and view-aware — and <b>scope-aware</b>: the
+        variables offered and resolved are the ones actually available where your cursor is (inside a
+        <code>{{ collection }}</code> loop, a related entry, a <code>{{ nav }}</code> tree, a
+        <code>{{ form }}</code>, a page-mapped template, or an <code>@collection</code>-hinted view).</p>
+
+        <p><b>Highlights</b></p>
+        <ul>
+            <li><b>Editing</b> — syntax highlighting with customizable colors; Antlers interpolation
+            inside strings (<code>"object-position: {logo:focus_css}"</code>) highlighted as real
+            Antlers; a view's <code>---</code>…<code>---</code> front matter editable as a real
+            <b>YAML</b> island; brace matching, commenting, and <code>{{ }}</code> auto-insert; code
+            folding; a <b>Structure view</b> outline; and <b>Template IDE hints</b>
+            (<code>{{# @name / @collection / @blueprint … #}}</code>).</li>
+
+            <li><b>Smart block editing</b> — completing a tag drops the caret where you'll type
+            (a parameter slot, or straight into the block); <b>Tab</b> walks parameter slots and then
+            the block; a single <b>Enter</b> expands an empty <code>{{ tag }}{{ /tag }}</code> to an
+            indented body.</li>
+
+            <li><b>Completion</b> — tags, tag methods/sub-tags, parameter names and <b>values</b>
+            (partial paths, collection/taxonomy handles, sort fields, booleans), logic keywords,
+            modifiers and their arguments (incl. inside conditions), colon shorthand
+            (<code>{{ collection:&hellip; }}</code>), and variables (blueprint fields, system, loop,
+            nav, form, <code>view:</code> front-matter keys, plus member/relationship completion when
+            dotting into grid/group fields and related entries). Backed by a bundled <b>Statamic 5 &amp;
+            6</b> catalog tailored to the version detected in your <code>composer.json</code>, extended
+            by custom tags/modifiers discovered in your project.</li>
+
+            <li><b>Navigation &amp; docs</b> — go to a variable's blueprint field, a partial file, a
+            <code>view:</code> key, or a custom tag/modifier's PHP class (including the inline
+            <code>{{ x = {your_tag &hellip;} }}</code> form); quick documentation on hover and
+            parameter info for modifier arguments.</li>
+
+            <li><b>Diagnostics</b> — a tag-balance annotator (unclosed/stray/ mismatched conditions and
+            paired tags) that leaves unknown/addon tags alone, plus an unknown-modifier inspection.</li>
+
+            <li><b>Refactoring</b> — Rename and Find Usages for partials and for blueprint field handles
+            (the YAML <code>handle:</code> &harr; every <code>{{ &hellip; }}</code> usage).</li>
+
+            <li><b>Formatting</b> — indentation-only Reformat Code designed to coexist with Prettier:
+            normalizes spacing in <code>{{ }}</code>, indents tag/condition bodies, dedents
+            <code>else</code>/<code>elseif</code>, bracket-nests multi-line arrays, and indents
+            multi-line and template-named HTML tags. Configurable via <i>Code Style → Antlers</i>, with
+            a toggle to defer entirely to Prettier.</li>
+
+            <li><b>Convenience</b> — Antlers live templates and a <i>New → Antlers Template</i> action.</li>
+        </ul>
+
+        <p>Works with <b>Statamic 5 and 6</b> on the IntelliJ 2025.2 platform (IntelliJ IDEA, PhpStorm,
+        WebStorm, and friends). PHP inside <code>{{$ &hellip; $}}</code> / <code>{{? &hellip; ?}}</code> and
+        native <code>&lt;?php &hellip; ?&gt;</code> blocks is highlighted where the JetBrains PHP plugin is
+        available (PhpStorm / IDEA Ultimate); everything else works everywhere.</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

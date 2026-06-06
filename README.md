@@ -5,12 +5,16 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
 <!-- Plugin description -->
-Language support for **[Statamic](https://statamic.dev) Antlers** templates (`*.antlers.html`) in IntelliJ-based IDEs.
+Language support for **[Statamic](https://statamic.dev) Antlers** templates (`*.antlers.html` and
+`*.antlers.php`) in IntelliJ-based IDEs.
 
 The plugin parses Antlers as a template language layered over HTML/CSS, so you get full Antlers
-intelligence inside `{{ }}` alongside the regular markup tooling around it. It understands your
-project's blueprints, fieldsets, collections, and a view's YAML front matter, so completion and
-navigation are blueprint- and view-aware.
+intelligence inside `{{ }}` alongside the regular markup tooling around it. It reads your project's
+blueprints, fieldsets, collections, taxonomies, navigations, forms, and a view's YAML front matter,
+so completion, navigation, and documentation are blueprint- and view-aware — and **scope-aware**:
+the variables offered and resolved are the ones actually available where your cursor is (inside a
+`{{ collection }}` loop, a related entry, a `{{ nav }}` tree, a `{{ form }}`, a page-mapped template,
+or an `@collection`-hinted view).
 
 ## Features
 
@@ -28,6 +32,11 @@ navigation are blueprint- and view-aware.
   its own line.
 - Code folding for paired tags, conditions, comments, noparse and PHP blocks.
 - A **Structure view** outline of the template's tag/condition nesting and partial includes.
+- **Template IDE hints**: `{{# @… #}}` directive comments (`@name`, `@desc`, `@param`, `@entry`,
+  `@collection`, `@blueprint`, `@set`) are highlighted and completed after `@`. A leading
+  `{{# @collection|@entry|@blueprint <handle> #}}` hint tells the plugin which blueprint a view's
+  variables come from, making completion and navigation field-aware even when there's no collection
+  mapping for the file.
 
 **Completion** (backed by a bundled Statamic 5 & 6 catalog — tailored to the version detected in your `composer.json` — plus custom tags/modifiers discovered in your project)
 - Tags, tag methods/sub-tags, parameter names, and **parameter values** — partial paths for
@@ -45,9 +54,11 @@ navigation are blueprint- and view-aware.
 
 **Navigation & docs**
 - Go-to-declaration from a `{{ variable }}` to its blueprint field, from `{{ partial:… }}` to the
-  partial file, from `{{ view:foo }}` to its front-matter key, and from custom tag/modifier names to
-  their PHP class.
-- Quick documentation (hover) for tags, modifiers, parameters, and variables (including `view:` keys).
+  partial file (including `partials/`, underscored, and dotted-nested partials), from `{{ view:foo }}`
+  to its front-matter key, and from a custom tag/modifier name to its PHP class — including tags used
+  in the inline form (`{{ x = {your_tag …} }}`).
+- Quick documentation (hover) for tags, modifiers, parameters, and variables (including `view:` keys),
+  and **parameter info** (Ctrl/⌘P) for modifier arguments.
 
 **Diagnostics**
 - A tag-balance annotator (unclosed/stray conditions and paired tags) that leaves unknown/addon tags
@@ -58,11 +69,19 @@ navigation are blueprint- and view-aware.
   handles (the YAML `handle:` ↔ every `{{ … }}` usage, across collections that import a shared
   fieldset).
 
+**Formatting**
+- On *Reformat Code*: one space inside `{{ }}` delimiters and around `|`; paired-tag and condition
+  bodies indented one level per nesting, with `{{ else }}`/`{{ elseif }}` dedented back to the
+  `{{ if }}`; multi-line arrays inside `{{ }}` bracket-nested; multi-line tag parameters indented under
+  the `{{` line; and template-named HTML tags (`<{{ html_tag }} … >` … `</{{ html_tag }}>`) indented too.
+- **Indentation-only — designed to coexist with Prettier** (it never reflows or breaks lines). Indent
+  size and tabs are configurable in *Settings → Editor → Code Style → Antlers*, and a master toggle in
+  *Settings → Languages & Frameworks → Antlers* turns Antlers formatting off entirely so you can defer
+  to Prettier.
+
 **Convenience**
 - A small set of Antlers live templates (`if`, `unless`, `coll`, `partial`, …) and a
   *New → Antlers Template* file action.
-- A formatter that, on *Reformat Code*, normalizes spacing inside `{{ }}` delimiters and indents a
-  multi-line tag's parameters one level under the `{{` line (with `}}` on its own line).
 <!-- Plugin description end -->
 
 ## Compatibility
