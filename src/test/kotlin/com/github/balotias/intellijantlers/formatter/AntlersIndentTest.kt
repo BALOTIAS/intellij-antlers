@@ -79,4 +79,38 @@ class AntlersIndentTest : BasePlatformTestCase() {
     fun testSingleLineTagUntouched() {
         assertEquals("{{ if a }}x{{ /if }}", reformat("{{ if a }}x{{ /if }}"))
     }
+
+    fun testInlineTagAddsLevel() {
+        val u = u()
+        assertEquals("<a href=\"x\">\n${u}link\n</a>", reformat("<a href=\"x\">\nlink\n</a>"))
+    }
+
+    fun testMultilineParamsIndentUnderOpener() {
+        val u = u()
+        val out = reformat("{{ collection:blog\nlimit=\"3\"\n}}\n{{ /collection }}")
+        assertEquals("{{ collection:blog\n${u}limit=\"3\"\n}}\n{{ /collection }}", out)
+    }
+
+    fun testNoparseInteriorPreserved() {
+        val out = reformat("{{ if a }}\n{{ noparse }}\n      raw {{ x }}\n{{ /noparse }}\n{{ /if }}")
+        val u = u()
+        assertEquals("{{ if a }}\n${u}{{ noparse }}\n      raw {{ x }}\n${u}{{ /noparse }}\n{{ /if }}", out)
+    }
+
+    fun testMultilineStringNotReindented() {
+        // Uses an Antlers T_STRING spanning multiple lines; the interior lines must not be reindented.
+        val out = reformat("{{ if a }}\n{{ x param=\"\nfoo\nbar\n\" }}\n{{ /if }}")
+        assertTrue("string interior preserved", out.contains("\nfoo\nbar\n"))
+    }
+
+    fun testTemplateNamedTagBodyIndents() {
+        val u = u()
+        assertEquals("<{{ as or 'a' }}>\n${u}<span>x</span>\n</{{ as or 'a' }}>",
+            reformat("<{{ as or 'a' }}>\n<span>x</span>\n</{{ as or 'a' }}>"))
+    }
+
+    fun testStrayCloserDoesNotCrashOrRunaway() {
+        val out = reformat("{{ /collection }}\n<div>\nx\n</div>")
+        assertStable(out)
+    }
 }
