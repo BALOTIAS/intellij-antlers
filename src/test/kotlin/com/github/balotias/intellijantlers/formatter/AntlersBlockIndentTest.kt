@@ -139,4 +139,30 @@ class AntlersBlockIndentTest : BasePlatformTestCase() {
             out
         )
     }
+
+    fun testTemplateTagGoldenCombined() {
+        val src = "<{{ html_tag }}\n" +
+            "{{\n[\n'btn' => view:size == 'md',\nview:class\n] | classes | attribute:class\n}}\n" +
+            "{{ if html_tag === 'button' }}\n{{ view:type | attribute:type }}\n" +
+            "{{ elseif html_tag === 'a' }}\n{{ href | attribute:href }}\n{{ /if }}\n" +
+            ">\n" +
+            "{{ if view:icon }}\n<span>{{ view:icon }}</span>\n{{ /if }}\n" +
+            "</{{ html_tag }}>"
+        // reformat first so myFixture.file is non-null before unit() calls getIndentOptions
+        val out = reformat(src)
+        val u = unit()
+        val expected = "<{{ html_tag }}\n" +
+            "${u}{{\n${u}${u}[\n${u}${u}${u}'btn' => view:size == 'md',\n${u}${u}${u}view:class\n${u}${u}] | classes | attribute:class\n${u}}}\n" +
+            "${u}{{ if html_tag === 'button' }}\n${u}${u}{{ view:type | attribute:type }}\n" +
+            "${u}{{ elseif html_tag === 'a' }}\n${u}${u}{{ href | attribute:href }}\n${u}{{ /if }}\n" +
+            ">\n" +
+            "${u}{{ if view:icon }}\n${u}${u}<span>{{ view:icon }}</span>\n${u}{{ /if }}\n" +
+            "</{{ html_tag }}>"
+        assertEquals(expected, out)
+    }
+
+    fun testTemplateTagIdempotent() {
+        val once = reformat("<{{ html_tag }}\n{{ x | attribute:y }}\n>\n{{ if a }}\n{{ b }}\n{{ /if }}\n</{{ html_tag }}>")
+        assertEquals("template-tag reformat is a fixed point", once, reformat(once))
+    }
 }
