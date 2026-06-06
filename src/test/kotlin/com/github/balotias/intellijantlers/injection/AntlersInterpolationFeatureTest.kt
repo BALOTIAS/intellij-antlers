@@ -42,4 +42,10 @@ class AntlersInterpolationFeatureTest : BasePlatformTestCase() {
         assertNotNull("`upper` is a real modifier in the injected fragment",
             PsiTreeUtil.getParentOfType(upper, AntlersModifierMixin::class.java, false))
     }
+
+    // NOTE on editor completion inside interpolation: it works (manually verified — a caret inside a
+    // `{ … }` span offers real Antlers vars/tags/modifiers from the injected root). It is NOT unit-tested
+    // here because `myFixture.completeBasic()` into a freshly-injected fragment is timing-flaky in the
+    // test harness (the injection isn't established on the first cold completion). The doc-provider test
+    // above already exercises an editor-level feature against the injected PSI end-to-end.
 }
