@@ -104,4 +104,20 @@ class AntlersMultilineFormatTest : BasePlatformTestCase() {
         val u = unit()
         assertEquals("{{\n${u}x = \"a[b\",\n${u}y = 2\n}}", out)
     }
+
+    fun testBracketNestingInsideIfBlockComposes() {
+        // block-indent sets the multi-line {{ opener at +1 (inside the if); the multiline pass then adds
+        // bracket depth on top of that opener indent.
+        val out = reformat("{{ if x }}\n{{\n[\n'a' => 1,\n] | classes\n}}\n{{ /if }}")
+        val u = unit()
+        assertEquals(
+            "{{ if x }}\n${u}{{\n${u}${u}[\n${u}${u}${u}'a' => 1,\n${u}${u}] | classes\n${u}}}\n{{ /if }}",
+            out
+        )
+    }
+
+    fun testBracketNestingIdempotent() {
+        val once = reformat("{{\n[\n'a' => 1,\n'b' => 2,\n] | classes\n}}")
+        assertEquals("bracket-nesting reformat is a fixed point", once, reformat(once))
+    }
 }
