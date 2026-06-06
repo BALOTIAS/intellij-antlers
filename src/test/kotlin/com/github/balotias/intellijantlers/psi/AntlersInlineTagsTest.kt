@@ -31,4 +31,9 @@ class AntlersInlineTagsTest : BasePlatformTestCase() {
     fun testUnknownNameAfterBraceIsNotInlineTagHead() {
         assertFalse(AntlersInlineTags.isInlineTagHead(identNamed("{{ x = {not_a_tag y=\"z\"} }}", "not_a_tag")))
     }
+
+    fun testClosingTagHeadIsNotInlineTagHead() {
+        // `{{ /collection }}` — the closer's ident is preceded by `/` (T_SLASH), not `{`, so not inline.
+        assertFalse(AntlersInlineTags.isInlineTagHead(identNamed("{{ collection }}{{ /collection }}", "collection")))
+    }
 }
