@@ -108,8 +108,7 @@
         <referencesSearch implementation="com.github.balotias.intellijantlers.references.AntlersFieldReferenceSearcher"/>
         <renamePsiElementProcessor implementation="com.github.balotias.intellijantlers.references.AntlersFieldRenameProcessor"/>
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersSpacingPostFormatProcessor"/>
-        <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersBlockIndentProcessor"/>
-        <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersMultilineTagIndentProcessor"/>
+        <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersIndentProcessor"/>
         <lang.formatter language="Antlers" implementationClass="com.github.balotias.intellijantlers.formatter.AntlersHtmlFormattingModelBuilder"/>
         <langCodeStyleSettingsProvider implementation="com.github.balotias.intellijantlers.settings.AntlersLanguageCodeStyleSettingsProvider"/>
         <colorSettingsPage implementation="com.github.balotias.intellijantlers.highlighting.AntlersColorSettingsPage"/>
