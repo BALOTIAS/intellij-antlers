@@ -1,8 +1,16 @@
-# intellij-antlers
+<div align="center">
+
+<img src="src/main/resources/META-INF/pluginIcon.svg" width="96" alt="Antlers logo">
+
+# Antlers
+
+**[Statamic](https://statamic.dev) Antlers** language support for **IntelliJ-based IDEs**
 
 ![Build](https://github.com/BALOTIAS/intellij-antlers/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/32139-antlers.svg)](https://plugins.jetbrains.com/plugin/32139-antlers)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/32139-antlers.svg)](https://plugins.jetbrains.com/plugin/32139-antlers)
+
+</div>
 
 <!-- Plugin description -->
 Language support for **[Statamic](https://statamic.dev) Antlers** templates (`*.antlers.html` and

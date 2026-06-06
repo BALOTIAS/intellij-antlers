@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-06-06
+
+### Added
+- **Partial parameter hints**: at a partial include (`{{ partial:components/button … }}` or the
+  `{{ partial src="…" … }}` form), the parameters the partial declares with `{{# @param* label … #}}`
+  directive comments now power three IDE surfaces, all sourced from the included partial file:
+  - **Autocomplete** of parameter names (required ones marked `*`, the `@param` description shown as
+    tail text); for the colon form the catalog `src` parameter is suppressed so only the component's
+    own parameters are offered.
+  - **Quick documentation** (hover / Ctrl-Q) on a parameter name, showing its `@param` description and
+    required/optional status.
+  - **Parameter info** (Ctrl/⌘P) listing the partial's parameters with the one at the caret in bold.
+
+### Changed
+- README now leads with the Statamic mark and an "Antlers" title.
+
 ## [1.0.1] - 2026-06-06
 
 ### Fixed
