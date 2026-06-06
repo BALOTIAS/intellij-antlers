@@ -190,4 +190,19 @@ class LexerTest {
             "the <?php tag must be claimed mid-HTML: $ts"
         }
     }
+
+    // The bare `%` is the Antlers tag-disambiguation prefix (e.g. `{{ %form:fields }}`), so it must be
+    // its own token rather than the generic operator — otherwise the grammar can't allow it before a
+    // tag name.
+    @Test fun bareModuloLexesAsPercentToken() {
+        val ts = types("{{ a % b }}")
+        assert(ts.contains(AntlersTypes.T_PERCENT)) { "bare % should be T_PERCENT: $ts" }
+        assert(!ts.contains(AntlersTypes.T_OP)) { "bare % must not also be T_OP: $ts" }
+    }
+
+    @Test fun moduloAssignStaysOperator() {
+        val ts = types("{{ a %= b }}")
+        assert(ts.contains(AntlersTypes.T_OP)) { "%= should stay T_OP: $ts" }
+        assert(!ts.contains(AntlersTypes.T_PERCENT)) { "%= must not be T_PERCENT: $ts" }
+    }
 }

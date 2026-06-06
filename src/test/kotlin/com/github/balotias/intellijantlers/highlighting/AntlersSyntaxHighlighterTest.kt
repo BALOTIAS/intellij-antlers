@@ -19,6 +19,11 @@ class AntlersSyntaxHighlighterTest {
         assertTrue(hl.getTokenHighlights(AntlersTypes.T_DOT).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
     }
 
+    // `%` (modulo and the tag-disambiguation prefix) keeps the operator color it had as part of T_OP.
+    @Test fun percentIsOperatorColored() {
+        assertTrue(hl.getTokenHighlights(AntlersTypes.T_PERCENT).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
+    }
+
     @Test fun phpTagDelimitersAreBraces() {
         for (t in listOf(AntlersTypes.T_PHP_TAG_OPEN, AntlersTypes.T_PHP_ECHO_TAG_OPEN, AntlersTypes.T_PHP_TAG_CLOSE)) {
             assertTrue("$t should be brace-colored",

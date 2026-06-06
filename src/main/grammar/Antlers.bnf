@@ -52,6 +52,7 @@
     T_RBRACE="}"
     T_AT="@"
     T_DOLLAR="$"
+    T_PERCENT="%"
     T_WS="T_WS"
   ]
 }
@@ -90,16 +91,21 @@ private statement_recover ::= !(T_RDOUBLE | T_LDOUBLE | T_OUTER_HTML | T_COMMENT
 
 private body ::= closingTag | condition | expr_
 
-closingTag ::= T_SLASH namePath? {
+// `{{ /tag }}`, with the optional `%` tag-disambiguation prefix and slash-separated path segments
+// (`{{ /partial:components/notification }}`). The slash tail mirrors the loose path tokens the opening
+// form already consumes via `tail_*`.
+closingTag ::= T_SLASH T_PERCENT? namePath? closerPathSegment_* {
   mixin="com.github.balotias.intellijantlers.psi.AntlersClosingTagMixin"
 }
+private closerPathSegment_ ::= T_SLASH pathSegment?
 
 condition ::= <<atConditionKeyword>> conditionKeyword (modifier | exprToken_)* {
   mixin="com.github.balotias.intellijantlers.psi.AntlersConditionMixin"
 }
 private conditionKeyword ::= T_IDENT
 
-private expr_ ::= namePath tail_* | tail_+
+// A leading `%` disambiguates a tag from a same-named variable (`{{ %form:fields }}`).
+private expr_ ::= T_PERCENT? namePath tail_* | tail_+
 
 private tail_ ::= parameter | modifier | exprToken_
 
@@ -125,10 +131,10 @@ private modifierArg_ ::= T_STRING | T_NUMBER | T_DOLLAR? T_IDENT
 
 private exprToken_ ::=
     T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
-  | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET
+  | T_EQUALS | T_DOLLAR | T_PERCENT | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET
   | T_LBRACE | T_RBRACE | T_IDENT | T_SLASH
 
 private groupToken_ ::=
     T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
-  | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET
+  | T_EQUALS | T_DOLLAR | T_PERCENT | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET
   | T_LBRACE | T_IDENT | T_SLASH

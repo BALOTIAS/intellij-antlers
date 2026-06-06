@@ -94,6 +94,15 @@ or an `@collection`-hinted view).
   inside `{{$ … $}}` / `{{? … ?}}` blocks is highlighted where the JetBrains PHP plugin is available
   (PhpStorm / IDEA Ultimate); everything else works everywhere.
 
+## Known limitations
+
+- When an **HTML tag name is itself an Antlers interpolation** (`<{{ as or 'h2' }}> … </{{ as or 'h2' }}>`),
+  the HTML attribute/value coloring *on that element* can be lost. The IDE colors HTML by re-lexing each
+  outer-HTML segment independently, and an interpolated tag name splits the tag across segments, so the
+  part after `}}` is lexed without its in-tag context. The Antlers `{{ }}` themselves are still parsed and
+  highlighted, and the spurious "Closing tag matches nothing" error on such tags is suppressed — only the
+  surrounding HTML coloring inside that specific element is affected.
+
 ## Installation
 
 - Using the IDE built-in plugin system:

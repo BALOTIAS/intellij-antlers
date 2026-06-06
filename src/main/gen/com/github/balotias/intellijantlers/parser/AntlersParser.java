@@ -188,7 +188,27 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // T_SLASH namePath?
+  // T_SLASH pathSegment?
+  static boolean closerPathSegment_(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "closerPathSegment_")) return false;
+    if (!nextTokenIs(builder_, T_SLASH)) return false;
+    boolean result_;
+    Marker marker_ = enter_section_(builder_);
+    result_ = consumeToken(builder_, T_SLASH);
+    result_ = result_ && closerPathSegment__1(builder_, level_ + 1);
+    exit_section_(builder_, marker_, null, result_);
+    return result_;
+  }
+
+  // pathSegment?
+  private static boolean closerPathSegment__1(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "closerPathSegment__1")) return false;
+    pathSegment(builder_, level_ + 1);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // T_SLASH T_PERCENT? namePath? closerPathSegment_*
   public static boolean closingTag(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "closingTag")) return false;
     if (!nextTokenIs(builder_, T_SLASH)) return false;
@@ -196,14 +216,34 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     Marker marker_ = enter_section_(builder_);
     result_ = consumeToken(builder_, T_SLASH);
     result_ = result_ && closingTag_1(builder_, level_ + 1);
+    result_ = result_ && closingTag_2(builder_, level_ + 1);
+    result_ = result_ && closingTag_3(builder_, level_ + 1);
     exit_section_(builder_, marker_, CLOSING_TAG, result_);
     return result_;
   }
 
-  // namePath?
+  // T_PERCENT?
   private static boolean closingTag_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "closingTag_1")) return false;
+    consumeToken(builder_, T_PERCENT);
+    return true;
+  }
+
+  // namePath?
+  private static boolean closingTag_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "closingTag_2")) return false;
     namePath(builder_, level_ + 1);
+    return true;
+  }
+
+  // closerPathSegment_*
+  private static boolean closingTag_3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "closingTag_3")) return false;
+    while (true) {
+      int pos_ = current_position_(builder_);
+      if (!closerPathSegment_(builder_, level_ + 1)) break;
+      if (!empty_element_parsed_guard_(builder_, "closingTag_3", pos_)) break;
+    }
     return true;
   }
 
@@ -270,7 +310,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
-  //   | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET
+  //   | T_EQUALS | T_DOLLAR | T_PERCENT | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET | T_RBRACKET
   //   | T_LBRACE | T_RBRACE | T_IDENT | T_SLASH
   static boolean exprToken_(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "exprToken_")) return false;
@@ -285,6 +325,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     if (!result_) result_ = consumeToken(builder_, T_SEMICOLON);
     if (!result_) result_ = consumeToken(builder_, T_EQUALS);
     if (!result_) result_ = consumeToken(builder_, T_DOLLAR);
+    if (!result_) result_ = consumeToken(builder_, T_PERCENT);
     if (!result_) result_ = consumeToken(builder_, T_AT);
     if (!result_) result_ = consumeToken(builder_, T_LPAREN);
     if (!result_) result_ = consumeToken(builder_, T_RPAREN);
@@ -298,7 +339,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // namePath tail_* | tail_+
+  // T_PERCENT? namePath tail_* | tail_+
   static boolean expr_(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr_")) return false;
     boolean result_;
@@ -309,24 +350,32 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // namePath tail_*
+  // T_PERCENT? namePath tail_*
   private static boolean expr__0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "expr__0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = namePath(builder_, level_ + 1);
-    result_ = result_ && expr__0_1(builder_, level_ + 1);
+    result_ = expr__0_0(builder_, level_ + 1);
+    result_ = result_ && namePath(builder_, level_ + 1);
+    result_ = result_ && expr__0_2(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
+  // T_PERCENT?
+  private static boolean expr__0_0(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "expr__0_0")) return false;
+    consumeToken(builder_, T_PERCENT);
+    return true;
+  }
+
   // tail_*
-  private static boolean expr__0_1(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "expr__0_1")) return false;
+  private static boolean expr__0_2(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "expr__0_2")) return false;
     while (true) {
       int pos_ = current_position_(builder_);
       if (!tail_(builder_, level_ + 1)) break;
-      if (!empty_element_parsed_guard_(builder_, "expr__0_1", pos_)) break;
+      if (!empty_element_parsed_guard_(builder_, "expr__0_2", pos_)) break;
     }
     return true;
   }
@@ -393,7 +442,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // T_OP | T_STRING | T_NUMBER | T_ARROW | T_DOT | T_COLON | T_COMMA | T_SEMICOLON
-  //   | T_EQUALS | T_DOLLAR | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET
+  //   | T_EQUALS | T_DOLLAR | T_PERCENT | T_AT | T_LPAREN | T_RPAREN | T_LBRACKET
   //   | T_LBRACE | T_IDENT | T_SLASH
   static boolean groupToken_(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "groupToken_")) return false;
@@ -408,6 +457,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     if (!result_) result_ = consumeToken(builder_, T_SEMICOLON);
     if (!result_) result_ = consumeToken(builder_, T_EQUALS);
     if (!result_) result_ = consumeToken(builder_, T_DOLLAR);
+    if (!result_) result_ = consumeToken(builder_, T_PERCENT);
     if (!result_) result_ = consumeToken(builder_, T_AT);
     if (!result_) result_ = consumeToken(builder_, T_LPAREN);
     if (!result_) result_ = consumeToken(builder_, T_RPAREN);
