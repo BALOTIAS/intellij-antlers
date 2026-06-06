@@ -47,6 +47,23 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
         assertTrue("bare unknown tag must not be flagged", balance("{{ unknownaddon }}").isEmpty())
     }
 
+    // #regression: a slash-path closing partial inside a paired tag used to break parser recovery,
+    // making the *enclosing* tag look unclosed. The inner partial close must not corrupt balance.
+    fun testSlashPathCloserDoesNotBreakEnclosingBalance() {
+        assertTrue("enclosing {{ if }} wrongly flagged: " +
+            balance("{{ if x }}{{ partial:components/notification }}hi{{ /partial:components/notification }}{{ /if }}")
+                .map { it.description },
+            balance("{{ if x }}{{ partial:components/notification }}hi{{ /partial:components/notification }}{{ /if }}").isEmpty())
+    }
+
+    // #regression: the `%` tag-disambiguation prefix used to error and break recovery, making the
+    // enclosing paired tag look unclosed.
+    fun testPercentPrefixDoesNotBreakEnclosingBalance() {
+        assertTrue("enclosing {{ if }} wrongly flagged: " +
+            balance("{{ if x }}{{ %collection:blog }}{{ /%collection:blog }}{{ /if }}").map { it.description },
+            balance("{{ if x }}{{ %collection:blog }}{{ /%collection:blog }}{{ /if }}").isEmpty())
+    }
+
     private fun mismatch(text: String): List<com.intellij.codeInsight.daemon.impl.HighlightInfo> {
         myFixture.configureByText("p.antlers.html", text)
         return myFixture.doHighlighting().filter { (it.description ?: "").contains("does not match") }

@@ -50,6 +50,7 @@ public interface AntlersTypes {
   IElementType T_NUMBER = new AntlersTokenType("T_NUMBER");
   IElementType T_OP = new AntlersTokenType("T_OP");
   IElementType T_OUTER_HTML = new AntlersTokenType("T_OUTER_HTML");
+  IElementType T_PERCENT = new AntlersTokenType("%");
   IElementType T_PHP_ECHO_CLOSE = new AntlersTokenType("$}}");
   IElementType T_PHP_ECHO_OPEN = new AntlersTokenType("{{$");
   IElementType T_PHP_ECHO_TAG_OPEN = new AntlersTokenType("<?=");

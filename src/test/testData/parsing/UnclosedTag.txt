@@ -4,5 +4,5 @@ Antlers File(0,13)
     PsiWhiteSpace(' ')(2,3)
     AntlersNamePathImpl(NAME_PATH)(3,13)
       PsiElement(AntlersTokenType.T_IDENT)('collection')(3,13)
-  PsiErrorElement:<parameter>, AntlersTokenType.$, AntlersTokenType.(, AntlersTokenType.), AntlersTokenType.,, AntlersTokenType.., AntlersTokenType./, AntlersTokenType.:, AntlersTokenType.;, AntlersTokenType.=, AntlersTokenType.=>, AntlersTokenType.@, AntlersTokenType.T_IDENT, AntlersTokenType.T_NUMBER, AntlersTokenType.T_OP, AntlersTokenType.T_STRING, AntlersTokenType.[, AntlersTokenType.], AntlersTokenType.{, AntlersTokenType.|, AntlersTokenType.} or AntlersTokenType.}} expected(13,13)
+  PsiErrorElement:<parameter>, AntlersTokenType.$, AntlersTokenType.%, AntlersTokenType.(, AntlersTokenType.), AntlersTokenType.,, AntlersTokenType.., AntlersTokenType./, AntlersTokenType.:, AntlersTokenType.;, AntlersTokenType.=, AntlersTokenType.=>, AntlersTokenType.@, AntlersTokenType.T_IDENT, AntlersTokenType.T_NUMBER, AntlersTokenType.T_OP, AntlersTokenType.T_STRING, AntlersTokenType.[, AntlersTokenType.], AntlersTokenType.{, AntlersTokenType.|, AntlersTokenType.} or AntlersTokenType.}} expected(13,13)
     <empty list>

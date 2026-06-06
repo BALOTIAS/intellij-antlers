@@ -59,7 +59,7 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
 
             AntlersTypes.T_PIPE -> PIPE_KEYS
 
-            AntlersTypes.T_OP, AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW,
+            AntlersTypes.T_OP, AntlersTypes.T_PERCENT, AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW,
             AntlersTypes.T_COLON, AntlersTypes.T_SLASH, AntlersTypes.T_DOT -> OPERATOR_KEYS
 
             AntlersTypes.T_FRONTMATTER_FENCE -> FRONTMATTER_FENCE_KEYS
