@@ -55,6 +55,7 @@
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersBlockIndentProcessor"/>
         <postFormatProcessor implementation="com.github.balotias.intellijantlers.formatter.AntlersMultilineTagIndentProcessor"/>
         <lang.formatter language="Antlers" implementationClass="com.github.balotias.intellijantlers.formatter.AntlersHtmlFormattingModelBuilder"/>
+        <langCodeStyleSettingsProvider implementation="com.github.balotias.intellijantlers.settings.AntlersLanguageCodeStyleSettingsProvider"/>
         <colorSettingsPage implementation="com.github.balotias.intellijantlers.highlighting.AntlersColorSettingsPage"/>
         <liveTemplateContext contextId="ANTLERS" implementation="com.github.balotias.intellijantlers.template.AntlersTemplateContextType"/>
         <defaultLiveTemplates file="liveTemplates/Antlers"/>
