@@ -63,8 +63,11 @@
             implementationClass="com.github.balotias.intellijantlers.editor.AntlersFrontMatterBodyManipulator"/>
         <lang.elementManipulator forClass="com.github.balotias.intellijantlers.psi.AntlersPhpBlockBody"
             implementationClass="com.github.balotias.intellijantlers.editor.AntlersPhpBlockBodyManipulator"/>
+        <lang.elementManipulator forClass="com.github.balotias.intellijantlers.psi.AntlersStringLeaf"
+            implementationClass="com.github.balotias.intellijantlers.editor.AntlersStringLeafManipulator"/>
         <multiHostInjector implementation="com.github.balotias.intellijantlers.injection.AntlersYamlInjector"/>
         <multiHostInjector implementation="com.github.balotias.intellijantlers.injection.AntlersPhpInjector"/>
+        <multiHostInjector implementation="com.github.balotias.intellijantlers.injection.AntlersStringInterpolationInjector"/>
 
         <projectConfigurable parentId="language"
             id="com.github.balotias.intellijantlers.settings.AntlersSettingsConfigurable"
