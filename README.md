@@ -109,10 +109,11 @@ or an `@collection`-hinted view).
 ## Known limitations
 
 - When an **HTML tag name is itself an Antlers interpolation** (`<{{ as or 'h2' }}> … </{{ as or 'h2' }}>`),
-  the IDE colors HTML by re-lexing each outer-HTML segment independently, so the segment after `}}` lacks
-  its in-tag context. Attribute **names and values** on such tags are re-colored to match normal tags, and
-  the spurious "Closing tag matches nothing" error is suppressed; any other HTML coloring nuance inside that
-  specific element may still differ.
+  some HTML coloring nuance inside that element can still differ from a normal tag — the IDE re-lexes each
+  outer-HTML segment independently, so the part after `}}` loses its in-tag context. The common cases are
+  handled, though: attribute **names and values** are re-colored to match normal tags, and the spurious HTML
+  errors such tags trigger ("Closing tag matches nothing", and "Closing tag name is missing" on multi-line
+  tags) are suppressed.
 - **Reformat Code** indents by nesting depth but does not add an extra level for the *continuation lines of
   a multi-line HTML attribute value* on a template-named tag (e.g. a wrapped `class="…"` on
   `<{{ as }} … >`). Such lines sit at the tag's attribute level rather than one deeper. Everything else —
@@ -123,7 +124,7 @@ or an `@collection`-hinted view).
 
 - Using the IDE built-in plugin system:
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "intellij-antlers"</kbd> >
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "Antlers"</kbd> >
   <kbd>Install</kbd>
 
 - Using JetBrains Marketplace:
@@ -147,4 +148,3 @@ Released under the [MIT License](LICENSE) © Matthias Balota.
 Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 [template]: https://github.com/JetBrains/intellij-platform-plugin-template
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
