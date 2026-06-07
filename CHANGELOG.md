@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-06-07
+
+### Changed
+- **Reformat Code** now indents to one combined nesting depth computed from HTML elements, Antlers
+  pairs/conditions, template-named `<{{ }}>` tags, and multi-line `{{ }}` params together — replacing the
+  previous two-pass approach that mis-indented templates mixing HTML and Antlers. Whitespace-significant
+  and opaque regions (`<pre>`/`<textarea>`, multi-line strings, comment/noparse/PHP blocks) are preserved;
+  the pass is idempotent. Indentation-only / Prettier-safe as before.
+
+### Fixed
+- Nested `{{ else }}` / `{{ elseif }}` no longer dedent past their own `{{ if }}` (they kept the indent
+  from enclosing pairs).
+- Loop bodies over arbitrary variables (`{{ buttons }} … {{ /buttons }}`, not just catalog pair tags) are
+  now indented.
+- Attribute **names and values** inside template-named tags (`<{{ as }} class="…">`) are colored to match
+  normal HTML tags; the interpolations inside attribute values stay Antlers-colored.
+
 ## [1.0.2] - 2026-06-06
 
 ### Added
