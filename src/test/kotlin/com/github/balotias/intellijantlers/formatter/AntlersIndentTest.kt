@@ -113,4 +113,16 @@ class AntlersIndentTest : BasePlatformTestCase() {
         val out = reformat("{{ /collection }}\n<div>\nx\n</div>")
         assertStable(out)
     }
+
+    fun testCommentInteriorPreserved() {
+        val u = u()
+        val out = reformat("{{ if a }}\n{{#\n   keep comment\n#}}\n{{ /if }}")
+        assertEquals("{{ if a }}\n${u}{{#\n   keep comment\n${u}#}}\n{{ /if }}", out)
+    }
+
+    fun testPhpBlockInteriorPreserved() {
+        val u = u()
+        val out = reformat("{{ if a }}\n{{\$\n   \$x = 1;\n\$}}\n{{ /if }}")
+        assertEquals("{{ if a }}\n${u}{{\$\n   \$x = 1;\n${u}\$}}\n{{ /if }}", out)
+    }
 }
