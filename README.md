@@ -114,6 +114,11 @@ or an `@collection`-hinted view).
   part after `}}` is lexed without its in-tag context. The Antlers `{{ }}` themselves are still parsed and
   highlighted, and the spurious "Closing tag matches nothing" error on such tags is suppressed — only the
   surrounding HTML coloring inside that specific element is affected.
+- **Reformat Code** indents by nesting depth but does not add an extra level for the *continuation lines of
+  a multi-line HTML attribute value* on a template-named tag (e.g. a wrapped `class="…"` on
+  `<{{ as }} … >`). Such lines sit at the tag's attribute level rather than one deeper. Everything else —
+  HTML elements, Antlers pairs/loops/conditions, and multi-line `{{ }}` params — indents to the correct
+  combined depth.
 
 ## Installation
 
