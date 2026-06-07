@@ -7,6 +7,7 @@
 ## [1.0.4] - 2026-06-07
 
 ### Fixed
+
 - Multi-line template-named tags (`<{{ as }}` … newline-attrs … `>` … `</{{ as }}>`) no longer show a
   spurious "Closing tag name is missing" HTML error; genuinely malformed closing tags are still reported.
 
@@ -135,7 +136,8 @@ First public release.
 - Identifiers no longer swallow a trailing hyphen, so compound operators lex correctly (`{{ foo-=3 }}`
   is `foo` `-=` `3`); kebab-case names like `meta-title` / `count-1` are still single identifiers.
 
-[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.3...HEAD
+[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.4...HEAD
+[1.0.4]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.0...1.0.1
