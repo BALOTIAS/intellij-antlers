@@ -100,7 +100,7 @@ or an `@collection`-hinted view).
   is tailored to the version detected in your project's `composer.json` (falling back to the latest when
   none is found), and custom/addon tags are discovered by scanning your project.
 - Both `*.antlers.html` and `*.antlers.php` views.
-- IntelliJ-based IDEs on the **2025.2** platform (IntelliJ IDEA, PhpStorm, WebStorm, and friends). PHP
+- IntelliJ-based IDEs, version **2025.2 or newer** (IntelliJ IDEA, PhpStorm, WebStorm, and friends). PHP
   inside `{{$ … $}}` / `{{? … ?}}` blocks is highlighted where the JetBrains PHP plugin is available
   (PhpStorm / IDEA Ultimate); everything else works everywhere.
 
