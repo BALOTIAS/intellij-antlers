@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+- Multi-line template-named tags (`<{{ as }}` … newline-attrs … `>` … `</{{ as }}>`) no longer show a
+  spurious "Closing tag name is missing" HTML error; genuinely malformed closing tags are still reported.
+
 ## [1.0.3] - 2026-06-07
 
 ### Changed

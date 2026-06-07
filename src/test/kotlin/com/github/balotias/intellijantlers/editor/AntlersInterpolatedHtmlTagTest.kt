@@ -25,4 +25,21 @@ class AntlersInterpolatedHtmlTagTest : BasePlatformTestCase() {
         assertTrue("a genuinely unmatched </span> must still be reported: $d",
             d.any { it.contains("Closing tag matches nothing") })
     }
+
+    // A multi-line `<{{ }}>` open tag makes HTML report "Closing tag name is missing" on the `</{{ }}>`
+    // (after `</` it sees `{{`, not a tag name) — also a false positive to suppress.
+    fun testMultilineInterpolatedTagNotFlagged() {
+        val d = descriptions(
+            "{{ if x }}\n    <{{ as or 'a' }}\n        class=\"y\"\n    >\n        <span>z</span>\n    </{{ as or 'a' }}>\n{{ /if }}"
+        )
+        assertFalse("false 'Closing tag name is missing' on interpolated tag: $d",
+            d.any { it.contains("Closing tag name is missing") })
+    }
+
+    // A genuinely malformed real closing tag (`</>`) must still be reported.
+    fun testRealMissingClosingTagNameStillFlagged() {
+        val d = descriptions("<div>hello</>")
+        assertTrue("a genuinely empty </> must still be reported: $d",
+            d.any { it.contains("Closing tag name is missing") })
+    }
 }

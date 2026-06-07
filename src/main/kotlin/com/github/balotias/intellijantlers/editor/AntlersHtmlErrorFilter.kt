@@ -44,6 +44,7 @@ class AntlersHtmlErrorFilter : HighlightInfoFilter {
         /** Substrings of the HTML structural errors produced by an interpolated tag name. */
         private val SUPPRESSED_FRAGMENTS = listOf(
             "Closing tag matches nothing",
+            "Closing tag name is missing",   // multi-line `</{{ … }}>` — HTML sees `</` then `{{`
             "is not closed",
         )
     }
