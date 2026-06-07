@@ -95,6 +95,9 @@ jobs:
   # Run plugin structure verification along with IntelliJ Plugin Verifier
   verify:
     name: Verify plugin
+    # Plugin Verifier downloads/transforms several IDEs (~5 min) — skip it on PRs and run only on pushes
+    # to main, where it still gates the release draft. PRs stay covered by the build + test jobs.
+    if: github.event_name != 'pull_request'
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:
