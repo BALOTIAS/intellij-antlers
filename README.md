@@ -13,11 +13,9 @@
 </div>
 
 <!-- Plugin description -->
-Language support for **[Statamic](https://statamic.dev) Antlers** templates (`*.antlers.html` and
-`*.antlers.php`) in IntelliJ-based IDEs.
-
-The plugin parses Antlers as a template language layered over HTML/CSS, so you get full Antlers
-intelligence inside `{{ }}` alongside the regular markup tooling around it. It reads your project's
+The plugin brings **[Statamic](https://statamic.dev) Antlers** support to `*.antlers.html` and
+`*.antlers.php` views, parsing Antlers as a template language layered over HTML/CSS — so you get full
+Antlers intelligence inside `{{ }}` alongside the regular markup tooling around it. It reads your project's
 blueprints, fieldsets, collections, taxonomies, navigations, forms, and a view's YAML front matter,
 so completion, navigation, and documentation are blueprint- and view-aware — and **scope-aware**:
 the variables offered and resolved are the ones actually available where your cursor is (inside a
