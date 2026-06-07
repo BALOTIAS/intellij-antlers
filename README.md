@@ -94,6 +94,31 @@ or an `@collection`-hinted view).
   *New → Antlers Template* file action.
 <!-- Plugin description end -->
 
+## See it in action
+
+**Context-aware completion inside `{{ }}`** — tags and sub-tags plus system and blueprint variables,
+each with its type and a one-line description.
+
+![Tag and variable completion](docs/screenshots/tag-and-variable-completion.png)
+
+**Scope-aware fields** — inside a `{{ collection:pages }}` loop, completion offers that collection
+blueprint's actual fields (here `title`), not a generic list.
+
+![Scope-aware blueprint field completion](docs/screenshots/scoped-field-completion.png)
+
+**Handle completion** — collection / taxonomy / form / nav handles after the colon shorthand.
+
+![Collection handle completion](docs/screenshots/collection-handle-completion.png)
+
+**Shorthand block tags** — `collection`, `foreach`, `section`, … from the bundled Statamic catalog.
+
+![Shorthand tag completion](docs/screenshots/shorthand-tag-completion.png)
+
+**Partial parameter hints** — at a `{{ partial: }}` include, the parameters the partial declares with
+`{{# @param #}}` comments (required ones marked) are completed and documented inline.
+
+![Partial parameter hints](docs/screenshots/partial-parameter-hints.png)
+
 ## Compatibility
 
 - **Statamic 5 and 6.** Antlers syntax is shared across both versions; the bundled tag/modifier catalog
