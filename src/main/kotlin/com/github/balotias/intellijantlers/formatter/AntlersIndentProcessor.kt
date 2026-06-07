@@ -68,17 +68,13 @@ class AntlersIndentProcessor : PostFormatProcessor {
     /**
      * (Contributor 2) Antlers pairs & conditions. A node's body — `opener-END-line+1 .. closer-START-line-1`
      * — gets `+1`; using the opener's END line leaves a multi-line opener's own param lines to contributor
-     * 4 (no double counting). `else`/`elseif` branch markers render at the `{{ if }}` level (no `+1`).
+     * 4 (no double counting). Pairing is permissive so variable loops (`{{ buttons }}…{{ /buttons }}`) nest
+     * too. `else`/`elseif` markers are then pulled back one level so they render at their own `{{ if }}`'s
+     * level (they get `+1` from that if's body like any other line, which the `-1` cancels — while keeping
+     * the `+1` from every enclosing pair).
      */
     private fun addAntlersPairDepth(antlers: AntlersFile, document: Document, project: Project, depth: IntArray) {
         val lineCount = depth.size
-        val elseLines = PsiTreeUtil.findChildrenOfType(antlers, AntlersStatement::class.java)
-            .filter {
-                val kw = (it.condition as? AntlersConditionMixin)?.keyword
-                kw == "else" || kw == "elseif"
-            }
-            .map { document.getLineNumber(it.textRange.startOffset) }
-            .toSet()
         fun walk(node: NestingNode) {
             val oStart = document.getLineNumber(node.opener.textRange.startOffset)
             val oEnd = document.getLineNumber(node.opener.textRange.endOffset - 1)
@@ -86,10 +82,21 @@ class AntlersIndentProcessor : PostFormatProcessor {
             if (node.closer == null && oEnd > oStart) { node.children.forEach(::walk); return }
             val cStart = node.closer?.let { document.getLineNumber(it.textRange.startOffset) }
             val bodyEnd = if (cStart != null) cStart - 1 else lineCount - 1
-            for (l in (oEnd + 1)..bodyEnd) if (l in 0 until lineCount && l !in elseLines) depth[l] += 1
+            for (l in (oEnd + 1)..bodyEnd) if (l in 0 until lineCount) depth[l] += 1
             node.children.forEach(::walk)
         }
-        AntlersNestingTreeBuilder.build(antlers, project).roots.forEach(::walk)
+        AntlersNestingTreeBuilder.build(antlers, project, permissive = true).roots.forEach(::walk)
+
+        // Dedent each `else`/`elseif` branch marker by one, back to its own `{{ if }}`'s level.
+        PsiTreeUtil.findChildrenOfType(antlers, AntlersStatement::class.java)
+            .filter {
+                val kw = (it.condition as? AntlersConditionMixin)?.keyword
+                kw == "else" || kw == "elseif"
+            }
+            .forEach {
+                val l = document.getLineNumber(it.textRange.startOffset)
+                if (l in 0 until lineCount) depth[l] -= 1
+            }
     }
 
     /** (Contributor 3) Template-named tags `<{{ … }}> … </{{ … }}>`: interior `+1`, excluding the `>` line. */

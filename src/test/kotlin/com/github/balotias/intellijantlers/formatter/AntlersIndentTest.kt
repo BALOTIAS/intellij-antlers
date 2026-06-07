@@ -125,4 +125,40 @@ class AntlersIndentTest : BasePlatformTestCase() {
         val out = reformat("{{ if a }}\n{{\$\n   \$x = 1;\n\$}}\n{{ /if }}")
         assertEquals("{{ if a }}\n${u}{{\$\n   \$x = 1;\n${u}\$}}\n{{ /if }}", out)
     }
+
+    // #regression: a nested if's {{ else }} must stay at its own if's level (still inside the outer if),
+    // not dedent all the way out.
+    fun testNestedElseStaysAtItsIfLevel() {
+        val u = u()
+        val out = reformat("{{ if a }}\n{{ if b }}\nx\n{{ else }}\ny\n{{ /if }}\n{{ /if }}")
+        assertEquals(
+            "{{ if a }}\n${u}{{ if b }}\n${u}${u}x\n${u}{{ else }}\n${u}${u}y\n${u}{{ /if }}\n{{ /if }}",
+            out
+        )
+    }
+
+    // A loop over an arbitrary variable (`{{ buttons }}…{{ /buttons }}`) indents its body, even though
+    // `buttons` is not a catalog pair tag.
+    fun testLoopVariableBodyIndents() {
+        val u = u()
+        val out = reformat("{{ buttons }}\n{{ partial:components/button }}\n{{ /buttons }}")
+        assertEquals("{{ buttons }}\n${u}{{ partial:components/button }}\n{{ /buttons }}", out)
+    }
+
+    fun testNestedLoopInsideHtmlInsideIf() {
+        val u = u()
+        val out = reformat("{{ if a }}\n<div>\n{{ buttons }}\n{{ partial:x }}\n{{ /buttons }}\n</div>\n{{ /if }}")
+        assertEquals(
+            "{{ if a }}\n${u}<div>\n${u}${u}{{ buttons }}\n${u}${u}${u}{{ partial:x }}\n${u}${u}{{ /buttons }}\n${u}</div>\n{{ /if }}",
+            out
+        )
+    }
+
+    // A non-pair tag with no closer must NOT indent everything after it (permissive pairing must discard
+    // unclosed unknown openers).
+    fun testUnclosedUnknownDoesNotIndentFollowing() {
+        val u = u()
+        val out = reformat("{{ title }}\n<div>\nx\n</div>")
+        assertEquals("{{ title }}\n<div>\n${u}x\n</div>", out)
+    }
 }
