@@ -25,17 +25,16 @@ dependencies {
 
 sourceSets["main"].java.srcDirs("src/main/gen")
 
-// Run each test in its own JVM. ParsingTestCase (lightweight, registers only the parser) and
-// BasePlatformTestCase (loads the full plugin.xml incl. the multi-root file view provider) otherwise
-// pollute each other's application-level registrations, making the view provider engage flakily.
+// The whole suite runs in one JVM (`forkEvery = 0`), ~28s, instead of the old `forkEvery = 1` (a fresh
+// ~5s IntelliJ-platform JVM per class, ~120 classes ≈ 10min on CI). The one class that used to require
+// per-class isolation, `AntlersParsingTest` (ParsingTestCase), is made registration-independent via
+// `checkAllPsiRoots() = false` (see that class) so it no longer conflicts with the plugin-loading tests.
 //
-// NB: do NOT add `maxParallelForks` here. All forks share the single IntelliJ test sandbox
-// (idea.system/config/plugins/log paths set by the IntelliJ Platform Gradle Plugin), so running them
-// concurrently contends on IntelliJ's single-instance lock and races on sandbox files — observed as the
-// `:test` task hanging and throwing IOExceptions. Real parallelism would require giving each fork its
-// own sandbox paths, which the plugin doesn't expose per-fork.
+// NB: do NOT add `maxParallelForks`. All forks share the single IntelliJ test sandbox (idea.system/config/
+// plugins/log paths set by the IntelliJ Platform Gradle Plugin), so concurrent forks contend on IntelliJ's
+// single-instance lock and race on sandbox files — observed as `:test` hanging and throwing IOExceptions.
 tasks.withType<Test>().configureEach {
-    forkEvery = 1
+    forkEvery = 0
 }
 
 // The generated lexer/parser/PSI is committed under src/main/gen and compiled directly. The

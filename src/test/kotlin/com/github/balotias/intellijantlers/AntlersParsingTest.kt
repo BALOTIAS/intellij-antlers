@@ -9,6 +9,13 @@ class AntlersParsingTest : ParsingTestCase("parsing", "antlers.html", AntlersPar
     override fun skipSpaces(): Boolean = false
     override fun includeRanges(): Boolean = true
 
+    // Dump only the primary (Antlers) PSI root. Otherwise, when the full plugin is loaded in the same JVM
+    // (by a BasePlatformTestCase), `.antlers.html` resolves to the multi-root template view provider and
+    // ParsingTestCase would expect per-root goldens (`<name>.Antlers.txt`) — making this test depend on
+    // whether the FileType is registered. Checking only the base root keeps the `<name>.txt` goldens valid
+    // regardless, so the whole suite can share one JVM (no per-class forking needed).
+    override fun checkAllPsiRoots(): Boolean = false
+
     fun testTag() = doTest(true)
     fun testModifiers() = doTest(true)
     fun testCondition() = doTest(true)
