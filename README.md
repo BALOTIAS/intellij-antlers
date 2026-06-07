@@ -109,11 +109,10 @@ or an `@collection`-hinted view).
 ## Known limitations
 
 - When an **HTML tag name is itself an Antlers interpolation** (`<{{ as or 'h2' }}> … </{{ as or 'h2' }}>`),
-  the HTML attribute/value coloring *on that element* can be lost. The IDE colors HTML by re-lexing each
-  outer-HTML segment independently, and an interpolated tag name splits the tag across segments, so the
-  part after `}}` is lexed without its in-tag context. The Antlers `{{ }}` themselves are still parsed and
-  highlighted, and the spurious "Closing tag matches nothing" error on such tags is suppressed — only the
-  surrounding HTML coloring inside that specific element is affected.
+  the IDE colors HTML by re-lexing each outer-HTML segment independently, so the segment after `}}` lacks
+  its in-tag context. Attribute **names and values** on such tags are re-colored to match normal tags, and
+  the spurious "Closing tag matches nothing" error is suppressed; any other HTML coloring nuance inside that
+  specific element may still differ.
 - **Reformat Code** indents by nesting depth but does not add an extra level for the *continuation lines of
   a multi-line HTML attribute value* on a template-named tag (e.g. a wrapped `class="…"` on
   `<{{ as }} … >`). Such lines sit at the tag's attribute level rather than one deeper. Everything else —

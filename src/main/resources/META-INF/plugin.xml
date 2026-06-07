@@ -95,6 +95,7 @@
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersSemanticHighlightAnnotator"/>
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersStringInterpolationAnnotator"/>
         <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersHintAnnotator"/>
+        <annotator language="Antlers" implementationClass="com.github.balotias.intellijantlers.editor.AntlersTemplateTagAttributeAnnotator"/>
         <daemon.highlightInfoFilter implementation="com.github.balotias.intellijantlers.editor.AntlersHtmlErrorFilter"/>
         <localInspection language="Antlers"
                          implementationClass="com.github.balotias.intellijantlers.inspection.AntlersUnknownModifierInspection"
