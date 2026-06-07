@@ -287,7 +287,7 @@ Create `src/test/kotlin/com/github/balotias/intellijantlers/highlighting/Antlers
 ```kotlin
 package com.github.balotias.intellijantlers.highlighting
 
-import com.intellij.ide.highlighter.XmlHighlighterColors
+import com.intellij.openapi.editor.XmlHighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
@@ -345,7 +345,7 @@ Create `src/main/kotlin/com/github/balotias/intellijantlers/editor/AntlersTempla
 package com.github.balotias.intellijantlers.editor
 
 import com.github.balotias.intellijantlers.parser.AntlersFile
-import com.intellij.ide.highlighter.XmlHighlighterColors
+import com.intellij.openapi.editor.XmlHighlighterColors
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity

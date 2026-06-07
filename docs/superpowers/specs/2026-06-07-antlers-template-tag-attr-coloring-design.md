@@ -48,7 +48,7 @@ Algorithm:
 - Runs once on the `AntlersFile` root (`if (element !is AntlersFile) return`), like `AntlersBalanceAnnotator`. Skips default projects.
 - Calls `AntlersTemplateTagAttributes.parts(element.text)`. For each part, emits:
   `holder.newSilentAnnotation(HighlightSeverity.INFORMATION).range(TextRange(start, end)).textAttributes(key).create()`
-  where `key` = `com.intellij.ide.highlighter.XmlHighlighterColors.HTML_ATTRIBUTE_NAME` for `NAME` and `HTML_ATTRIBUTE_VALUE` for `VALUE`.
+  where `key` = `com.intellij.openapi.editor.XmlHighlighterColors.HTML_ATTRIBUTE_NAME` for `NAME` and `HTML_ATTRIBUTE_VALUE` for `VALUE`.
 - Tolerant; never throws.
 - Registered in `plugin.xml`: `<annotator language="Antlers" implementationClass="…editor.AntlersTemplateTagAttributeAnnotator"/>`.
 
