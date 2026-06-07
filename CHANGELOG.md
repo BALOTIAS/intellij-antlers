@@ -7,6 +7,7 @@
 ## [1.0.3] - 2026-06-07
 
 ### Changed
+
 - **Reformat Code** now indents to one combined nesting depth computed from HTML elements, Antlers
   pairs/conditions, template-named `<{{ }}>` tags, and multi-line `{{ }}` params together — replacing the
   previous two-pass approach that mis-indented templates mixing HTML and Antlers. Whitespace-significant
@@ -14,6 +15,7 @@
   the pass is idempotent. Indentation-only / Prettier-safe as before.
 
 ### Fixed
+
 - Nested `{{ else }}` / `{{ elseif }}` no longer dedent past their own `{{ if }}` (they kept the indent
   from enclosing pairs).
 - Loop bodies over arbitrary variables (`{{ buttons }} … {{ /buttons }}`, not just catalog pair tags) are
@@ -24,8 +26,10 @@
 ## [1.0.2] - 2026-06-06
 
 ### Added
+
 - **Partial parameter hints**: at a partial include (`{{ partial:components/button … }}` or the
   `{{ partial src="…" … }}` form), the parameters the partial declares with `{{# @param* label … #}}`
+
   directive comments now power three IDE surfaces, all sourced from the included partial file:
   - **Autocomplete** of parameter names (required ones marked `*`, the `@param` description shown as
     tail text); for the colon form the catalog `src` parameter is suppressed so only the component's
@@ -35,11 +39,13 @@
   - **Parameter info** (Ctrl/⌘P) listing the partial's parameters with the one at the caret in bold.
 
 ### Changed
+
 - README now leads with the Statamic mark and an "Antlers" title.
 
 ## [1.0.1] - 2026-06-06
 
 ### Fixed
+
 - Closing tags with slash-separated paths (`{{ /partial:components/notification }}`) no longer report a
   parse error; the closer now accepts the same `/segment` path tail as the opening form.
 - The `%` tag-disambiguation prefix (`{{ %form:fields }}` / `{{ /%form:fields }}`) parses correctly —
@@ -52,14 +58,17 @@
   "Closing tag matches nothing" error; genuine unmatched closing tags are still reported.
 
 ### Known limitations
+
 - When an HTML tag name is itself an Antlers interpolation, HTML attribute/value coloring on that element
   can be lost (the layered HTML highlighter re-lexes each segment independently). The `{{ }}` themselves
   are still parsed and highlighted. See the README for details.
 
 ## [1.0.0] - 2026-06-06
+
 First public release.
 
 ### Added
+
 - Antlers language support for `*.antlers.html` (parsed as a template language over HTML/CSS): lexer,
   grammar, PSI, and file type.
 - Syntax highlighting (tags, variables, strings, numbers, comments, operators, PHP/noparse blocks) with
@@ -73,6 +82,7 @@ First public release.
   conditions, comments, noparse, and PHP blocks.
 - Structure view of tag/condition nesting and partial includes.
 - **Template IDE hints**: `{{# @name / @desc / @param / @entry / @collection / @blueprint / @set #}}`
+
   directive comments are highlighted and completed after `@`; a leading `@collection`/`@entry`/`@blueprint`
   hint drives blueprint field scoping for the view.
 - Completion backed by a bundled Statamic catalog merged with custom tags/modifiers scanned from the
@@ -115,5 +125,12 @@ First public release.
 - Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
 
 ### Fixed
+
 - Identifiers no longer swallow a trailing hyphen, so compound operators lex correctly (`{{ foo-=3 }}`
   is `foo` `-=` `3`); kebab-case names like `meta-title` / `count-1` are still single identifiers.
+
+[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.3...HEAD
+[1.0.3]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.2...1.0.3
+[1.0.2]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.1...1.0.2
+[1.0.1]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.0...1.0.1
+[1.0.0]: https://github.com/BALOTIAS/intellij-antlers/commits/1.0.0
