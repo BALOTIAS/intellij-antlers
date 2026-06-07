@@ -43,7 +43,14 @@ object AntlersNestingTreeBuilder {
         (root as? PsiFile)?.let { AntlersStatements.sortedIn(it) }
             ?: PsiTreeUtil.findChildrenOfType(root, AntlersStatement::class.java).sortedBy { it.textRange.startOffset }
 
-    fun build(root: PsiElement, project: Project): NestingTree {
+    /**
+     * @param permissive when true, ANY `{{ name }}…{{ /name }}` with a matching closer is treated as a
+     *   pair (not just catalog `isPair` tags) — so variable loops like `{{ buttons }}` nest. Unclosed
+     *   *unknown* openers are discarded (their bodies are not nested). The formatter uses this; the
+     *   balance annotator / folding / structure view use the default (false) so they never pair — and
+     *   therefore never flag — unknown/addon tags.
+     */
+    fun build(root: PsiElement, project: Project, permissive: Boolean = false): NestingTree {
         val catalog = if (project.isDefault) null else AntlersCatalogService.getInstance(project)
         val roots = mutableListOf<NestingNode>()
         val unmatched = mutableListOf<AntlersStatement>()
@@ -73,13 +80,20 @@ object AntlersNestingTreeBuilder {
             val namePath = stmt.namePath as? AntlersNamePathMixin ?: continue
             val head = namePath.head
             if (head.isBlank()) continue
-            if (catalog?.tag(head)?.isPair == true) stack.addLast(Frame(head, stmt))
+            if (permissive || catalog?.tag(head)?.isPair == true) stack.addLast(Frame(head, stmt))
         }
         // Openers still open at EOF are unclosed; attach innermost-first to their parent (or roots).
+        // In permissive mode an unclosed *unknown* opener is discarded (its body must not nest) — but its
+        // already-closed children are hoisted up so a properly-closed inner construct keeps its nesting.
         while (stack.isNotEmpty()) {
             val f = stack.removeLast()
-            val node = NestingNode(f.opener, f.name, null, f.children)
-            (stack.lastOrNull()?.children ?: roots).add(node)
+            val known = f.name in CONDITION_OPENERS || catalog?.tag(f.name)?.isPair == true
+            if (permissive && !known) {
+                (stack.lastOrNull()?.children ?: roots).addAll(f.children)
+            } else {
+                val node = NestingNode(f.opener, f.name, null, f.children)
+                (stack.lastOrNull()?.children ?: roots).add(node)
+            }
         }
         return NestingTree(roots, unmatched)
     }
