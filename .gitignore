@@ -6,3 +6,4 @@
 build
 chain.crt
 private.pem
+*.hprof

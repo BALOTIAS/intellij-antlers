@@ -28,6 +28,12 @@ sourceSets["main"].java.srcDirs("src/main/gen")
 // Run each test in its own JVM. ParsingTestCase (lightweight, registers only the parser) and
 // BasePlatformTestCase (loads the full plugin.xml incl. the multi-root file view provider) otherwise
 // pollute each other's application-level registrations, making the view provider engage flakily.
+//
+// NB: do NOT add `maxParallelForks` here. All forks share the single IntelliJ test sandbox
+// (idea.system/config/plugins/log paths set by the IntelliJ Platform Gradle Plugin), so running them
+// concurrently contends on IntelliJ's single-instance lock and races on sandbox files — observed as the
+// `:test` task hanging and throwing IOExceptions. Real parallelism would require giving each fork its
+// own sandbox paths, which the plugin doesn't expose per-fork.
 tasks.withType<Test>().configureEach {
     forkEvery = 1
 }
