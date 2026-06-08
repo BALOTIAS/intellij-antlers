@@ -32,6 +32,10 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         val name = ident.text
         val catalog = AntlersCatalogService.getInstance(ident.project)
 
+        // `switch(…)` is the inline match-like *operator*, not the `{{ switch between=… }}` cycling tag.
+        // Resolve it first so hover shows the operator's docs instead of the tag's (same name, `(` tail).
+        if (isSwitchOperator(ident)) return switchOperatorDoc()
+
         // Modifier: the identifier is the modifier name.
         PsiTreeUtil.getParentOfType(ident, AntlersModifierMixin::class.java)?.let { mod ->
             if (mod.modifierName == name) {
@@ -173,6 +177,34 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         }
         sb.append(DocumentationMarkup.CONTENT_END)
         appendDocUrl(sb, def.docUrl)
+        return sb.toString()
+    }
+
+    /**
+     * True when [ident] is the head of the inline `switch(…)` operator. The `(` may be the ident's own
+     * next sibling (the bare `{ switch(…) }` inline form) or the next sibling of its name-path wrapper
+     * (`{{ switch(…) }}`), so walk leaves rather than siblings to cover both.
+     */
+    private fun isSwitchOperator(ident: PsiElement): Boolean {
+        if (ident.text != "switch") return false
+        var leaf = PsiTreeUtil.nextLeaf(ident)
+        while (leaf != null && leaf.text.isBlank()) leaf = PsiTreeUtil.nextLeaf(leaf)
+        return leaf?.node?.elementType == AntlersTypes.T_LPAREN
+    }
+
+    private fun switchOperatorDoc(): String {
+        val sb = StringBuilder()
+        sb.append(DocumentationMarkup.DEFINITION_START)
+        sb.append("Antlers operator <b>switch</b>")
+        sb.append(DocumentationMarkup.DEFINITION_END)
+        sb.append(DocumentationMarkup.CONTENT_START)
+        sb.append(esc(
+            "Inline conditional that returns the value of the first matching case. Each case is an " +
+                "(expression) => value pair; an empty () => value is the default. Handy inside " +
+                "interpolations and tag parameters, where tag pairs aren't allowed."
+        ))
+        sb.append(DocumentationMarkup.CONTENT_END)
+        appendDocUrl(sb, "https://statamic.dev/frontend/antlers#switch")
         return sb.toString()
     }
 

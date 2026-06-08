@@ -34,6 +34,22 @@ class AntlersDocumentationProviderTest : BasePlatformTestCase() {
         assertNull(docAt("{{ some_random_var<caret> }}"))
     }
 
+    // `{{ switch between=… }}` is the cycling tag — hover shows the tag docs.
+    fun testSwitchTagDoc() {
+        val doc = docAt("{{ swi<caret>tch between='a|b' }}")
+        assertNotNull(doc)
+        assertTrue("is the tag doc: $doc", doc!!.contains("tags/switch"))
+    }
+
+    // `switch(…)` is the inline operator, NOT the tag — hover must not show the tag docs.
+    fun testSwitchOperatorDocIsNotTagDoc() {
+        val doc = docAt("{{ swi<caret>tch((s == 'md') => 'a', () => 'b') }}")
+        assertNotNull("the operator should have its own doc: $doc", doc)
+        assertFalse("must not be the switch *tag* doc: $doc", doc!!.contains("tags/switch"))
+        assertTrue("describes the operator: $doc", doc.contains("operator"))
+        assertTrue("links the language docs: $doc", doc.contains("frontend/antlers"))
+    }
+
     fun testHoverResolvesModifierDocElement() {
         val text = "{{ title | up<caret>per }}"
         val caret = text.indexOf("<caret>")
