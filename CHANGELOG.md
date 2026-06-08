@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-06-08
+
+### Added
+
+- The logical **word operators** `and`, `or`, `xor`, and `not` are now highlighted as keywords (like
+  `if`/`else`), so `{{ as or 'a' }}` reads as logic instead of blending into plain text — including inside
+  interpolated HTML tag names (`<{{ as or 'a' }}>`). A path segment that merely shares the spelling
+  (`{{ foo.or }}`) stays an identifier.
+- `switch(…)` — the inline match-like **switch operator** — is highlighted as a keyword, distinct from
+  the `{{ switch between=… }}` cycling tag (which stays tag-colored). This holds in both the top-level
+  form and when the operator is nested in a tag-parameter string (`sizes="{{ switch(…) }}"`), where
+  Antlers interpolation rewrites it to the single-brace `{ switch(…) }` inline form. Hovering the operator
+  now shows the operator's own quick documentation instead of the `switch` tag's.
+
 ## [1.0.4] - 2026-06-07
 
 ### Fixed
@@ -136,7 +150,8 @@ First public release.
 - Identifiers no longer swallow a trailing hyphen, so compound operators lex correctly (`{{ foo-=3 }}`
   is `foo` `-=` `3`); kebab-case names like `meta-title` / `count-1` are still single identifiers.
 
-[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.4...HEAD
+[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.5...HEAD
+[1.0.5]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.1...1.0.2
