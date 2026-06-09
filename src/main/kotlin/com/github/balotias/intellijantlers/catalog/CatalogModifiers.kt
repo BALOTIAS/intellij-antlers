@@ -534,6 +534,32 @@ object CatalogModifiers {
                 ModifierParam("tag", "HTML tag name to wrap the value in."),
             ),
             docUrl = "https://statamic.dev/modifiers/wrap"),
-        ModifierDef(name = "years_ago", description = "Years since.", docUrl = "https://statamic.dev/modifiers/years_ago")
+        ModifierDef(name = "years_ago", description = "Years since.", docUrl = "https://statamic.dev/modifiers/years_ago"),
+        // Source-verified additions (statamic/cms CoreModifiers.php).
+        ModifierDef(name = "starts_with", description = "True if the value begins with the given string.", takesArguments = true,
+            parameters = listOf(ModifierParam("string", "The prefix to test for.")),
+            docUrl = "https://statamic.dev/modifiers/starts_with"),
+        ModifierDef(name = "ends_with", description = "True if the value ends with the given string.", takesArguments = true,
+            parameters = listOf(ModifierParam("string", "The suffix to test for.")),
+            docUrl = "https://statamic.dev/modifiers/ends_with"),
+        ModifierDef(name = "is_empty", description = "True if the value is empty.",
+            docUrl = "https://statamic.dev/modifiers/is_empty"),
+        ModifierDef(name = "merge", description = "Merge the value with another array from the context.", takesArguments = true,
+            parameters = listOf(ModifierParam("array", "The array (context variable) to merge in.")),
+            docUrl = "https://statamic.dev/modifiers/merge"),
+        ModifierDef(name = "trans", description = "Translate the value via a language-file key.",
+            docUrl = "https://statamic.dev/modifiers/trans"),
+        ModifierDef(name = "trans_choice", description = "Translate with pluralization for a count.", takesArguments = true,
+            parameters = listOf(ModifierParam("count", "The number used to choose the plural form.")),
+            docUrl = "https://statamic.dev/modifiers/trans_choice"),
+        ModifierDef(name = "format_time", description = "Format a date/time value as a time string.", takesArguments = true,
+            parameters = listOf(ModifierParam("format", "The time format.", optional = true)),
+            docUrl = "https://statamic.dev/modifiers/format_time"),
+        ModifierDef(name = "mailto", description = "Build an obfuscated mailto: anchor from an email value.",
+            docUrl = "https://statamic.dev/modifiers/mailto"),
+        ModifierDef(name = "has_lower_case", description = "True if the value contains a lowercase character.",
+            docUrl = "https://statamic.dev/modifiers/has_lower_case"),
+        ModifierDef(name = "has_upper_case", description = "True if the value contains an uppercase character.",
+            docUrl = "https://statamic.dev/modifiers/has_upper_case")
     )
 }

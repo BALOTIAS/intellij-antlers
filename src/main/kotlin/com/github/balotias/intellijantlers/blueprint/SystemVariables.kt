@@ -49,6 +49,14 @@ object SystemVariables {
         SystemVariable("live_preview", "Whether the page is rendering in Live Preview."),
         SystemVariable("edit_url", "Control-Panel edit URL for the current content."),
         SystemVariable("sites", "All configured sites."),
-        SystemVariable("is_entry", "Whether the current content is an entry.")
+        SystemVariable("is_entry", "Whether the current content is an entry."),
+        // Source-verified global cascade variables (statamic/cms View/Cascade.php).
+        SystemVariable("get_post", "Combined GET and POST variables (POST takes precedence)."),
+        SystemVariable("cp_url", "The URL to the Control Panel."),
+        SystemVariable("current_date", "The current date/time (alias of now)."),
+        SystemVariable("current_full_url", "The current request URL including query string."),
+        SystemVariable("logged_out", "Whether the visitor is not authenticated."),
+        SystemVariable("today", "Today's date."),
+        SystemVariable("xml_header", "Outputs the XML declaration (for feeds/sitemaps).")
     )
 }

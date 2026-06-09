@@ -20,6 +20,15 @@
   adjacent iteration), and `next:` / `prev:` complete to the loop's scoped fields.
 - After a **`groupby`**, the group variables `key` and `values` are suggested. (The `as 'alias'` rename
   of `values` and the outer group-loop's own field scope are not yet modeled.)
+- **Catalog coverage** expanded after a full audit of the Statamic 6 docs *and source* (`statamic/cms`):
+  ten missing modifiers (`merge`, `starts_with`, `ends_with`, `is_empty`, `trans`, `trans_choice`,
+  `format_time`, `mailto`, `has_lower_case`, `has_upper_case`); seven global variables (`get_post`,
+  `cp_url`, `current_date`, `current_full_url`, `logged_out`, `today`, `xml_header`); many real asset
+  augmentation properties for dotted access (`ratio`, `orientation`, `focus_css`, `is_svg`/`is_pdf`/…,
+  the `size_b`/`size_kb`/… family, `container`, `folder`, `edit_url`, duration keys); and additional
+  source-verified tag parameters (`query_scope` on collection/taxonomy/users/assets/dictionary;
+  `when`/`unless` on `partial`; `min_count`/`site` on `taxonomy`; `reverse`/`trim` on `nav`; `to`/`route`/
+  `response` on `redirect`).
 
 ### Changed
 
@@ -33,6 +42,10 @@
 
 ### Fixed
 
+- **Corrected tag definitions** that didn't match the Statamic source: `foreach` no longer advertises a
+  non-existent `in` parameter (it takes `array`/`as`); `asset`'s primary parameter is `url` and it is now
+  a pair tag (`{{ asset url=… }} … {{ /asset }}`); `get_site` is a pair tag; `redirect` now has its real
+  parameters.
 - **`@{ … @}` brace escapes** inside strings/parameters are no longer treated as Antlers interpolation,
   so `{{ "literal @{foo@} text" }}` keeps `{foo}` literal instead of highlighting/injecting it. (A
   backslash-prefixed raw param — `{{ tag \attr="{ raw }" }}` — is still injected; that needs a lexer

@@ -23,7 +23,8 @@ object CatalogTags {
                 ParamDef(name = "filter", description = "A custom query filter."),
                 ParamDef(name = "paginate", description = "Entries per page.", type = "integer"),
                 ParamDef(name = "as", description = "Alias the results into a named loop."),
-                ParamDef(name = "scope", description = "Scope each item under a variable.")
+                ParamDef(name = "scope", description = "Scope each item under a variable."),
+                ParamDef(name = "query_scope", description = "Apply a query scope class to the results.")
             )
         ),
         TagDef(
@@ -36,7 +37,9 @@ object CatalogTags {
                 ParamDef(name = "handle", description = "The navigation handle."),
                 ParamDef(name = "from", description = "Start the tree from a URI."),
                 ParamDef(name = "include_home", description = "Include the home page.", type = "boolean"),
-                ParamDef(name = "max_depth", description = "Maximum nesting depth.", type = "integer")
+                ParamDef(name = "max_depth", description = "Maximum nesting depth.", type = "integer"),
+                ParamDef(name = "reverse", description = "Reverse the order of the tree.", type = "boolean"),
+                ParamDef(name = "trim", description = "Trim whitespace in the output.", type = "boolean")
             )
         ),
         TagDef(
@@ -46,17 +49,21 @@ object CatalogTags {
             isPair = false,
             methods = listOf("if_exists", "exists"),
             parameters = listOf(
-                ParamDef(name = "src", description = "Path to the partial.", required = true)
+                ParamDef(name = "src", description = "Path to the partial.", required = true),
+                ParamDef(name = "when", description = "Only render the partial when this is truthy.", type = "boolean"),
+                ParamDef(name = "unless", description = "Only render the partial unless this is truthy.", type = "boolean")
             )
         ),
+        // The asset tag retrieves a single asset by URL and exposes its data inside the tag pair
+        // (`{{ asset url=… }} {{ url }} {{ /asset }}`). Source: Tags/Asset.php — `hasAny(['url','src'])`.
         TagDef(
             name = "asset",
-            description = "Fetch a single asset.",
+            description = "Fetch a single asset by URL and expose its data inside the pair.",
             docUrl = "https://statamic.dev/tags/asset",
-            isPair = false,
+            isPair = true,
             parameters = listOf(
-                ParamDef(name = "id", description = "The asset id (container::path)."),
-                ParamDef(name = "src", description = "The asset path.")
+                ParamDef(name = "url", description = "The asset URL.", required = true),
+                ParamDef(name = "src", description = "Alias of url.")
             )
         ),
         TagDef(
@@ -66,7 +73,8 @@ object CatalogTags {
             isPair = true,
             parameters = listOf(
                 ParamDef(name = "handle", description = "The field/variable holding assets."),
-                ParamDef(name = "limit", description = "Maximum number of assets.", type = "integer")
+                ParamDef(name = "limit", description = "Maximum number of assets.", type = "integer"),
+                ParamDef(name = "query_scope", description = "Apply a query scope class to the results.")
             )
         ),
         TagDef(
@@ -116,7 +124,10 @@ object CatalogTags {
             methods = listOf("count"),
             parameters = listOf(
                 ParamDef(name = "from", description = "Taxonomy handle."),
-                ParamDef(name = "sort", description = "Sort field/direction.")
+                ParamDef(name = "sort", description = "Sort field/direction."),
+                ParamDef(name = "min_count", description = "Only include terms with at least this many entries.", type = "integer"),
+                ParamDef(name = "site", description = "Limit to a specific site."),
+                ParamDef(name = "query_scope", description = "Apply a query scope class to the results.")
             )
         ),
         TagDef(
@@ -180,7 +191,13 @@ object CatalogTags {
             name = "redirect",
             description = "Redirect the response.",
             docUrl = "https://statamic.dev/tags/redirect",
-            isPair = false
+            isPair = false,
+            parameters = listOf(
+                ParamDef(name = "to", description = "URL to redirect to."),
+                ParamDef(name = "url", description = "Alias of to."),
+                ParamDef(name = "route", description = "A named route to redirect to."),
+                ParamDef(name = "response", description = "HTTP status code (default 302).", type = "integer")
+            )
         ),
         TagDef(
             name = "increment",
@@ -258,7 +275,8 @@ object CatalogTags {
             isPair = true,
             parameters = listOf(
                 ParamDef(name = "index", description = "The search index handle."),
-                ParamDef(name = "query", description = "The search query variable.")
+                ParamDef(name = "query", description = "The search query variable."),
+                ParamDef(name = "site", description = "Limit results to a specific site.")
             )
         ),
         // New tags from Appendix A
@@ -293,16 +311,21 @@ object CatalogTags {
             parameters = listOf(
                 ParamDef(name = "from", description = "Dictionary handle.", required = true),
                 ParamDef(name = "limit", description = "Maximum number of items.", type = "integer"),
-                ParamDef(name = "sort", description = "Sort field and direction.")
+                ParamDef(name = "sort", description = "Sort field and direction."),
+                ParamDef(name = "query_scope", description = "Apply a query scope class to the results.")
             )
         ),
         TagDef(
+            // The array is passed as the tag part (`{{ foreach:my_array }}`) or via `array=`/`:array=`.
+            // Source: Tags/Iterate.php — there is no `in` parameter.
             name = "foreach",
-            description = "Loop over items in a variable.",
+            description = "Loop over items in a variable (key/value via as=\"key|value\").",
             docUrl = "https://statamic.dev/tags/foreach",
             isPair = true,
             parameters = listOf(
-                ParamDef(name = "in", description = "The variable to iterate over.", required = true)
+                ParamDef(name = "array", description = "The array to iterate (alternative to the tag part)."),
+                ParamDef(name = "as", description = "Alias the key/value, e.g. as=\"key|value\"."),
+                ParamDef(name = "limit", description = "Maximum number of items.", type = "integer")
             )
         ),
         TagDef(
@@ -334,10 +357,11 @@ object CatalogTags {
             )
         ),
         TagDef(
+            // Pair: exposes the site's data inside `{{ get_site:handle }} … {{ /get_site:handle }}`.
             name = "get_site",
-            description = "Output data from a specific site.",
+            description = "Output data from a specific site (inside the tag pair).",
             docUrl = "https://statamic.dev/tags/get_site",
-            isPair = false,
+            isPair = true,
             parameters = listOf(
                 ParamDef(name = "handle", description = "The site handle.", required = true)
             )
@@ -462,7 +486,8 @@ object CatalogTags {
                 ParamDef(name = "limit", description = "Maximum number of users.", type = "integer"),
                 ParamDef(name = "sort", description = "Sort field and direction."),
                 ParamDef(name = "group", description = "Filter by user group."),
-                ParamDef(name = "role", description = "Filter by user role.")
+                ParamDef(name = "role", description = "Filter by user role."),
+                ParamDef(name = "query_scope", description = "Apply a query scope class to the results.")
             )
         )
     )

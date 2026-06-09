@@ -39,9 +39,25 @@ class CatalogTagCoverageTest {
 
     @Test fun pairFlagsForStructuralTags() {
         listOf("collection", "nav", "taxonomy", "form", "assets", "cache", "section", "loop", "foreach",
-            "users", "nocache", "push", "prepend", "once").forEach { assertTrue("$it should be a pair", tag(it).isPair) }
-        listOf("partial", "glide", "link", "svg", "redirect", "yield", "404", "asset", "mix", "trans",
+            "users", "nocache", "push", "prepend", "once",
+            "asset", "get_site").forEach { assertTrue("$it should be a pair", tag(it).isPair) }
+        listOf("partial", "glide", "link", "svg", "redirect", "yield", "404", "mix", "trans",
             "switch", "stack", "slot").forEach { assertTrue("$it should be single", !tag(it).isPair) }
+    }
+
+    // Parameters/flags corrected against the actual statamic/cms source (not just the docs).
+    @Test fun sourceVerifiedParameters() {
+        fun params(t: String) = tag(t).parameters.map { it.name }.toSet()
+        // foreach takes `array`/`as` (Iterate.php) — never the previously-bogus `in`.
+        assertTrue("foreach has array/as", params("foreach").containsAll(listOf("array", "as")))
+        assertTrue("foreach must not advertise a bogus `in`", "in" !in params("foreach"))
+        assertTrue("asset primary param is url", params("asset").contains("url"))
+        assertTrue("redirect params", params("redirect").containsAll(listOf("to", "response")))
+        assertTrue("partial when/unless", params("partial").containsAll(listOf("when", "unless")))
+        assertTrue("taxonomy min_count", params("taxonomy").contains("min_count"))
+        assertTrue("nav reverse", params("nav").contains("reverse"))
+        assertTrue("query_scope on collection", params("collection").contains("query_scope"))
+        assertTrue("query_scope on users", params("users").contains("query_scope"))
     }
 
     @Test fun subTagsPresent() {

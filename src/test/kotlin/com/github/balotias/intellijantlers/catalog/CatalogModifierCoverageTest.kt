@@ -30,7 +30,10 @@ class CatalogModifierCoverageTest {
         "studly", "substr", "subtract", "sum", "surround", "swap_case", "table", "tidy", "timezone",
         "title", "to_json", "to_qs", "to_spaces", "to_tabs", "trim", "truncate", "ucfirst", "ul",
         "underscored", "unique", "upper", "url", "urldecode", "urlencode", "urlencode_except_slashes",
-        "values", "weeks_ago", "where", "where_in", "widont", "word_count", "wrap", "years_ago"
+        "values", "weeks_ago", "where", "where_in", "widont", "word_count", "wrap", "years_ago",
+        // Source-verified additions (statamic/cms CoreModifiers.php) the catalog was missing.
+        "ends_with", "format_time", "has_lower_case", "has_upper_case", "is_empty", "mailto", "merge",
+        "starts_with", "trans", "trans_choice"
     )
 
     @Test fun coversAllCoreModifiers() {
