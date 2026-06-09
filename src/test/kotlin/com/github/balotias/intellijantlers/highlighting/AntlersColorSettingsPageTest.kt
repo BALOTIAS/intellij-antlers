@@ -10,7 +10,8 @@ class AntlersColorSettingsPageTest : BasePlatformTestCase() {
             AntlersSyntaxHighlighter.BRACES, AntlersSyntaxHighlighter.TAG, AntlersSyntaxHighlighter.KEYWORD,
             AntlersSyntaxHighlighter.MODIFIER, AntlersSyntaxHighlighter.PARAMETER, AntlersSyntaxHighlighter.IDENTIFIER,
             AntlersSyntaxHighlighter.STRING, AntlersSyntaxHighlighter.NUMBER, AntlersSyntaxHighlighter.COMMENT,
-            AntlersSyntaxHighlighter.OPERATOR, AntlersSyntaxHighlighter.PIPE, AntlersSyntaxHighlighter.HINT,
+            AntlersSyntaxHighlighter.OPERATOR, AntlersSyntaxHighlighter.PUNCTUATION,
+            AntlersSyntaxHighlighter.PIPE, AntlersSyntaxHighlighter.HINT,
             AntlersSyntaxHighlighter.FRONTMATTER_FENCE,
         )
         assertEquals(expected, keys)

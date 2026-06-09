@@ -1,6 +1,8 @@
 package com.github.balotias.intellijantlers.highlighting
 
 import com.github.balotias.intellijantlers.psi.AntlersTypes
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -14,14 +16,30 @@ class AntlersSyntaxHighlighterTest {
         assertFalse("pipe is no longer Operator", keys.contains(AntlersSyntaxHighlighter.OPERATOR))
     }
 
-    @Test fun otherOperatorsStayOperator() {
-        assertTrue(hl.getTokenHighlights(AntlersTypes.T_COLON).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
-        assertTrue(hl.getTokenHighlights(AntlersTypes.T_DOT).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
+    // The genuine comparison/logical/arithmetic operators (T_OP) and the arrow get the Operator color.
+    @Test fun symbolicOperatorsAreOperatorColored() {
+        for (t in listOf(AntlersTypes.T_OP, AntlersTypes.T_ARROW)) {
+            assertTrue("$t should be operator-colored",
+                hl.getTokenHighlights(t).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
+        }
     }
 
-    // `%` (modulo and the tag-disambiguation prefix) keeps the operator color it had as part of T_OP.
-    @Test fun percentIsOperatorColored() {
-        assertTrue(hl.getTokenHighlights(AntlersTypes.T_PERCENT).toList().contains(AntlersSyntaxHighlighter.OPERATOR))
+    // OPERATION_SIGN renders as default foreground in most themes, so `==`/`<` looked uncolored.
+    // The Operator color falls back to KEYWORD (themed) so symbolic operators actually stand out.
+    @Test fun operatorColorIsVisibleNotDefaultForeground() {
+        assertEquals(DefaultLanguageHighlighterColors.KEYWORD,
+            AntlersSyntaxHighlighter.OPERATOR.fallbackAttributeKey)
+    }
+
+    // Path/structural punctuation (`:` `.` `/` `=` `%`) is split off onto a separate, subtle key so
+    // that making operators visible does not also paint every colon and dot in a path.
+    @Test fun pathPunctuationIsSeparateAndNotOperatorColored() {
+        for (t in listOf(AntlersTypes.T_COLON, AntlersTypes.T_DOT, AntlersTypes.T_SLASH,
+                AntlersTypes.T_EQUALS, AntlersTypes.T_PERCENT)) {
+            val keys = hl.getTokenHighlights(t).toList()
+            assertTrue("$t should be punctuation-colored", keys.contains(AntlersSyntaxHighlighter.PUNCTUATION))
+            assertFalse("$t must not use the visible operator color", keys.contains(AntlersSyntaxHighlighter.OPERATOR))
+        }
     }
 
     @Test fun phpTagDelimitersAreBraces() {

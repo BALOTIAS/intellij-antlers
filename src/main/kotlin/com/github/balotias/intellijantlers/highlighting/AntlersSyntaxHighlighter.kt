@@ -17,7 +17,14 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         val STRING = TextAttributesKey.createTextAttributesKey("ANTLERS_STRING", DefaultLanguageHighlighterColors.STRING)
         val NUMBER = TextAttributesKey.createTextAttributesKey("ANTLERS_NUMBER", DefaultLanguageHighlighterColors.NUMBER)
         val COMMENT = TextAttributesKey.createTextAttributesKey("ANTLERS_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT)
-        val OPERATOR = TextAttributesKey.createTextAttributesKey("ANTLERS_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN)
+        // Genuine operators (== < && => …). Falls back to KEYWORD, not OPERATION_SIGN: most themes
+        // render OPERATION_SIGN as plain default foreground, which left symbolic operators looking
+        // uncoloured. Themable separately via the "Operator" entry.
+        val OPERATOR = TextAttributesKey.createTextAttributesKey("ANTLERS_OPERATOR", DefaultLanguageHighlighterColors.KEYWORD)
+
+        /** Path/structural punctuation (`:` `.` `/` `=` `%`) — kept subtle so operators standing out
+         *  doesn't also paint every colon and dot in a path. */
+        val PUNCTUATION = TextAttributesKey.createTextAttributesKey("ANTLERS_PUNCTUATION", DefaultLanguageHighlighterColors.OPERATION_SIGN)
 
         val TAG = TextAttributesKey.createTextAttributesKey("ANTLERS_TAG", DefaultLanguageHighlighterColors.METADATA)
         val KEYWORD = TextAttributesKey.createTextAttributesKey("ANTLERS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD)
@@ -37,6 +44,7 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
         private val NUMBER_KEYS = arrayOf(NUMBER)
         private val COMMENT_KEYS = arrayOf(COMMENT)
         private val OPERATOR_KEYS = arrayOf(OPERATOR)
+        private val PUNCTUATION_KEYS = arrayOf(PUNCTUATION)
         private val PIPE_KEYS = arrayOf(PIPE)
         private val FRONTMATTER_FENCE_KEYS = arrayOf(FRONTMATTER_FENCE)
         private val EMPTY_KEYS = arrayOf<TextAttributesKey>()
@@ -59,8 +67,11 @@ class AntlersSyntaxHighlighter : SyntaxHighlighterBase() {
 
             AntlersTypes.T_PIPE -> PIPE_KEYS
 
-            AntlersTypes.T_OP, AntlersTypes.T_PERCENT, AntlersTypes.T_EQUALS, AntlersTypes.T_ARROW,
-            AntlersTypes.T_COLON, AntlersTypes.T_SLASH, AntlersTypes.T_DOT -> OPERATOR_KEYS
+            // Genuine operators stand out; path/structural punctuation stays subtle.
+            AntlersTypes.T_OP, AntlersTypes.T_ARROW -> OPERATOR_KEYS
+
+            AntlersTypes.T_PERCENT, AntlersTypes.T_EQUALS,
+            AntlersTypes.T_COLON, AntlersTypes.T_SLASH, AntlersTypes.T_DOT -> PUNCTUATION_KEYS
 
             AntlersTypes.T_FRONTMATTER_FENCE -> FRONTMATTER_FENCE_KEYS
 

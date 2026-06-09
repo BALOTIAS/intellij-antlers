@@ -38,6 +38,7 @@ class AntlersColorSettingsPage : ColorSettingsPage {
             AttributesDescriptor("Number", AntlersSyntaxHighlighter.NUMBER),
             AttributesDescriptor("Comment", AntlersSyntaxHighlighter.COMMENT),
             AttributesDescriptor("Operator", AntlersSyntaxHighlighter.OPERATOR),
+            AttributesDescriptor("Punctuation", AntlersSyntaxHighlighter.PUNCTUATION),
             AttributesDescriptor("Modifier pipe", AntlersSyntaxHighlighter.PIPE),
             AttributesDescriptor("Template hint", AntlersSyntaxHighlighter.HINT),
             AttributesDescriptor("Front matter//Fence", AntlersSyntaxHighlighter.FRONTMATTER_FENCE),

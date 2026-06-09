@@ -17,6 +17,16 @@
   segment or lone variable sharing the spelling (`{{ foo.take }}`, `{{ take }}`) stays an identifier —
   and are suggested in completion after an expression (but not after a real tag head).
 
+### Changed
+
+- **Symbolic operators** (`==`, `===`, `!=`, `>`, `<`, `<=`, `>=`, `&&`, `||`, `!`, `??`, `+`, `-`, `*`,
+  `=>`, …) are now visibly highlighted instead of blending into plain text — so a clause like
+  `{{ players where (team == "Bulls") }}` reads as an expression. The "Operator" color now falls back to
+  the keyword color (most themes render the old operator default as plain foreground); path/structural
+  punctuation (`:` `.` `/` `=` `%`) is split onto a separate, subtle **Punctuation** color so colons and
+  dots in paths stay quiet. Both are themeable independently under *Settings → Editor → Color Scheme →
+  Antlers*.
+
 ## [1.0.5] - 2026-06-08
 
 ### Added
