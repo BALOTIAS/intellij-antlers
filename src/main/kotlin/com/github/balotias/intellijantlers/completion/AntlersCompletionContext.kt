@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 
-enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, TAG_SHORTHAND, PARAMETER, PARAMETER_VALUE, MODIFIER, FIELD_PATH, NONE }
+enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, TAG_SHORTHAND, PARAMETER, PARAMETER_VALUE, MODIFIER, FIELD_PATH, CONDITION_OPERATOR, NONE }
 
 data class AntlersCompletionInfo(
     val kind: AntlersCompletionKind,
@@ -40,12 +40,22 @@ object AntlersCompletionContext {
             AntlersTypes.T_DOT ->
                 AntlersCompletionInfo(AntlersCompletionKind.FIELD_PATH, pathPrefix = segmentsBeforeCaret(statement, position))
 
-            AntlersTypes.T_COLON ->
-                if (prevSignificantLeaf(prev, statement)?.node?.elementType == AntlersTypes.T_LDOUBLE)
-                    AntlersCompletionInfo(AntlersCompletionKind.TAG_SHORTHAND)
-                else headOf(statement)?.let {
-                    AntlersCompletionInfo(AntlersCompletionKind.TAG_METHOD, it, segmentsBeforeCaret(statement, position))
-                } ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
+            AntlersTypes.T_COLON -> {
+                val beforeColon = prevSignificantLeaf(prev, statement)
+                when {
+                    beforeColon?.node?.elementType == AntlersTypes.T_LDOUBLE ->
+                        AntlersCompletionInfo(AntlersCompletionKind.TAG_SHORTHAND)
+                    // `field:operator=` query condition: the colon's left side is a floating field ident
+                    // (a direct statement child, not part of the head namePath) on a condition-capable tag.
+                    beforeColon?.node?.elementType == AntlersTypes.T_IDENT &&
+                        beforeColon.parent is AntlersStatement &&
+                        headOf(statement) in AntlersConditionOperators.CONDITION_TAGS ->
+                        AntlersCompletionInfo(AntlersCompletionKind.CONDITION_OPERATOR, headOf(statement))
+                    else -> headOf(statement)?.let {
+                        AntlersCompletionInfo(AntlersCompletionKind.TAG_METHOD, it, segmentsBeforeCaret(statement, position))
+                    } ?: AntlersCompletionInfo(AntlersCompletionKind.NONE)
+                }
+            }
 
             AntlersTypes.T_EQUALS -> {
                 val nameLeaf = prevSignificantLeaf(prev, statement)

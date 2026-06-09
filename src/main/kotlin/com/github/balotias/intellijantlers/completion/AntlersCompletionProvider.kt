@@ -301,7 +301,30 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                         )
                     }
                 }
+
+                // On a condition-capable tag, offer the target collection/taxonomy/user blueprint fields
+                // as the left-hand side of a `field:operator="value"` query condition.
+                if (info.tagHead in AntlersConditionOperators.CONDITION_TAGS) {
+                    for (f in conditionFields(parameters.position, info.tagHead!!, project)) {
+                        result.addElement(
+                            LookupElementBuilder.create(f.handle)
+                                .withIcon(AntlersIcons.FILE)
+                                .withTypeText("Condition field")
+                                .withTailText(if (f.display.isNotBlank()) "  ${f.display}" else null, true)
+                        )
+                    }
+                }
             }
+
+            AntlersCompletionKind.CONDITION_OPERATOR ->
+                for ((op, desc) in AntlersConditionOperators.PRIMARY) {
+                    result.addElement(
+                        LookupElementBuilder.create(op)
+                            .withIcon(AntlersIcons.FILE)
+                            .withTypeText("Condition")
+                            .withTailText("  $desc", true)
+                    )
+                }
 
             AntlersCompletionKind.MODIFIER ->
                 for (mod in catalog.modifiers()) {
@@ -373,6 +396,23 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                 .withTypeText("Logic")
                 .withInsertHandler(AntlersKeywordInsertHandler(kw))
         )
+    }
+
+    /** Blueprint fields of the collection/taxonomy/users tag at [position] — the targets of a condition. */
+    private fun conditionFields(
+        position: com.intellij.psi.PsiElement,
+        tagHead: String,
+        project: com.intellij.openapi.project.Project,
+    ): List<BlueprintField> {
+        val stmt = PsiTreeUtil.getParentOfType(position, AntlersStatement::class.java) ?: return emptyList()
+        val handle = PsiTreeUtil.findChildOfType(stmt, com.github.balotias.intellijantlers.psi.AntlersNamePathMixin::class.java)?.method
+        val ns = when (tagHead) {
+            "collection" -> handle?.let { BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, it) }
+            "taxonomy" -> handle?.let { BlueprintNamespace(BlueprintNamespace.Kind.TAXONOMY, it) }
+            "users" -> BlueprintNamespace(BlueprintNamespace.Kind.USER, "user")
+            else -> null
+        } ?: return emptyList()
+        return BlueprintService.getInstance(project).fieldsFor(ns)
     }
 
     private fun offerMembers(field: BlueprintField, project: com.intellij.openapi.project.Project, result: CompletionResultSet) {

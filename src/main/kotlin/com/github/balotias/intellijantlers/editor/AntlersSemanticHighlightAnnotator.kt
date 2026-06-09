@@ -5,6 +5,7 @@ import com.github.balotias.intellijantlers.highlighting.AntlersSyntaxHighlighter
 import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
 import com.github.balotias.intellijantlers.psi.AntlersModifierMixin
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
+import com.github.balotias.intellijantlers.completion.AntlersConditionOperators
 import com.github.balotias.intellijantlers.completion.QUERY_OPERATORS
 import com.github.balotias.intellijantlers.psi.AntlersInlineTags
 import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
@@ -30,8 +31,15 @@ class AntlersSemanticHighlightAnnotator : Annotator {
             is AntlersModifierMixin ->
                 firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.MODIFIER) }
 
-            is AntlersParameterMixin ->
-                firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.PARAMETER) }
+            is AntlersParameterMixin -> {
+                // A `field:operator="value"` query condition parses as a bound parameter named after the
+                // operator — paint it as an operator, not a parameter name.
+                firstIdent(element)?.let { ident ->
+                    val key = if (AntlersConditionOperators.isConditionOperatorIdent(ident))
+                        AntlersSyntaxHighlighter.OPERATOR else AntlersSyntaxHighlighter.PARAMETER
+                    paint(holder, ident, key)
+                }
+            }
 
             is AntlersNamePathMixin -> {
                 // Also paints the keyword/tag in a closer's name-path (`{{ /if }}`, `{{ /collection }}`)

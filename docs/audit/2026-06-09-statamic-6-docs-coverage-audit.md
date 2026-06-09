@@ -42,7 +42,12 @@ dictionary); M3 `cookie` and `get_site` both have an `index()` (pair) form.
 
 ## CRUCIAL
 
-### C1 — Tag conditions (`field:operator="value"`) are unmodeled and mis-parse
+### C1 — Tag conditions (`field:operator="value"`) — ✅ IMPLEMENTED (MVP, no grammar change)
+**Status:** completion (operators after `field:` + field-name targets), operator highlighting, and hover
+docs shipped for `collection`/`taxonomy`/`users`, detecting the condition by token pattern (the operator
+parses as a bound param preceded by a floating field ident). Deep PSI modeling — find-usages/rename of a
+field used *inside* a condition — remains deferred (would need the grammar change below).
+
 The biggest gap. Statamic filters `collection`/`taxonomy`/`users` results with parameter conditions:
 `{{ collection:blog title:contains="tao" date:is_after="now" status:is="published" }}`
 (`:field:is="x"` for a variable RHS; pipe-separated multi-values; dotted sub-fields `event_date.start:`).

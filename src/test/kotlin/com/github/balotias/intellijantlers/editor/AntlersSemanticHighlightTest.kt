@@ -111,6 +111,15 @@ class AntlersSemanticHighlightTest : BasePlatformTestCase() {
     fun testQueryOperatorAsLoneVariableNotColored() =
         assertNull(keyOver("{{ take }}", "take"))
 
+    // A tag query condition `field:operator="value"` — the operator reads as an operator, not a param.
+    fun testConditionOperatorColored() =
+        assertEquals(AntlersSyntaxHighlighter.OPERATOR,
+            keyOver("{{ collection:blog title:contains=\"tao\" }}", "contains"))
+
+    // A genuine bound parameter (`:src=`) on a non-condition tag stays a parameter name.
+    fun testBoundParamNotMiscoloredAsConditionOperator() =
+        assertEquals(AntlersSyntaxHighlighter.PARAMETER, keyOver("{{ partial :src=\"x\" }}", "src"))
+
     /** Count keyword/tag-colored highlights over [token] — used to assert the closer is painted too. */
     private fun coloredCount(text: String, token: String, key: TextAttributesKey): Int {
         myFixture.configureByText("p.antlers.html", text)

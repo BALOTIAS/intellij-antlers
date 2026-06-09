@@ -20,6 +20,12 @@
   adjacent iteration), and `next:` / `prev:` complete to the loop's scoped fields.
 - After a **`groupby`**, the group variables `key` and `values` are suggested. (The `as 'alias'` rename
   of `values` and the outer group-loop's own field scope are not yet modeled.)
+- **Tag query conditions** are now understood on the `collection`/`taxonomy`/`users` tags
+  (`{{ collection:blog title:contains="tao" }}`): the ~30 condition operators (`is`, `contains`,
+  `starts_with`, `is_after`, `in`, `gt`, …, verified against the Statamic source) are suggested after a
+  `field:`; the target blueprint fields are suggested as condition targets; the operator is highlighted as
+  an operator (no longer mistaken for a parameter name); and hovering it shows its documentation. (Deep
+  PSI — find-usages/rename of a field used *inside* a condition — is not yet modeled.)
 - **Catalog coverage** expanded after a full audit of the Statamic 6 docs *and source* (`statamic/cms`):
   ten missing modifiers (`merge`, `starts_with`, `ends_with`, `is_empty`, `trans`, `trans_choice`,
   `format_time`, `mailto`, `has_lower_case`, `has_upper_case`); seven global variables (`get_post`,

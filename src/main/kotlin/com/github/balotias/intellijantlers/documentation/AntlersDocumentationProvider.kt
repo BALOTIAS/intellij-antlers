@@ -36,6 +36,10 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         // Resolve it first so hover shows the operator's docs instead of the tag's (same name, `(` tail).
         if (isSwitchOperator(ident)) return switchOperatorDoc()
 
+        // A `field:operator="value"` query condition — show the operator's docs, not a param/modifier.
+        if (com.github.balotias.intellijantlers.completion.AntlersConditionOperators.isConditionOperatorIdent(ident))
+            return conditionOperatorDoc(name)
+
         // Modifier: the identifier is the modifier name.
         PsiTreeUtil.getParentOfType(ident, AntlersModifierMixin::class.java)?.let { mod ->
             if (mod.modifierName == name) {
@@ -205,6 +209,20 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         ))
         sb.append(DocumentationMarkup.CONTENT_END)
         appendDocUrl(sb, "https://statamic.dev/frontend/antlers#switch")
+        return sb.toString()
+    }
+
+    private fun conditionOperatorDoc(operator: String): String {
+        val desc = com.github.balotias.intellijantlers.completion.AntlersConditionOperators.describe(operator)
+            ?: "Filters the tag's results."
+        val sb = StringBuilder()
+        sb.append(DocumentationMarkup.DEFINITION_START)
+        sb.append("Tag condition operator <b>${esc(operator)}</b>")
+        sb.append(DocumentationMarkup.DEFINITION_END)
+        sb.append(DocumentationMarkup.CONTENT_START)
+        sb.append(esc("$desc A query condition, written as a tag parameter: field:$operator=\"value\"."))
+        sb.append(DocumentationMarkup.CONTENT_END)
+        appendDocUrl(sb, "https://statamic.dev/tags/conditions")
         return sb.toString()
     }
 

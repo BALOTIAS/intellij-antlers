@@ -58,6 +58,14 @@ class AntlersDocumentationProviderTest : BasePlatformTestCase() {
         assertTrue("links the Antlers language page: $doc", doc.contains("frontend/antlers"))
     }
 
+    // Hovering a tag query-condition operator shows the operator's docs, not param/modifier docs.
+    fun testConditionOperatorDoc() {
+        val doc = docAt("{{ collection:blog title:cont<caret>ains=\"tao\" }}")
+        assertNotNull(doc)
+        assertTrue("names the operator: $doc", doc!!.contains("contains"))
+        assertTrue("describes it as a condition: $doc", doc.contains("condition"))
+    }
+
     fun testHoverResolvesModifierDocElement() {
         val text = "{{ title | up<caret>per }}"
         val caret = text.indexOf("<caret>")
