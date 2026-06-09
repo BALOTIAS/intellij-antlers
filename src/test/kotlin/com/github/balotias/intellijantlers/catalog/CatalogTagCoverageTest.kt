@@ -12,7 +12,9 @@ class CatalogTagCoverageTest {
         "increment", "installed", "link", "locales", "loop", "markdown", "mix", "mount_url", "nav",
         "nocache", "oauth", "obfuscate", "parent", "partial", "protect", "redirect", "route", "scope",
         "search", "section", "session", "svg", "switch", "taxonomy", "trans", "user", "user_groups",
-        "user_roles", "users", "vite", "yield"
+        "user_roles", "users", "vite", "yield",
+        // Template/layout structural constructs documented on the Antlers language page (not /tags/).
+        "once", "prepend", "push", "slot", "stack"
     )
 
     private fun tag(name: String) = CatalogTags.ALL.first { it.name == name }
@@ -26,15 +28,20 @@ class CatalogTagCoverageTest {
     @Test fun noDuplicatesAndDocUrls() {
         val names = CatalogTags.ALL.map { it.name }
         assertTrue("duplicate tag names", names.size == names.toSet().size)
+        // Most tags live under /tags/; the Antlers structural constructs (push/once/slot…) are
+        // documented on the language page instead, so allow either canonical Statamic docs location.
         assertTrue("docUrls well-formed",
-            CatalogTags.ALL.all { it.docUrl.startsWith("https://statamic.dev/tags/") })
+            CatalogTags.ALL.all {
+                it.docUrl.startsWith("https://statamic.dev/tags/") ||
+                    it.docUrl.startsWith("https://statamic.dev/frontend/antlers")
+            })
     }
 
     @Test fun pairFlagsForStructuralTags() {
         listOf("collection", "nav", "taxonomy", "form", "assets", "cache", "section", "loop", "foreach",
-            "users", "nocache").forEach { assertTrue("$it should be a pair", tag(it).isPair) }
+            "users", "nocache", "push", "prepend", "once").forEach { assertTrue("$it should be a pair", tag(it).isPair) }
         listOf("partial", "glide", "link", "svg", "redirect", "yield", "404", "asset", "mix", "trans",
-            "switch").forEach { assertTrue("$it should be single", !tag(it).isPair) }
+            "switch", "stack", "slot").forEach { assertTrue("$it should be single", !tag(it).isPair) }
     }
 
     @Test fun subTagsPresent() {

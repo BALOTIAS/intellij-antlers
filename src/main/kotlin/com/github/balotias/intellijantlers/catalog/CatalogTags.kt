@@ -141,6 +141,41 @@ object CatalogTags {
             docUrl = "https://statamic.dev/tags/yield",
             isPair = false
         ),
+        // Stacks: push/prepend code from anywhere, render it once with {{ stack:name }}.
+        // (Antlers language constructs — documented on the frontend page, not under /tags/.)
+        TagDef(
+            name = "stack",
+            description = "Render the complete contents of a named stack.",
+            docUrl = "https://statamic.dev/frontend/antlers#stacks",
+            isPair = false
+        ),
+        TagDef(
+            name = "push",
+            description = "Push template code onto a named stack to render elsewhere in the layout.",
+            docUrl = "https://statamic.dev/frontend/antlers#stacks",
+            isPair = true
+        ),
+        TagDef(
+            name = "prepend",
+            description = "Prepend template code onto the beginning of a named stack.",
+            docUrl = "https://statamic.dev/frontend/antlers#stacks",
+            isPair = true
+        ),
+        TagDef(
+            name = "once",
+            description = "Render the enclosed template only once per rendering cycle.",
+            docUrl = "https://statamic.dev/frontend/antlers#once",
+            isPair = true
+        ),
+        // Single: `{{ slot }}` / `{{ slot:name }}` renders content passed into a partial pair. Kept
+        // single so the bare render form isn't flagged unclosed; the named `{{ slot:x }}…{{ /slot:x }}`
+        // definition still colors/completes, it just isn't balance-checked.
+        TagDef(
+            name = "slot",
+            description = "Output content passed into a partial via its tag pair (named or default slot).",
+            docUrl = "https://statamic.dev/frontend/antlers#slots",
+            isPair = false
+        ),
         TagDef(
             name = "redirect",
             description = "Redirect the response.",

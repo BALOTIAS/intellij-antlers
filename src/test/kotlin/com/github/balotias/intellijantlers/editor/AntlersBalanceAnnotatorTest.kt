@@ -42,6 +42,17 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
         assertTrue(balance("{{ collection:blog }}{{ if x }}{{ /if }}{{ /collection }}").isEmpty())
     }
 
+    // The `once` block construct is a known pair, so it gets balance-checked like if/collection.
+    fun testUnclosedOnceWarns() {
+        val d = balance("{{ once }}")
+        assertTrue(d.any { it.severity == HighlightSeverity.WARNING && it.description.contains("never closed") })
+    }
+
+    fun testBalancedOnceAndPushHaveNoDiagnostics() {
+        assertTrue(balance("{{ once }}{{ /once }}").isEmpty())
+        assertTrue(balance("{{ push:scripts }}{{ /push:scripts }}").isEmpty())
+    }
+
     fun testUnknownConstructIgnored() {
         assertTrue("stray /unknownaddon must not be flagged", balance("{{ /unknownaddon }}").isEmpty())
         assertTrue("bare unknown tag must not be flagged", balance("{{ unknownaddon }}").isEmpty())

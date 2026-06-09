@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-06-09
+
+### Added
+
+- The Antlers template/layout **stack and structural constructs** are now recognized: `{{ stack:name }}`,
+  `{{ push:name }}…{{ /push:name }}`, `{{ prepend:name }}…{{ /prepend:name }}`, `{{ once }}…{{ /once }}`,
+  and `{{ slot }}`. They are tag-colored, offered in completion, documented on hover, and the pair forms
+  (`push`/`prepend`/`once`) participate in tag balancing, folding, and the structure view.
+- The Antlers **query/builder operators** `where`, `merge`, `orderby`, `groupby`, `take`, `skip`, and
+  `pluck` are highlighted as keywords in operator position (e.g. `{{ players where (…) }}`) — a path
+  segment or lone variable sharing the spelling (`{{ foo.take }}`, `{{ take }}`) stays an identifier —
+  and are suggested in completion after an expression (but not after a real tag head).
+
 ## [1.0.5] - 2026-06-08
 
 ### Added
@@ -150,7 +163,8 @@ First public release.
 - Identifiers no longer swallow a trailing hyphen, so compound operators lex correctly (`{{ foo-=3 }}`
   is `foo` `-=` `3`); kebab-case names like `meta-title` / `count-1` are still single identifiers.
 
-[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.5...HEAD
+[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.6...HEAD
+[1.0.6]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.2...1.0.3

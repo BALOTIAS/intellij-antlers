@@ -50,6 +50,14 @@ class AntlersDocumentationProviderTest : BasePlatformTestCase() {
         assertTrue("links the language docs: $doc", doc.contains("frontend/antlers"))
     }
 
+    // A structural construct (once/push/slot…) is a catalog tag, so hover shows its docs like any tag.
+    fun testStructuralConstructHasTagDoc() {
+        val doc = docAt("{{ on<caret>ce }}{{ /once }}")
+        assertNotNull(doc)
+        assertTrue("describes once: $doc", doc!!.contains("once"))
+        assertTrue("links the Antlers language page: $doc", doc.contains("frontend/antlers"))
+    }
+
     fun testHoverResolvesModifierDocElement() {
         val text = "{{ title | up<caret>per }}"
         val caret = text.indexOf("<caret>")

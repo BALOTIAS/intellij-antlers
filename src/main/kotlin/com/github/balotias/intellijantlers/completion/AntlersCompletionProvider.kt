@@ -241,6 +241,17 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                         result.addElement(paramElement(p.name, p.required, p.description))
                     }
                 }
+
+                // After a plain expression (the head is a variable/array, not a tag) the next token can
+                // be a query/builder operator — `{{ players where (…) }}`. Offer them only here so tag
+                // parameter completion isn't polluted with operators.
+                if (catalog.tag(info.tagHead ?: "") == null) {
+                    for (op in QUERY_OPERATORS) {
+                        result.addElement(
+                            LookupElementBuilder.create(op).withIcon(AntlersIcons.FILE).withTypeText("Operator")
+                        )
+                    }
+                }
             }
 
             AntlersCompletionKind.MODIFIER ->

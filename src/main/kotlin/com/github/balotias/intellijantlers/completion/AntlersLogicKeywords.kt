@@ -5,6 +5,13 @@ import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 
+/**
+ * Statamic query/builder infix operators (`{{ items = players where (…) }}` etc.). Lexed as plain
+ * T_IDENT, so — like the logical word operators `and`/`or` — they're keyword-coloured by the annotator
+ * and offered as completions after an expression. Shared by the annotator and the completion provider.
+ */
+val QUERY_OPERATORS = listOf("where", "merge", "orderby", "groupby", "take", "skip", "pluck")
+
 /** How a logic keyword is inserted. */
 enum class LogicKind { OPENER, MID, PLAIN }
 

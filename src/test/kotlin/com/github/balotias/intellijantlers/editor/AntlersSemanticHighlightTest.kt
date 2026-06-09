@@ -80,6 +80,37 @@ class AntlersSemanticHighlightTest : BasePlatformTestCase() {
     fun testBoundParameterNameColored() =
         assertEquals(AntlersSyntaxHighlighter.PARAMETER, keyOver("{{ partial :src=\"x\" }}", "src"))
 
+    // Antlers template/layout structural constructs (stacks/once/slot) are catalog tags now, so their
+    // heads color like any other tag.
+    fun testOnceTagColored() =
+        assertEquals(AntlersSyntaxHighlighter.TAG, keyOver("{{ once }}{{ /once }}", "once"))
+
+    fun testPushTagColored() =
+        assertEquals(AntlersSyntaxHighlighter.TAG, keyOver("{{ push:scripts }}{{ /push:scripts }}", "push"))
+
+    fun testStackTagColored() =
+        assertEquals(AntlersSyntaxHighlighter.TAG, keyOver("{{ stack:scripts }}", "stack"))
+
+    // Query/builder operators (`where`/`merge`/`orderby`/`groupby`/`take`/`skip`/`pluck`) are Statamic
+    // language operators lexed as plain T_IDENT — keyword-colored like the logical word operators when
+    // they stand as an infix operator in an expression body.
+    fun testQueryOperatorWhereColored() =
+        assertEquals(AntlersSyntaxHighlighter.KEYWORD, keyOver("{{ players where ('x') }}", "where"))
+
+    fun testQueryOperatorTakeColored() =
+        assertEquals(AntlersSyntaxHighlighter.KEYWORD, keyOver("{{ players take (2) }}", "take"))
+
+    fun testQueryOperatorMergeColored() =
+        assertEquals(AntlersSyntaxHighlighter.KEYWORD, keyOver("{{ a merge b }}", "merge"))
+
+    // A field access (`foo.take`) or a standalone variable (`{{ take }}`) sharing an operator's spelling
+    // must stay an identifier, not be mistaken for the operator.
+    fun testQueryOperatorAsPathSegmentNotColored() =
+        assertNull(keyOver("{{ foo.take }}", "take"))
+
+    fun testQueryOperatorAsLoneVariableNotColored() =
+        assertNull(keyOver("{{ take }}", "take"))
+
     /** Count keyword/tag-colored highlights over [token] — used to assert the closer is painted too. */
     private fun coloredCount(text: String, token: String, key: TextAttributesKey): Int {
         myFixture.configureByText("p.antlers.html", text)

@@ -5,6 +5,7 @@ import com.github.balotias.intellijantlers.highlighting.AntlersSyntaxHighlighter
 import com.github.balotias.intellijantlers.psi.AntlersConditionMixin
 import com.github.balotias.intellijantlers.psi.AntlersModifierMixin
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
+import com.github.balotias.intellijantlers.completion.QUERY_OPERATORS
 import com.github.balotias.intellijantlers.psi.AntlersInlineTags
 import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
@@ -67,8 +68,12 @@ class AntlersSemanticHighlightAnnotator : Annotator {
         }
     }
 
-    /** The four Antlers logical word operators (Statamic `LanguageKeywords`); reserved, never variables. */
-    private val wordOperators = setOf("and", "or", "xor", "not")
+    /**
+     * Infix word operators lexed as plain T_IDENT: the four logical operators (Statamic
+     * `LanguageKeywords`) plus the query/builder operators (`where`/`take`/…). All reserved in operator
+     * position, so paint them as keywords.
+     */
+    private val wordOperators = setOf("and", "or", "xor", "not") + QUERY_OPERATORS
 
     private fun isWordOperator(element: PsiElement): Boolean {
         if (element.node?.elementType != AntlersTypes.T_IDENT) return false
