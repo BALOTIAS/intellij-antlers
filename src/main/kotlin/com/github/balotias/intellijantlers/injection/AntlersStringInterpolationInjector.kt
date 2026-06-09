@@ -14,6 +14,10 @@ import com.intellij.psi.PsiLanguageInjectionHost
  * `{{ … }}`, so the interpolation parses as a real Antlers expression — enabling completion, go-to-def,
  * hover, and modifier docs/Ctrl+P inside interpolation. Each span is its own injected fragment. Field
  * scope inside the fragment is global/page (not the enclosing loop) — a documented limitation.
+ *
+ * `@{ … @}` brace escapes are honoured (the scanner skips them, so they are not injected). NOT handled
+ * (deferred): a backslash-prefixed raw param `{{ tag \attr="{ raw }" }}` still injects its value — the
+ * `\` currently lexes as a BAD_CHARACTER, so suppressing it cleanly needs a lexer + grammar change.
  */
 class AntlersStringInterpolationInjector : MultiHostInjector {
 

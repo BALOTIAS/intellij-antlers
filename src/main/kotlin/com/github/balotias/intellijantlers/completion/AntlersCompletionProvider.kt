@@ -28,6 +28,15 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.util.ProcessingContext
 
+/** The `groupby` builder operator as a whole word (used to gate the group-variable suggestions). */
+private val GROUPBY_OPERATOR = Regex("\\bgroupby\\b")
+
+/** Variables a `groupby` group exposes. */
+private val GROUPBY_VARIABLES = listOf(
+    "key" to "The current group's key",
+    "values" to "The current group's items (loop with {{ values }}…{{ /values }})",
+)
+
 /** Classifies the caret context and offers the matching Antlers completions. */
 class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
@@ -112,6 +121,17 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                             )
                         }
                     }
+                    // `next:field` / `prev:field` reach the adjacent iteration's fields.
+                    for (rel in listOf("next", "prev")) {
+                        if (seen.add(rel)) {
+                            result.addElement(
+                                LookupElementBuilder.create(rel)
+                                    .withIcon(AntlersIcons.FILE)
+                                    .withTypeText("Loop")
+                                    .withTailText("  the $rel iteration's fields (use $rel:field)", true)
+                            )
+                        }
+                    }
                 }
                 // Nav-tree vars only inside a {{ nav … }} scope.
                 if (scopes.any { it.navMeta }) {
@@ -149,6 +169,23 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                         )
                     }
                 }
+                // `groupby` produces groups, each exposing `key` and a loopable `values`. Offer those
+                // once a groupby operator has appeared earlier in the template. v1 limits (documented):
+                // the `as 'alias'` rename and the outer group-loop's own scope aren't modelled — these
+                // are the default names, and fields inside `{{ values }}` come from the global fallback.
+                val beforeCaret = parameters.editor.document.immutableCharSequence.subSequence(0, parameters.offset)
+                if (GROUPBY_OPERATOR.containsMatchIn(beforeCaret)) {
+                    for ((name, desc) in GROUPBY_VARIABLES) {
+                        if (seen.add(name)) {
+                            result.addElement(
+                                LookupElementBuilder.create(name)
+                                    .withIcon(AntlersIcons.FILE)
+                                    .withTypeText("Group")
+                                    .withTailText("  $desc", true)
+                            )
+                        }
+                    }
+                }
                 // `view` namespace — only when this file actually has front matter.
                 if (com.github.balotias.intellijantlers.view.ViewFrontMatterService.getInstance(project)
                         .frontMatter(file) != null && seen.add("view")
@@ -163,7 +200,19 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
 
             AntlersCompletionKind.TAG_METHOD -> {
                 val tag = catalog.tag(info.tagHead ?: "")
-                if (tag != null) {
+                if ((info.tagHead == "next" || info.tagHead == "prev") &&
+                    AntlersScopeResolver.scopesAt(parameters.position).isNotEmpty()
+                ) {
+                    // `{{ next:field }}` / `{{ prev:field }}` — the adjacent iteration shares the loop's fields.
+                    for (field in AntlersFieldContext.fieldsInScope(parameters.position, project).orEmpty()) {
+                        result.addElement(
+                            LookupElementBuilder.create(field.handle)
+                                .withIcon(AntlersIcons.FILE)
+                                .withTypeText("Field")
+                                .withTailText(if (field.display.isNotBlank()) "  ${field.display}" else null, true)
+                        )
+                    }
+                } else if (tag != null) {
                     tag.methods.forEach { m ->
                         result.addElement(
                             LookupElementBuilder.create(m).withIcon(AntlersIcons.FILE).withTypeText("Method")

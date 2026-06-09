@@ -16,6 +16,10 @@
   `pluck` are highlighted as keywords in operator position (e.g. `{{ players where (…) }}`) — a path
   segment or lone variable sharing the spelling (`{{ foo.take }}`, `{{ take }}`) stays an identifier —
   and are suggested in completion after an expression (but not after a real tag head).
+- Inside a loop, the **`next:` / `prev:` accessors** are suggested (`{{ next:title }}` reaches the
+  adjacent iteration), and `next:` / `prev:` complete to the loop's scoped fields.
+- After a **`groupby`**, the group variables `key` and `values` are suggested. (The `as 'alias'` rename
+  of `values` and the outer group-loop's own field scope are not yet modeled.)
 
 ### Changed
 
@@ -26,6 +30,13 @@
   punctuation (`:` `.` `/` `=` `%`) is split onto a separate, subtle **Punctuation** color so colons and
   dots in paths stay quiet. Both are themeable independently under *Settings → Editor → Color Scheme →
   Antlers*.
+
+### Fixed
+
+- **`@{ … @}` brace escapes** inside strings/parameters are no longer treated as Antlers interpolation,
+  so `{{ "literal @{foo@} text" }}` keeps `{foo}` literal instead of highlighting/injecting it. (A
+  backslash-prefixed raw param — `{{ tag \attr="{ raw }" }}` — is still injected; that needs a lexer
+  change and is deferred.)
 
 ## [1.0.5] - 2026-06-08
 

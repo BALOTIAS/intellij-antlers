@@ -16,6 +16,9 @@ object AntlersInterpolationScanner {
         while (i < n) {
             val c = text[i]
             if (c == '\\') { i += 2; continue }          // escape: skip the next char (e.g. \{ )
+            if (c == '@' && i + 1 < n && (text[i + 1] == '{' || text[i + 1] == '}')) {
+                i += 2; continue                          // Antlers `@{ … @}` brace escape → literal, not a span
+            }
             if (c == '{') {
                 val span = matchSpan(text, i)
                 if (span != null) { spans.add(span); i = span.closeBrace + 1; continue }
@@ -35,6 +38,7 @@ object AntlersInterpolationScanner {
             val c = text[i]
             when {
                 c == '\\' -> { i += 2; continue }         // escape in any state
+                c == '@' && i + 1 < n && (text[i + 1] == '{' || text[i + 1] == '}') -> i += 2  // @{ / @} escape
                 inSingle -> { if (c == '\'') inSingle = false; i++ }
                 c == '\'' -> { inSingle = true; i++ }
                 c == '{' -> { depth++; i++ }

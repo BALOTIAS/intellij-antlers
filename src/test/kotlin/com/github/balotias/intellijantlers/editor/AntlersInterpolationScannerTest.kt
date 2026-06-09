@@ -18,6 +18,13 @@ class AntlersInterpolationScannerTest {
     @Test fun ignoresEscapedBrace() =
         assertEquals(emptyList<String>(), contents("\"a \\{not} b\""))
 
+    // Antlers `@{ … @}` escapes braces inside strings/params so the content is literal, not interpolated.
+    @Test fun ignoresAtEscapedBraces() =
+        assertEquals(emptyList<String>(), contents("\"string @{foo@} bar\""))
+
+    @Test fun atEscapeBeforeRealSpanStillFindsTheRealOne() =
+        assertEquals(listOf("bar"), contents("\"@{foo@} {bar}\""))
+
     @Test fun unmatchedOpenIsIgnored() =
         assertEquals(emptyList<String>(), contents("\"a {oops\""))
 
