@@ -79,18 +79,21 @@ or an `@collection`-hinted view).
 
 **Navigation & docs**
 - Go-to-declaration from a `{{ variable }}` to its blueprint field, from `{{ partial:… }}` to the
-  partial file (including `partials/`, underscored, and dotted-nested partials), from `{{ view:foo }}`
-  to its front-matter key, and from a custom tag/modifier name to its PHP class — including tags used
-  in the inline form (`{{ x = {your_tag …} }}`).
+  partial file (including `partials/`, underscored, dotted-nested, and `addon::`-namespaced partials —
+  resolving to the published view under `resources/views/vendor/`, or the addon's own view in `vendor/`),
+  from `{{ view:foo }}` to its front-matter key, and from a custom tag/modifier name to its PHP class —
+  including tags used in the inline form (`{{ x = {your_tag …} }}`).
 - Quick documentation (hover) for tags, modifiers, parameters, and variables (including `view:` keys),
   and for partial-include parameters (from the partial's `@param` hints); plus **parameter info**
   (Ctrl/⌘P) for modifier arguments.
 
-- A tag-balance annotator (unclosed/stray conditions and paired tags) that leaves unknown/addon tags
-  alone, an unknown-modifier inspection, and an unresolved-partial inspection — all with **quick-fixes**:
-  *Insert closing `{{ /… }}`* for an unclosed tag/condition, *Remove stray closing tag* for an orphan
-  closer, *Change to `…`* (closest-match suggestions) for a mistyped modifier, and *Create partial* to
-  create the missing view file for an unresolved `{{ partial:… }}`.
+**Diagnostics**
+- A tag-balance annotator (unclosed / stray / mismatched-handle conditions and paired tags) that leaves
+  unknown/addon tags alone, an unknown-modifier inspection, and an unresolved-partial inspection — all
+  with **quick-fixes**: *Insert closing `{{ /… }}`* for an unclosed tag/condition (keeping the shorthand
+  handle, `{{ /collection:drinks }}`), *Remove stray closing tag* for an orphan closer, *Change to `…`*
+  (closest-match suggestions) for a mistyped modifier, and *Create partial* to create the missing view
+  file for an unresolved `{{ partial:… }}`.
 
 **Refactoring**
 - **Rename** and **Find Usages** for partials (file ↔ every include) and for blueprint field
