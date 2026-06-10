@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Go-to-declaration, Find Usages, and Rename for blueprint fields used inside tag conditions.** A field
+  on the left of a `field:operator="value"` condition (`{{ collection:blog title:contains="…" }}`) now
+  resolves to its blueprint declaration — Ctrl/⌘-click navigates to it, Find Usages lists the condition,
+  and renaming the field updates the condition — resolved in the queried tag's collection/taxonomy/user
+  blueprint.
+
 ## [1.0.7] - 2026-06-10
 
 ### Added

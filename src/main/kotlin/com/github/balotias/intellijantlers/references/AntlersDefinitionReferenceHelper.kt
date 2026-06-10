@@ -28,6 +28,13 @@ object AntlersDefinitionReferenceHelper {
             return arrayOf(AntlersPhpClassReference(element, name, isModifier = false))
         }
 
+        // Condition field: the LHS of a `field:operator="value"` query condition is a loose ident (not a
+        // name path). Resolve it to the field in the queried tag's blueprint namespace so go-to-def, Find
+        // Usages, and Rename work on it — reusing the member reference (its searcher/rename already cover it).
+        com.github.balotias.intellijantlers.completion.AntlersConditionOperators.conditionFieldNamespace(element)?.let { ns ->
+            return arrayOf(AntlersBlueprintMemberReference(element, ns, name))
+        }
+
         // Tag head: element must be the first T_IDENT child of an AntlersNamePathMixin
         val path = PsiTreeUtil.getParentOfType(element, AntlersNamePathMixin::class.java)
             ?: return emptyArray()

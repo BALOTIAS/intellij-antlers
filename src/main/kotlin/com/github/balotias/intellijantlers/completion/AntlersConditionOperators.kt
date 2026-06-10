@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.completion
 
+import com.github.balotias.intellijantlers.blueprint.BlueprintNamespace
 import com.github.balotias.intellijantlers.psi.AntlersNamePathMixin
 import com.github.balotias.intellijantlers.psi.AntlersParameterMixin
 import com.github.balotias.intellijantlers.psi.AntlersStatement
@@ -76,5 +77,27 @@ object AntlersConditionOperators {
         var sib = param.prevSibling
         while (sib != null && sib.text.isBlank()) sib = sib.prevSibling
         return sib?.node?.elementType == AntlersTypes.T_IDENT && sib.parent is AntlersStatement
+    }
+
+    /**
+     * If [fieldIdent] is the field (left-hand side) of a `field:operator="value"` condition, the blueprint
+     * namespace of the tag being queried (`collection:blog` → the `blog` collection, etc.); else null.
+     * Lets references resolve a condition field to its declaration without a grammar change.
+     */
+    fun conditionFieldNamespace(fieldIdent: PsiElement): BlueprintNamespace? {
+        if (fieldIdent.node?.elementType != AntlersTypes.T_IDENT) return null
+        val stmt = fieldIdent.parent as? AntlersStatement ?: return null
+        var sib = fieldIdent.nextSibling
+        while (sib != null && sib.text.isBlank()) sib = sib.nextSibling
+        val param = sib as? AntlersParameterMixin ?: return null
+        val opIdent = param.node.findChildByType(AntlersTypes.T_IDENT)?.psi ?: return null
+        if (!isConditionOperatorIdent(opIdent)) return null
+        val namePath = PsiTreeUtil.findChildOfType(stmt, AntlersNamePathMixin::class.java) ?: return null
+        return when (namePath.head) {
+            "collection" -> namePath.method?.let { BlueprintNamespace(BlueprintNamespace.Kind.COLLECTION, it) }
+            "taxonomy" -> namePath.method?.let { BlueprintNamespace(BlueprintNamespace.Kind.TAXONOMY, it) }
+            "users" -> BlueprintNamespace(BlueprintNamespace.Kind.USER, "user")
+            else -> null
+        }
     }
 }
