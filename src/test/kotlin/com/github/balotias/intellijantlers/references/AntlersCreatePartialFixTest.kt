@@ -61,6 +61,21 @@ class AntlersCreatePartialFixTest : BasePlatformTestCase() {
         assertEquals("seo.antlers.html", (resolved as? com.intellij.psi.PsiFile)?.name)
     }
 
+    // A vendor partial that is NOT published resolves to the addon's own view under
+    // vendor/<org>/<namespace>/resources/views/… (the namespace is the package dir name).
+    fun testVendorPartialResolvesToAddonSource() {
+        myFixture.addFileToProject(
+            "vendor/studio1902/statamic-peak-seo/resources/views/snippets/seo.antlers.html", "seo"
+        )
+        val file = myFixture.addFileToProject(
+            "resources/views/page.antlers.html", "{{ partial:statamic-peak-seo::snippets/seo }}"
+        )
+        myFixture.configureFromExistingVirtualFile(file.virtualFile)
+        val resolved = file.findReferenceAt(file.text.indexOf("statamic-peak-seo"))?.resolve()
+        assertNotNull("vendor partial resolves to the addon source", resolved)
+        assertEquals("seo.antlers.html", (resolved as? com.intellij.psi.PsiFile)?.name)
+    }
+
     // A partial that resolves is not flagged (no false "Cannot resolve" / create fix).
     fun testResolvedPartialNotFlagged() {
         myFixture.addFileToProject("resources/views/blog/card.antlers.html", "card")

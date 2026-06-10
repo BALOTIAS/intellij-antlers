@@ -48,22 +48,38 @@ object StatamicProject {
      * views root, and the exact name before the underscored-partial convention (`{{ partial:btn }}`
      * resolves `_btn.antlers.html` — Statamic's recommended partial naming).
      */
+    private val EXTS = listOf("antlers.html", "antlers.php", "html")
+
     fun resolvePartial(element: PsiElement, rawPath: String): VirtualFile? {
         val root = viewsRoot(element) ?: return null
-        val exts = listOf("antlers.html", "antlers.php", "html")
-        // Vendor namespace: `ns::path` → views published to resources/views/vendor/<ns>/<path>.
-        if (rawPath.contains("::")) {
-            val ns = rawPath.substringBefore("::")
-            val sub = rawPath.substringAfter("::").replace('.', '/')
-            if (ns.isBlank() || sub.isBlank()) return null
-            for (ext in exts) root.findFileByRelativePath("vendor/$ns/$sub.$ext")?.let { return it }
-            return null
+        if (rawPath.contains("::")) return resolveVendorPartial(root, rawPath)
+        return findPartialUnder(root, rawPath.replace('.', '/'))
+    }
+
+    /**
+     * A vendor-namespaced partial `ns::path`: first the **published** views
+     * (`resources/views/vendor/<ns>/<path>`), then the addon's **own** views in
+     * `vendor/<org>/<ns>/resources/views/<path>` (the namespace is the package directory name, as
+     * Statamic registers it). Lets Ctrl-click jump straight to the real addon partial when unpublished.
+     */
+    private fun resolveVendorPartial(root: VirtualFile, rawPath: String): VirtualFile? {
+        val ns = rawPath.substringBefore("::")
+        val sub = rawPath.substringAfter("::").replace('.', '/')
+        if (ns.isBlank() || sub.isBlank()) return null
+        root.findFileByRelativePath("vendor/$ns")?.let { findPartialUnder(it, sub)?.let { f -> return f } }
+        val vendor = root.parent?.parent?.findChild("vendor") ?: return null
+        for (org in vendor.children) {
+            val views = org.findChild(ns)?.findFileByRelativePath("resources/views") ?: continue
+            findPartialUnder(views, sub)?.let { return it }
         }
-        val path = rawPath.replace('.', '/')   // Laravel/Statamic dot notation: layouts.default.footer
-        val names = listOf(path, underscoredPartial(path))   // exact name, then `_basename`
+        return null
+    }
+
+    /** Finds a partial named [sub] under [base], trying the `partials/` prefix and the `_basename` form. */
+    private fun findPartialUnder(base: VirtualFile, sub: String): VirtualFile? {
         for (loc in listOf("partials/", "")) {
-            for (name in names) {
-                for (ext in exts) root.findFileByRelativePath("$loc$name.$ext")?.let { return it }
+            for (name in listOf(sub, underscoredPartial(sub))) {
+                for (ext in EXTS) base.findFileByRelativePath("$loc$name.$ext")?.let { return it }
             }
         }
         return null

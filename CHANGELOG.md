@@ -12,8 +12,10 @@
   `{{ partial:… }}` that resolves to no **local** view file is flagged with a *"Create partial"* fix that
   creates it. Dynamic paths (`src="page_builder/{type}"`) and vendor-namespaced partials
   (`partial:addon::snippets/seo`) are not flagged (no false positives).
-- **Vendor-namespaced partials** (`partial:addon::path`) resolve to their published view under
-  `resources/views/vendor/<namespace>/…` for go-to-declaration.
+- **Vendor-namespaced partials** (`partial:addon::path`) resolve for go-to-declaration — to the
+  **published** view under `resources/views/vendor/<namespace>/…` if present, otherwise to the addon's
+  **own** view in `vendor/<org>/<namespace>/resources/views/…` — so Ctrl/⌘-click jumps straight to the
+  real partial.
 
 ## [1.0.8] - 2026-06-10
 
