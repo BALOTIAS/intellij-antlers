@@ -329,6 +329,16 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                 }
             }
 
+            AntlersCompletionKind.CONDITION_VALUE -> {
+                val matched = paramValueResultSet(parameters, result)
+                val field = info.pathPrefix.firstOrNull() ?: ""
+                for ((value, type) in AntlersConditionValues.valuesFor(field, info.paramName ?: "")) {
+                    matched.addElement(
+                        LookupElementBuilder.create(value).withIcon(AntlersIcons.FILE).withTypeText(type)
+                    )
+                }
+            }
+
             AntlersCompletionKind.CONDITION_OPERATOR ->
                 for ((op, desc) in AntlersConditionOperators.PRIMARY) {
                     result.addElement(

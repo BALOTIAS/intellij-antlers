@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.util.PsiTreeUtil
 
-enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, TAG_SHORTHAND, PARAMETER, PARAMETER_VALUE, MODIFIER, FIELD_PATH, CONDITION_OPERATOR, NONE }
+enum class AntlersCompletionKind { TAG_NAME, TAG_METHOD, TAG_SHORTHAND, PARAMETER, PARAMETER_VALUE, MODIFIER, FIELD_PATH, CONDITION_OPERATOR, CONDITION_VALUE, NONE }
 
 data class AntlersCompletionInfo(
     val kind: AntlersCompletionKind,
@@ -61,6 +61,12 @@ object AntlersCompletionContext {
                 val nameLeaf = prevSignificantLeaf(prev, statement)
                 if (nameLeaf?.node?.elementType != AntlersTypes.T_IDENT) {
                     AntlersCompletionInfo(AntlersCompletionKind.NONE)
+                } else if (AntlersConditionOperators.isConditionOperatorIdent(nameLeaf)) {
+                    // `field:operator="value"` — complete the right-hand side based on operator/field.
+                    AntlersCompletionInfo(
+                        AntlersCompletionKind.CONDITION_VALUE, headOf(statement),
+                        pathPrefix = listOfNotNull(conditionFieldOf(nameLeaf)), paramName = nameLeaf.text
+                    )
                 } else if (isBoundParamName(nameLeaf, statement)) {
                     // Bound param `:name=` / `:$name=` takes a variable expression, not a literal.
                     AntlersCompletionInfo(AntlersCompletionKind.NONE)
@@ -80,6 +86,14 @@ object AntlersCompletionContext {
 
             else -> AntlersCompletionInfo(AntlersCompletionKind.NONE)
         }
+    }
+
+    /** The field name of a condition: the floating ident immediately before the operator's parameter. */
+    private fun conditionFieldOf(operatorIdent: PsiElement): String? {
+        val param = operatorIdent.parent ?: return null
+        var sib = param.prevSibling
+        while (sib != null && sib.text.isBlank()) sib = sib.prevSibling
+        return if (sib?.node?.elementType == AntlersTypes.T_IDENT) sib.text else null
     }
 
     /** True when [nameLeaf] is a BOUND parameter name: `:name` or `:$name` (grammar `T_COLON T_DOLLAR? T_IDENT`). */

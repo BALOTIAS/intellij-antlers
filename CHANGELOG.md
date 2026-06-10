@@ -6,6 +6,10 @@
 
 ### Added
 
+- **Tag condition values** are now suggested on the right-hand side of a `field:operator="value"`
+  condition: `status:is="<caret>"` offers `published`/`draft`/`scheduled`, truthy operators
+  (`exists`/`is_empty`/…) offer `true`/`false`, and date operators (`is_after`/`is_before`/…) offer
+  `now`/`today`/`tomorrow`/`yesterday`.
 - Inside a **`{{ foreach }}`** loop, the `key` and `value` variables are suggested — or the `as="k|v"`
   aliases when set.
 - The **`void`** placeholder (`{{ x ? 'a' : void }}`) is highlighted as a language keyword.
