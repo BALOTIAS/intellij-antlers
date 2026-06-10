@@ -25,8 +25,12 @@ or an `@collection`-hinted view).
 ## Features
 
 **Editing**
-- Syntax highlighting for tags, variables, strings, numbers, comments, operators, and PHP/noparse
-  blocks — with customizable colors (*Settings → Editor → Color Scheme → Antlers*). Antlers
+- Syntax highlighting for tags, variables, strings, numbers, comments, and PHP/noparse blocks, with
+  **operators highlighted as keywords** — the logical word operators (`and`/`or`/`xor`/`not`), the
+  query/builder operators (`where`/`merge`/`orderby`/`groupby`/`take`/`skip`/`pluck`), the inline
+  `switch` operator, the `void` placeholder, and the symbolic comparison/math operators all read
+  distinctly from plain text (separate **Operator** and **Punctuation** colors). All colors are
+  customizable (*Settings → Editor → Color Scheme → Antlers*). Antlers
   interpolation inside strings (`"object-position: {logo:focus_css}"`) is highlighted as real Antlers,
   and a view's `---` … `---` front matter is a real **YAML** island — comments, highlighting, and YAML
   errors/warnings/completion all work inside it.
@@ -48,13 +52,21 @@ or an `@collection`-hinted view).
 - Tags, tag methods/sub-tags, parameter names, and **parameter values** — partial paths for
   `partial:src=`, collection/taxonomy handles for `from=`/`in=`/…, field names for `sort=`, and
   `true`/`false` for boolean params.
-- Logic keywords (`if`, `unless`, `else`, `elseif`, `endif`) offered inside `{{ }}`, context-aware —
-  the followers (`else`/`elseif`/`endif`) appear only inside the matching open block.
+- **Tag query conditions** — in `{{ collection:blog title:contains="…" }}` (also `taxonomy`/`users`),
+  the condition operators (`is`, `contains`, `starts_with`, `is_after`, `in`, `gt`, …) are completed
+  after a `field:`, the target blueprint fields are offered as condition targets, and the value side is
+  completed too (`status:is="published"`, `exists="true"`, `is_after="now"`). The operator is highlighted
+  and hovering it shows its documentation.
+- Logic keywords (`if`, `unless`, `else`, `elseif`, `endif`) and the query/builder operators
+  (`where`, `merge`, `orderby`, `groupby`, `take`, `skip`, `pluck`) offered inside `{{ }}`, context-aware —
+  the condition followers (`else`/`elseif`/`endif`) appear only inside the matching open block.
 - Modifiers (after `|`) with their arguments — including modifiers used inside conditions
   (`{{ if code | contains("…") }}`).
 - Collection/taxonomy/form/nav handles after the colon shorthand (`{{ collection:<caret> }}`).
-- Variables: blueprint fields, system variables, loop, nav-tree, and form variables — resolved
-  for the current scope (inside `{{ collection }}`, `{{ nav }}`, `{{ form }}`, page-mapped templates, etc.).
+- Variables: blueprint fields, system variables, loop variables (including the `next:`/`prev:`
+  accessors, `{{ foreach }}` key/value, and `groupby` key/values), nav-tree, and form variables —
+  resolved for the current scope (inside `{{ collection }}`, `{{ nav }}`, `{{ form }}`, `{{ foreach }}`,
+  page-mapped templates, etc.).
 - **View front matter**: keys declared in a view's `---` … `---` block are completed after `{{ view: }}`.
 - **Partial parameters**: at a partial include (`{{ partial:components/button … }}`), the parameters the
   partial declares with `{{# @param* label … #}}` directive comments are completed by name (required ones

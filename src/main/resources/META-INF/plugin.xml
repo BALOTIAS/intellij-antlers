@@ -18,7 +18,10 @@
 
         <p><b>Highlights</b></p>
         <ul>
-            <li><b>Editing</b> — syntax highlighting with customizable colors; Antlers interpolation
+            <li><b>Editing</b> — syntax highlighting with customizable colors, including operators read
+            as keywords (the word operators <code>and</code>/<code>or</code>/<code>not</code>, the
+            query/builder operators <code>where</code>/<code>take</code>/<code>groupby</code>/&hellip;,
+            the inline <code>switch</code> operator, and <code>void</code>); Antlers interpolation
             inside strings (<code>"object-position: {logo:focus_css}"</code>) highlighted as real
             Antlers; a view's <code>---</code>…<code>---</code> front matter editable as a real
             <b>YAML</b> island; brace matching, commenting, and <code>{{ }}</code> auto-insert; code
@@ -31,11 +34,15 @@
             indented body.</li>
 
             <li><b>Completion</b> — tags, tag methods/sub-tags, parameter names and <b>values</b>
-            (partial paths, collection/taxonomy handles, sort fields, booleans), logic keywords,
-            modifiers and their arguments (incl. inside conditions), colon shorthand
-            (<code>{{ collection:&hellip; }}</code>), and variables (blueprint fields, system, loop,
-            nav, form, <code>view:</code> front-matter keys, plus member/relationship completion when
-            dotting into grid/group fields and related entries). Backed by a bundled <b>Statamic 5 &amp;
+            (partial paths, collection/taxonomy handles, sort fields, booleans); <b>tag query
+            conditions</b> (<code>title:contains=&quot;&hellip;&quot;</code> on collection/taxonomy/users —
+            the operators, the target blueprint fields, and the values); logic keywords and the
+            query/builder operators (<code>where</code>/<code>orderby</code>/<code>groupby</code>/&hellip;);
+            modifiers and their arguments (incl. inside conditions); colon shorthand
+            (<code>{{ collection:&hellip; }}</code>); and variables (blueprint fields, system, loop — incl.
+            <code>next:</code>/<code>prev:</code>, <code>foreach</code> key/value, and <code>groupby</code>
+            key/values — nav, form, <code>view:</code> front-matter keys, plus member/relationship
+            completion when dotting into grid/group fields and related entries). Backed by a bundled <b>Statamic 5 &amp;
             6</b> catalog tailored to the version detected in your <code>composer.json</code>, extended
             by custom tags/modifiers discovered in your project.</li>
 
