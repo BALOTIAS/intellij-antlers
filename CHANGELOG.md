@@ -25,6 +25,9 @@
 - **Go-to-declaration for the `svg` tag.** `{{ svg:trash }}` and `{{ svg src="trash" }}` resolve to the
   SVG file — Ctrl/⌘-click opens it — through Statamic's path cascade (`resources/svg` → `resources` →
   `public/svg` → `public`, with `.svg` appended when absent, verified against the Statamic source).
+- **Go-to-declaration for literal media paths.** A literal image/media path written in Antlers — glide
+  `src="/img/hero.jpg"`, asset `url="photos/x.webp"`, or a bare `{{ "/img/logo.png" }}` — resolves to the
+  file under the web root (`public/`, then the default asset container `public/assets/`).
 
 ### Fixed
 

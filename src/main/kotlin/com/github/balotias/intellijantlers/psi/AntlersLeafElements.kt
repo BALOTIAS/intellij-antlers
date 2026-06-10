@@ -2,6 +2,7 @@ package com.github.balotias.intellijantlers.psi
 
 import com.github.balotias.intellijantlers.references.AntlersDefinitionReferenceHelper
 import com.github.balotias.intellijantlers.references.AntlersPartialReferenceHelper
+import com.github.balotias.intellijantlers.references.AntlersStaticFileReferenceHelper
 import com.github.balotias.intellijantlers.references.AntlersSvgReferenceHelper
 import com.intellij.psi.ElementManipulators
 import com.intellij.psi.LiteralTextEscaper
@@ -19,7 +20,9 @@ class AntlersStringLeaf(type: IElementType, text: CharSequence) :
     LeafPsiElement(type, text), PsiLanguageInjectionHost {
 
     override fun getReferences(): Array<PsiReference> {
-        return AntlersSvgReferenceHelper.refsForString(this) + AntlersPartialReferenceHelper.refsForString(this)
+        return AntlersSvgReferenceHelper.refsForString(this) +
+            AntlersPartialReferenceHelper.refsForString(this) +
+            AntlersStaticFileReferenceHelper.refsForString(this)
     }
 
     override fun getReference(): PsiReference? = references.firstOrNull()

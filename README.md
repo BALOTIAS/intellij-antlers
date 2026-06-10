@@ -82,9 +82,10 @@ or an `@collection`-hinted view).
   partial file (including `partials/`, underscored, dotted-nested, and `addon::`-namespaced partials —
   resolving to the published view under `resources/views/vendor/`, or the addon's own view in `vendor/`),
   from `{{ view:foo }}` to its front-matter key, from `{{ svg:… }}` / `{{ svg src="…" }}` to the SVG file
-  (resolved through Statamic's `resources/svg` → `resources` → `public/svg` → `public` cascade), and from
-  a custom tag/modifier name to its PHP class — including tags used in the inline form
-  (`{{ x = {your_tag …} }}`).
+  (resolved through Statamic's `resources/svg` → `resources` → `public/svg` → `public` cascade), from a
+  literal media path written in Antlers (glide `src="/img/hero.jpg"`, asset `url="…"`, or a bare
+  `{{ "/img/logo.png" }}`) to the file under `public/` (and `public/assets/`), and from a custom
+  tag/modifier name to its PHP class — including tags used in the inline form (`{{ x = {your_tag …} }}`).
 - Quick documentation (hover) for tags, modifiers, parameters, and variables (including `view:` keys),
   and for partial-include parameters (from the partial's `@param` hints); plus **parameter info**
   (Ctrl/⌘P) for modifier arguments.

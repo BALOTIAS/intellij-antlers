@@ -49,9 +49,11 @@
             by custom tags/modifiers discovered in your project.</li>
 
             <li><b>Navigation &amp; docs</b> — go to a variable's blueprint field, a partial file, a
-            <code>view:</code> key, the <code>svg</code> tag's file (<code>{{ svg:trash }}</code>), or a
-            custom tag/modifier's PHP class (including the inline <code>{{ x = {your_tag &hellip;} }}</code>
-            form); quick documentation on hover and parameter info for modifier arguments.</li>
+            <code>view:</code> key, the <code>svg</code> tag's file (<code>{{ svg:trash }}</code>), a
+            literal media path (<code>glide</code>/<code>asset</code> <code>src</code>/<code>url</code>, a
+            bare image path) under <code>public/</code>, or a custom tag/modifier's PHP class (including the
+            inline <code>{{ x = {your_tag &hellip;} }}</code> form); quick documentation on hover and
+            parameter info for modifier arguments.</li>
 
             <li><b>Diagnostics</b> — a tag-balance annotator (unclosed/stray/ mismatched conditions and
             paired tags) that leaves unknown/addon tags alone, plus unknown-modifier and

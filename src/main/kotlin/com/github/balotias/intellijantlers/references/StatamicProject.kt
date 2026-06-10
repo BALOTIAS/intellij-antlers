@@ -66,6 +66,20 @@ object StatamicProject {
         return null
     }
 
+    /**
+     * A literal media path written in Antlers (glide `src`, asset `url`, or a bare path string) → the file
+     * under the web root: `public/<path>`, then the default asset container `public/assets/<path>`. A
+     * non-default asset disk / web root isn't read (would need the PHP filesystem config), so paths outside
+     * those two roots don't resolve.
+     */
+    fun resolvePublicFile(element: PsiElement, rawPath: String): VirtualFile? {
+        val projectRoot = viewsRoot(element)?.parent?.parent ?: return null
+        val path = rawPath.removePrefix("/")
+        projectRoot.findFileByRelativePath("public/$path")?.let { return it }
+        projectRoot.findFileByRelativePath("public/assets/$path")?.let { return it }
+        return null
+    }
+
     fun resolvePartial(element: PsiElement, rawPath: String): VirtualFile? {
         val root = viewsRoot(element) ?: return null
         if (rawPath.contains("::")) return resolveVendorPartial(root, rawPath)
