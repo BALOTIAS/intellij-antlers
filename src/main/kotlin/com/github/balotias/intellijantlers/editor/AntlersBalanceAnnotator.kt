@@ -10,6 +10,7 @@ import com.github.balotias.intellijantlers.scope.NestingNode
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.psi.PsiElement
 
 /**
@@ -22,6 +23,10 @@ class AntlersBalanceAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         if (element !is AntlersFile) return            // run once, on the Antlers file root
         if (element.project.isDefault) return
+        // Don't balance-check an injected `{ … }` string-interpolation fragment: it's its own tiny Antlers
+        // file, so a lone `{taxonomy}` (a variable that happens to share a pair-tag's name) would be
+        // wrongly flagged "never closed".
+        if (InjectedLanguageManager.getInstance(element.project).isInjectedFragment(element)) return
         val catalog = AntlersCatalogService.getInstance(element.project)
 
         val tree = AntlersNestingTreeBuilder.build(element, element.project)

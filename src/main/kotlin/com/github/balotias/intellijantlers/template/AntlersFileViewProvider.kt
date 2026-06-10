@@ -5,6 +5,7 @@ import com.github.balotias.intellijantlers.psi.AntlersElementType
 import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.intellij.lang.Language
 import com.intellij.lang.LanguageParserDefinitions
+import com.intellij.injected.editor.VirtualFileWindow
 import com.intellij.lang.html.HTMLLanguage
 import com.intellij.lang.xml.XMLLanguage
 import com.intellij.openapi.vfs.VirtualFile
@@ -81,7 +82,10 @@ class AntlersFileViewProvider(
         private fun getTemplateDataLanguage(manager: PsiManager, virtualFile: VirtualFile): Language {
             val dataLang = TemplateDataLanguageMappings.getInstance(manager.project)?.getMapping(virtualFile)
             if (dataLang != null) return dataLang
-            // `.antlers.xml` (sitemaps, feeds) is Antlers layered over XML; everything else over HTML.
+            // An injected `{ … }` string-interpolation fragment is a tiny Antlers *expression*, not a
+            // document — XML-validating a bare `{taxonomy}` would falsely flag it. Use HTML (tolerant) for
+            // injected fragments; only real `.antlers.xml` files (sitemaps, feeds) layer over XML.
+            if (virtualFile is VirtualFileWindow) return HTMLLanguage.INSTANCE
             return if (virtualFile.name.endsWith(".antlers.xml")) XMLLanguage.INSTANCE else HTMLLanguage.INSTANCE
         }
     }

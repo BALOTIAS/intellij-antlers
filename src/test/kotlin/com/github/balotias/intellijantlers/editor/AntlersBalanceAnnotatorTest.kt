@@ -75,6 +75,15 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
             balance("{{ if x }}{{ %collection:blog }}{{ /%collection:blog }}{{ /if }}").isEmpty())
     }
 
+    // #regression (user-reported): a `{var}` string interpolation whose variable shares a pair-tag's name
+    // (`{taxonomy}` in `from="{taxonomy}"`) is a variable access, not an unclosed tag — its injected
+    // fragment must not be balance-checked, so the enclosing `{{ taxonomy }}` still balances.
+    fun testInterpolationMatchingPairTagNameNotFlagged() {
+        val text = "{{ taxonomy from=\"{taxonomy}\" collection=\"{handle}\" as=\"r\" }}{{ /taxonomy }}"
+        assertTrue("interpolation {taxonomy} wrongly flagged: ${balance(text).map { it.description }}",
+            balance(text).isEmpty())
+    }
+
     private fun mismatch(text: String): List<com.intellij.codeInsight.daemon.impl.HighlightInfo> {
         myFixture.configureByText("p.antlers.html", text)
         return myFixture.doHighlighting().filter { (it.description ?: "").contains("does not match") }

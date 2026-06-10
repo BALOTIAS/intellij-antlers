@@ -54,4 +54,12 @@ class AntlersXmlFileTest : BasePlatformTestCase() {
         val e = errors("sitemap.antlers.xml", "<urlset {{ yield:namespace }}>\n<url/>\n</urlset>")
         assertTrue("Antlers in tag-attribute position must not produce false errors: $e", e.isEmpty())
     }
+
+    // #regression (user-reported): `{var}` interpolations in tag params (the sitemap `from="{handle}"`)
+    // are injected as tiny Antlers expressions — they must not be XML-validated as their own documents.
+    fun testInterpolationsInParamsHaveNoFalseErrors() {
+        val e = errors("sitemap.antlers.xml",
+            "<urlset>{{ taxonomy from=\"{taxonomy}\" collection=\"{handle}\" as=\"r\" }}{{ /taxonomy }}</urlset>")
+        assertTrue("interpolations in params must not produce false errors: $e", e.isEmpty())
+    }
 }
