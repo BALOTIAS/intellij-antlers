@@ -6,6 +6,7 @@ import com.github.balotias.intellijantlers.psi.AntlersTypes
 import com.intellij.lang.Language
 import com.intellij.lang.LanguageParserDefinitions
 import com.intellij.lang.html.HTMLLanguage
+import com.intellij.lang.xml.XMLLanguage
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.MultiplePsiFilesPerDocumentFileViewProvider
 import com.intellij.psi.PsiFile
@@ -79,7 +80,9 @@ class AntlersFileViewProvider(
     companion object {
         private fun getTemplateDataLanguage(manager: PsiManager, virtualFile: VirtualFile): Language {
             val dataLang = TemplateDataLanguageMappings.getInstance(manager.project)?.getMapping(virtualFile)
-            return dataLang ?: HTMLLanguage.INSTANCE
+            if (dataLang != null) return dataLang
+            // `.antlers.xml` (sitemaps, feeds) is Antlers layered over XML; everything else over HTML.
+            return if (virtualFile.name.endsWith(".antlers.xml")) XMLLanguage.INSTANCE else HTMLLanguage.INSTANCE
         }
     }
 }

@@ -13,9 +13,10 @@
 </div>
 
 <!-- Plugin description -->
-The plugin brings **[Statamic](https://statamic.dev) Antlers** support to `*.antlers.html` and
-`*.antlers.php` views, parsing Antlers as a template language layered over HTML/CSS — so you get full
-Antlers intelligence inside `{{ }}` alongside the regular markup tooling around it. It reads your project's
+The plugin brings **[Statamic](https://statamic.dev) Antlers** support to `*.antlers.html`,
+`*.antlers.php`, and `*.antlers.xml` views, parsing Antlers as a template language layered over HTML/CSS
+(or **XML** for `.antlers.xml` sitemaps/feeds) — so you get full Antlers intelligence inside `{{ }}`
+alongside the regular markup tooling around it. It reads your project's
 blueprints, fieldsets, collections, taxonomies, navigations, forms, and a view's YAML front matter,
 so completion, navigation, and documentation are blueprint- and view-aware — and **scope-aware**:
 the variables offered and resolved are the ones actually available where your cursor is (inside a
@@ -148,7 +149,8 @@ blueprint's actual fields (here `title`), not a generic list.
 - **Statamic 5 and 6.** Antlers syntax is shared across both versions; the bundled tag/modifier catalog
   is tailored to the version detected in your project's `composer.json` (falling back to the latest when
   none is found), and custom/addon tags are discovered by scanning your project.
-- Both `*.antlers.html` and `*.antlers.php` views.
+- `*.antlers.html`, `*.antlers.php`, and `*.antlers.xml` views (the last layered over XML for
+  sitemaps/feeds).
 - IntelliJ-based IDEs, version **2025.2 or newer** (IntelliJ IDEA, PhpStorm, WebStorm, and friends). PHP
   inside `{{$ … $}}` / `{{? … ?}}` blocks is highlighted where the JetBrains PHP plugin is available
   (PhpStorm / IDEA Ultimate); everything else works everywhere.

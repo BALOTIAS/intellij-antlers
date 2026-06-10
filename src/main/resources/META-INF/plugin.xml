@@ -5,11 +5,12 @@
     <vendor email="balotamatthias@gmail.com" url="https://github.com/BALOTIAS/intellij-antlers">Matthias Balota</vendor>
     <description><![CDATA[
         <p>Full language support for <b>Statamic Antlers</b> templates
-        (<code>*.antlers.html</code> and <code>*.antlers.php</code>) in IntelliJ-based IDEs.</p>
+        (<code>*.antlers.html</code>, <code>*.antlers.php</code>, and <code>*.antlers.xml</code>) in
+        IntelliJ-based IDEs.</p>
 
-        <p>Antlers is parsed as a template language layered over HTML/CSS, so you get real Antlers
-        intelligence inside <code>{{ }}</code> while keeping the regular HTML and CSS tooling in the
-        surrounding markup. The plugin reads your project's <b>blueprints, fieldsets, collections,
+        <p>Antlers is parsed as a template language layered over HTML/CSS (or <b>XML</b> for
+        <code>.antlers.xml</code> sitemaps/feeds), so you get real Antlers intelligence inside
+        <code>{{ }}</code> while keeping the regular markup tooling in the surrounding content. The plugin reads your project's <b>blueprints, fieldsets, collections,
         taxonomies, navigations, forms,</b> and a view's <b>YAML front matter</b>, so completion,
         navigation, and documentation are blueprint- and view-aware — and <b>scope-aware</b>: the
         variables offered and resolved are the ones actually available where your cursor is (inside a
@@ -85,7 +86,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- AntlersCatalogService is registered via the @Service annotation, not here. -->
-        <fileType name="Antlers" implementationClass="com.github.balotias.intellijantlers.AntlersFileType" fieldName="INSTANCE" language="Antlers" patterns="*.antlers.html;*.antlers.php"/>
+        <fileType name="Antlers" implementationClass="com.github.balotias.intellijantlers.AntlersFileType" fieldName="INSTANCE" language="Antlers" patterns="*.antlers.html;*.antlers.php;*.antlers.xml"/>
         
         <lang.parserDefinition language="Antlers" implementationClass="com.github.balotias.intellijantlers.parser.AntlersParserDefinition"/>
         <lang.ast.factory language="Antlers" implementationClass="com.github.balotias.intellijantlers.parser.AntlersASTFactory"/>

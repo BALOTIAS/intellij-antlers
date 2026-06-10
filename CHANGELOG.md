@@ -28,6 +28,10 @@
 - **Go-to-declaration for literal media paths.** A literal image/media path written in Antlers — glide
   `src="/img/hero.jpg"`, asset `url="photos/x.webp"`, or a bare `{{ "/img/logo.png" }}` — resolves to the
   file under the web root (`public/`, then the default asset container `public/assets/`).
+- **`.antlers.xml` views** (sitemaps, RSS/Atom feeds) are now recognized — Antlers layered over **XML**
+  instead of HTML, so the markup gets XML tooling while the `{{ }}` stay Antlers. Conditionally-emitted
+  elements (`{{ if }}<url>…</url>{{ /if }}`) and Antlers in tag-attribute position
+  (`<urlset {{ yield:namespace }}>`) don't trigger false well-formedness errors.
 
 ### Fixed
 
