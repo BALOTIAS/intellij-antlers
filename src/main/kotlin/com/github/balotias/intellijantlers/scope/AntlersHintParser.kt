@@ -2,13 +2,13 @@ package com.github.balotias.intellijantlers.scope
 
 /**
  * Parses Antlers Toolbox "Template IDE Hint" directives out of a `{{# … #}}` comment body. Pure /
- * IntelliJ-free; tolerant. A directive is a line whose first non-whitespace token is one of the seven
+ * IntelliJ-free; tolerant. A directive is a line whose first non-whitespace token is one of the
  * `@<directive>` keywords, followed by its (trimmed) value.
  */
 object AntlersHintParser {
 
-    /** The seven directive names, without the leading `@`. */
-    val DIRECTIVE_NAMES = setOf("name", "desc", "param", "entry", "collection", "blueprint", "set")
+    /** The recognized directive names, without the leading `@`. */
+    val DIRECTIVE_NAMES = setOf("name", "desc", "param", "deprecated", "entry", "collection", "blueprint", "set")
 
     /** `nameStart`/`nameEnd` = half-open `@directive` offsets in the parsed body; `value` is trimmed. */
     data class Directive(val name: String, val nameStart: Int, val nameEnd: Int, val value: String)

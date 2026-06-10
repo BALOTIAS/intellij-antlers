@@ -291,7 +291,7 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                 partialStmt?.let { stmt ->
                     AntlersPartialReferenceHelper.includedPartialFile(stmt)?.let { pf ->
                         for (p in AntlersPartialParams.of(pf))
-                            result.addElement(paramElement(p.name, p.required, p.description))
+                            result.addElement(paramElement(p.name, p.required, p.description, p.deprecated))
                     }
                 }
 
@@ -405,10 +405,11 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
     }
 
     /** A parameter-name lookup element (shared by catalog params and partial `@param`s). */
-    private fun paramElement(name: String, required: Boolean, description: String) =
+    private fun paramElement(name: String, required: Boolean, description: String, deprecated: Boolean = false) =
         LookupElementBuilder.create(name)
             .withIcon(AntlersIcons.FILE)
-            .withTypeText(if (required) "Param*" else "Param")
+            .withTypeText(if (deprecated) "Deprecated" else if (required) "Param*" else "Param")
+            .withStrikeoutness(deprecated)
             .withTailText(if (description.isNotBlank()) "  $description" else null, true)
             .withInsertHandler(ParameterInsertHandler)
 

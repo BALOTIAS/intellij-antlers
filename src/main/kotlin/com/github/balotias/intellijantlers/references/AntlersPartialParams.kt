@@ -15,8 +15,13 @@ import com.intellij.psi.PsiWhiteSpace
  */
 object AntlersPartialParams {
 
-    /** One `@param[*] <name> <description>` declaration. */
-    data class PartialParam(val name: String, val required: Boolean, val description: String)
+    /** One `@param[*] <name> <description>` (or `@deprecated <name> <message>`) declaration. */
+    data class PartialParam(
+        val name: String,
+        val required: Boolean,
+        val description: String,
+        val deprecated: Boolean = false,
+    )
 
     /** Decompose a `@param` directive value into a [PartialParam]; null when there is no name token. */
     fun fromDirectiveValue(value: String): PartialParam? {
@@ -36,10 +41,12 @@ object AntlersPartialParams {
         // tree that actually holds the `{{# … #}}` comments (falling back to the file as given).
         val antlers = partialFile.viewProvider.getPsi(AntlersLanguage.INSTANCE) ?: partialFile
         val body = leadingCommentBody(antlers) ?: return emptyList()
-        return AntlersHintParser.parse(body)
-            .filter { it.name == "@param" }
-            .mapNotNull { fromDirectiveValue(it.value) }
-            .distinctBy { it.name }
+        val directives = AntlersHintParser.parse(body)
+        val params = directives.filter { it.name == "@param" }.mapNotNull { fromDirectiveValue(it.value) }
+        val deprecated = directives.filter { it.name == "@deprecated" }
+            .mapNotNull { fromDirectiveValue(it.value)?.copy(required = false, deprecated = true) }
+        // `@param` wins for a name in both — the param itself isn't deprecated, only a usage of it is.
+        return (params + deprecated).distinctBy { it.name }
     }
 
     private fun leadingCommentBody(file: PsiFile): String? {

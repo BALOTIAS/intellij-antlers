@@ -44,8 +44,8 @@ or an `@collection`-hinted view).
   its own line.
 - Code folding for paired tags, conditions, comments, noparse and PHP blocks.
 - A **Structure view** outline of the template's tag/condition nesting and partial includes.
-- **Template IDE hints**: `{{# @… #}}` directive comments (`@name`, `@desc`, `@param`, `@entry`,
-  `@collection`, `@blueprint`, `@set`) are highlighted and completed after `@`. A leading
+- **Template IDE hints**: `{{# @… #}}` directive comments (`@name`, `@desc`, `@param`, `@deprecated`,
+  `@entry`, `@collection`, `@blueprint`, `@set`) are highlighted and completed after `@`. A leading
   `{{# @collection|@entry|@blueprint <handle> #}}` hint tells the plugin which blueprint a view's
   variables come from, making completion and navigation field-aware even when there's no collection
   mapping for the file.
@@ -73,7 +73,8 @@ or an `@collection`-hinted view).
 - **View front matter**: keys declared in a view's `---` … `---` block are completed after `{{ view: }}`.
 - **Partial parameters**: at a partial include (`{{ partial:components/button … }}`), the parameters the
   partial declares with `{{# @param* label … #}}` directive comments are completed by name (required ones
-  marked `*`), and hovering a param name shows its `@param` description.
+  marked `*`; `@deprecated` ones offered struck through with a *Deprecated* marker), and hovering a param
+  name shows its description — the migration note for a deprecated one.
 - Member/relationship completion when dotting into grid/group fields and related entries.
 
 **Navigation & docs**

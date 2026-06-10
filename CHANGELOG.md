@@ -18,6 +18,10 @@
   **published** view under `resources/views/vendor/<namespace>/…` if present, otherwise to the addon's
   **own** view in `vendor/<org>/<namespace>/resources/views/…` — so Ctrl/⌘-click jumps straight to the
   real partial.
+- **`@deprecated` Template IDE Hint directive.** `{{# @deprecated <param> <message> #}}` is now a
+  recognized directive — highlighted, and suggested after `@` alongside `@param`/`@name`/… A partial's
+  deprecated parameters are still offered at the include (so existing usages resolve) but shown **struck
+  through** with a *Deprecated* marker, and hovering one shows its migration note.
 
 ### Fixed
 

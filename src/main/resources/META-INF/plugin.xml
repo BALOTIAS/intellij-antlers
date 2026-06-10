@@ -28,7 +28,7 @@
             errors; a view's <code>---</code>…<code>---</code> front matter editable as a real
             <b>YAML</b> island; brace matching, commenting, and <code>{{ }}</code> auto-insert; code
             folding; a <b>Structure view</b> outline; and <b>Template IDE hints</b>
-            (<code>{{# @name / @collection / @blueprint … #}}</code>).</li>
+            (<code>{{# @name / @param / @deprecated / @collection … #}}</code>).</li>
 
             <li><b>Smart block editing</b> — completing a tag drops the caret where you'll type
             (a parameter slot, or straight into the block); <b>Tab</b> walks parameter slots and then

@@ -14,6 +14,10 @@ class AntlersHintCompletionTest : BasePlatformTestCase() {
         assertTrue("offers hint directives, got $items", items.containsAll(listOf("name", "collection", "blueprint")))
     }
 
+    fun testDeprecatedDirectiveOffered() {
+        assertTrue("offers @deprecated", complete("{{# @<caret> #}}").contains("deprecated"))
+    }
+
     fun testFiltersByTypedPrefix() {
         // 'col' → only 'collection' matches; completeBasic auto-inserts the single match.
         myFixture.configureByText("p.antlers.html", "{{# @col<caret> #}}")

@@ -147,10 +147,11 @@ class AntlersDocumentationProvider : AbstractDocumentationProvider() {
         if (PsiTreeUtil.getChildOfType(statement, AntlersNamePathMixin::class.java)?.head != "partial") return null
         val partial = AntlersPartialReferenceHelper.includedPartialFile(statement) ?: return null
         val pp = AntlersPartialParams.of(partial).firstOrNull { it.name == name } ?: return null
-        val req = if (pp.required) " (required)" else " (optional)"
+        val req = if (pp.deprecated) " (deprecated)" else if (pp.required) " (required)" else " (optional)"
+        val desc = if (pp.deprecated) "Deprecated. ${pp.description}".trim() else pp.description
         return section(
             "Parameter <b>${esc(name)}</b>$req — partial <code>${esc(partial.name)}</code>",
-            pp.description,
+            desc,
             ""
         )
     }

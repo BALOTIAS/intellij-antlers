@@ -7,7 +7,8 @@ class AntlersPartialParamDocTest : BasePlatformTestCase() {
     private fun setup() {
         myFixture.addFileToProject(
             "resources/views/components/_button.antlers.html",
-            "{{#\n@param* label The caption label.\n@param as The wrapping element.\n#}}\n<button></button>"
+            "{{#\n@param* label The caption label.\n@param as The wrapping element.\n" +
+                "@deprecated old_icon Use the icon param instead.\n#}}\n<button></button>"
         )
     }
 
@@ -44,5 +45,12 @@ class AntlersPartialParamDocTest : BasePlatformTestCase() {
         val doc = docAt("{{ partial src=\"components/button\" a<caret>s=\"h2\" }}")
         assertNotNull("expected doc for `as` in the src= include form", doc)
         assertTrue(doc!!.contains("The wrapping element."))
+    }
+
+    fun testDeprecatedParamDoc() {
+        val doc = docAt("{{ partial:components/button old_i<caret>con=\"x\" }}")
+        assertNotNull("expected doc for the deprecated param", doc)
+        assertTrue("marked deprecated: $doc", doc!!.contains("deprecated"))
+        assertTrue("shows the migration note: $doc", doc.contains("Use the icon param instead."))
     }
 }

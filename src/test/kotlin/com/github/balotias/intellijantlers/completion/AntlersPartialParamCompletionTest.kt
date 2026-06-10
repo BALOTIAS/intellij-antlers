@@ -11,6 +11,7 @@ class AntlersPartialParamCompletionTest : BasePlatformTestCase() {
             @param as The wrapping element.
             @param button_type Inline if needed.
             @param faux Boolean.
+            @deprecated old_icon Use the icon param instead.
         #}}
         <button>{{ label }}</button>
     """.trimIndent()
@@ -54,6 +55,15 @@ class AntlersPartialParamCompletionTest : BasePlatformTestCase() {
         val label = completeElementsIn("{{ partial:components/button <caret> }}").first { it.lookupString == "label" }
         val p = LookupElementPresentation(); label.renderElement(p)
         assertEquals("Param*", p.typeText)
+    }
+
+    fun testDeprecatedParamOfferedWithStrikeoutMarker() {
+        val els = completeElementsIn("{{ partial:components/button <caret> }}")
+        val el = els.firstOrNull { it.lookupString == "old_icon" }
+        assertNotNull("deprecated param is still offered: ${els.map { it.lookupString }}", el)
+        val p = LookupElementPresentation(); el!!.renderElement(p)
+        assertEquals("Deprecated", p.typeText)
+        assertTrue("rendered struck through", p.isStrikeout)
     }
 
     fun testUnresolvedPartialDoesNotCrash() {

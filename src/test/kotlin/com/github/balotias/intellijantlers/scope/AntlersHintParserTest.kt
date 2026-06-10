@@ -18,6 +18,12 @@ class AntlersHintParserTest {
         assertEquals(emptyList<String>(), names("just prose\n@unknown x\n  @ also not\n"))
     }
 
+    @Test fun recognizesDeprecatedDirective() {
+        val d = AntlersHintParser.parse("@deprecated srcset_from Use sources instead.\n").single()
+        assertEquals("@deprecated", d.name)
+        assertEquals("srcset_from Use sources instead.", d.value)
+    }
+
     @Test fun capturesValueAndNameSpan() {
         val body = "  @collection blog\n"
         val d = AntlersHintParser.parse(body).single()
@@ -25,9 +31,9 @@ class AntlersHintParserTest {
         assertEquals("@collection", body.substring(d.nameStart, d.nameEnd))
     }
 
-    @Test fun directiveSetIsTheSevenNames() {
+    @Test fun directiveSetIsTheKnownNames() {
         assertEquals(
-            setOf("name", "desc", "param", "entry", "collection", "blueprint", "set"),
+            setOf("name", "desc", "param", "deprecated", "entry", "collection", "blueprint", "set"),
             AntlersHintParser.DIRECTIVE_NAMES
         )
     }
