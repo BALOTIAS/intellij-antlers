@@ -23,7 +23,9 @@
             query/builder operators <code>where</code>/<code>take</code>/<code>groupby</code>/&hellip;,
             the inline <code>switch</code> operator, and <code>void</code>); Antlers interpolation
             inside strings (<code>"object-position: {logo:focus_css}"</code>) highlighted as real
-            Antlers; a view's <code>---</code>…<code>---</code> front matter editable as a real
+            Antlers; Antlers-generated <code>&lt;script&gt;</code>/<code>&lt;style&gt;</code> content (e.g.
+            a JSON-LD graph built with <code>{{ if }}</code> loops) without false JS/CSS/JSON parser
+            errors; a view's <code>---</code>…<code>---</code> front matter editable as a real
             <b>YAML</b> island; brace matching, commenting, and <code>{{ }}</code> auto-insert; code
             folding; a <b>Structure view</b> outline; and <b>Template IDE hints</b>
             (<code>{{# @name / @collection / @blueprint … #}}</code>).</li>
