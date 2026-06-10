@@ -166,6 +166,9 @@ blueprint's actual fields (here `title`), not a generic list.
   `<{{ as }} … >`). Such lines sit at the tag's attribute level rather than one deeper. Everything else —
   HTML elements, Antlers pairs/loops/conditions, and multi-line `{{ }}` params — indents to the correct
   combined depth.
+- **Media-path go-to-declaration** resolves files under `public/` (and the default `public/assets/`). An
+  asset container mapped to a **custom filesystem disk** isn't resolved — that disk's root lives in
+  `config/filesystems.php`, which the plugin doesn't read.
 
 ## Installation
 
