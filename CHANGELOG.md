@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-06-10
+
 ### Added
 
 - **Go-to-declaration, Find Usages, and Rename for blueprint fields used inside tag conditions.** A field
@@ -235,7 +237,8 @@ First public release.
 - Identifiers no longer swallow a trailing hyphen, so compound operators lex correctly (`{{ foo-=3 }}`
   is `foo` `-=` `3`); kebab-case names like `meta-title` / `count-1` are still single identifiers.
 
-[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.7...HEAD
+[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.8...HEAD
+[1.0.8]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.7...1.0.8
 [1.0.7]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.4...1.0.5
