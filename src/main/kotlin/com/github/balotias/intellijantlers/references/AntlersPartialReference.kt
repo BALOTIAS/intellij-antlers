@@ -1,5 +1,7 @@
 package com.github.balotias.intellijantlers.references
 
+import com.intellij.codeInspection.LocalQuickFix
+import com.intellij.codeInspection.LocalQuickFixProvider
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -20,12 +22,16 @@ class AntlersPartialReference(
     range: TextRange,
     private val path: String,
     val isPathTail: Boolean = true
-) : PsiReferenceBase<PsiElement>(element, range) {
+) : PsiReferenceBase<PsiElement>(element, range), LocalQuickFixProvider {
 
     override fun resolve(): PsiElement? {
         val vf = StatamicProject.resolvePartial(element, path) ?: return null
         return PsiManager.getInstance(element.project).findFile(vf)
     }
+
+    /** When the partial is unresolved, offer to create the view file (only on the tail ref, once). */
+    override fun getQuickFixes(): Array<LocalQuickFix> =
+        if (isPathTail && resolve() == null) arrayOf(CreatePartialFix(path)) else emptyArray()
 
     override fun handleElementRename(newElementName: String): PsiElement {
         if (!isPathTail) return element   // dir-part references navigate but don't rewrite

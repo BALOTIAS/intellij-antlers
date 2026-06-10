@@ -83,11 +83,11 @@ or an `@collection`-hinted view).
   and for partial-include parameters (from the partial's `@param` hints); plus **parameter info**
   (Ctrl/⌘P) for modifier arguments.
 
-**Diagnostics**
 - A tag-balance annotator (unclosed/stray conditions and paired tags) that leaves unknown/addon tags
-  alone, and an inspection for unknown modifiers — both with **quick-fixes**: *Insert closing
-  `{{ /… }}`* for an unclosed tag/condition, and *Change to `…`* (closest-match suggestions) for a
-  mistyped modifier.
+  alone, an unknown-modifier inspection, and an unresolved-partial inspection — all with **quick-fixes**:
+  *Insert closing `{{ /… }}`* for an unclosed tag/condition, *Remove stray closing tag* for an orphan
+  closer, *Change to `…`* (closest-match suggestions) for a mistyped modifier, and *Create partial* to
+  create the missing view file for an unresolved `{{ partial:… }}`.
 
 **Refactoring**
 - **Rename** and **Find Usages** for partials (file ↔ every include) and for blueprint field

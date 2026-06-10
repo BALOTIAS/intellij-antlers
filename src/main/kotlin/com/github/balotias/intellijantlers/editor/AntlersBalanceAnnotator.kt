@@ -33,12 +33,12 @@ class AntlersBalanceAnnotator : Annotator {
                 val name = (closing as? AntlersClosingTagMixin)?.closedName?.substringBefore(':') ?: continue
                 if (name in CONDITION_OPENERS || catalog.tag(name)?.isPair == true) {
                     holder.newAnnotation(HighlightSeverity.ERROR, "Closing '/$name' has no matching opening tag.")
-                        .range(stmt).create()
+                        .range(stmt).withFix(RemoveStrayCloserFix(stmt)).create()
                 }
             } else {
                 val kw = (stmt.condition as? AntlersConditionMixin)?.keyword ?: continue
                 holder.newAnnotation(HighlightSeverity.ERROR, "Closing '$kw' has no matching opening tag.")
-                    .range(stmt).create()
+                    .range(stmt).withFix(RemoveStrayCloserFix(stmt)).create()
             }
         }
 

@@ -108,6 +108,16 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
             mismatch(text).isEmpty())
     }
 
+    // A stray closer (no opener) offers a fix that removes it.
+    fun testRemoveStrayCloserFix() {
+        myFixture.configureByText("p.antlers.html", "{{ /collection }}")
+        val fixes = myFixture.getAllQuickFixes()
+        val fix = fixes.firstOrNull { it.text.startsWith("Remove stray") }
+        assertNotNull("expected a remove-stray-closer fix: ${fixes.map { it.text }}", fix)
+        myFixture.launchAction(fix!!)
+        assertFalse("stray closer removed: ${myFixture.file.text}", myFixture.file.text.contains("/collection"))
+    }
+
     // An unclosed pair tag offers an "Insert closing" fix that appends the matching closer.
     fun testInsertCloserFixForUnclosedTag() {
         myFixture.configureByText("p.antlers.html", "{{ collection:blog }}")

@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- **Quick-fixes on diagnostics.** An unknown modifier offers *"Change to '…'"* suggestions (the closest
+  known modifiers, for typos like `uppr` → `upper`); an unclosed pair tag / condition offers *"Insert
+  closing '{{ /… }}'"*; a stray closer with no opener offers *"Remove stray closing tag"*; and a
+  `{{ partial:… }}` that resolves to no view file is flagged with a *"Create partial"* fix that creates it.
+
 ## [1.0.8] - 2026-06-10
 
 ### Added
@@ -13,9 +20,6 @@
   resolves to its blueprint declaration — Ctrl/⌘-click navigates to it, Find Usages lists the condition,
   and renaming the field updates the condition — resolved in the queried tag's collection/taxonomy/user
   blueprint.
-- **Quick-fixes on diagnostics.** An unknown modifier now offers *"Change to '…'"* suggestions (the
-  closest known modifiers, for typos like `uppr` → `upper`), and an unclosed pair tag / condition offers
-  *"Insert closing '{{ /… }}'"* to append the matching closer.
 
 ### Fixed
 
