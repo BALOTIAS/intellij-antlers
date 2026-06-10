@@ -9,7 +9,11 @@
 - **Quick-fixes on diagnostics.** An unknown modifier offers *"Change to '…'"* suggestions (the closest
   known modifiers, for typos like `uppr` → `upper`); an unclosed pair tag / condition offers *"Insert
   closing '{{ /… }}'"*; a stray closer with no opener offers *"Remove stray closing tag"*; and a
-  `{{ partial:… }}` that resolves to no view file is flagged with a *"Create partial"* fix that creates it.
+  `{{ partial:… }}` that resolves to no **local** view file is flagged with a *"Create partial"* fix that
+  creates it. Dynamic paths (`src="page_builder/{type}"`) and vendor-namespaced partials
+  (`partial:addon::snippets/seo`) are not flagged (no false positives).
+- **Vendor-namespaced partials** (`partial:addon::path`) resolve to their published view under
+  `resources/views/vendor/<namespace>/…` for go-to-declaration.
 
 ## [1.0.8] - 2026-06-10
 

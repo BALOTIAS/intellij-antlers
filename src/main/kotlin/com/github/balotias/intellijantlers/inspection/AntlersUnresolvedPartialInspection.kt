@@ -23,7 +23,8 @@ class AntlersUnresolvedPartialInspection : LocalInspectionTool() {
                 if (element !is AntlersIdentLeaf && element !is AntlersStringLeaf) return
                 val ref = element.references.filterIsInstance<AntlersPartialReference>()
                     .firstOrNull { it.isPathTail } ?: return
-                if (ref.resolve() != null) return
+                // Skip dynamic (`{…}`) and vendor-namespaced (`ns::path`) paths — not a creatable local view.
+                if (!ref.isLocalViewPath || ref.resolve() != null) return
                 holder.registerProblem(
                     element, "Cannot resolve partial", ProblemHighlightType.WEAK_WARNING, *ref.quickFixes
                 )

@@ -91,6 +91,20 @@ object AntlersPartialReferenceHelper {
         return PsiManager.getInstance(statement.project).findFile(vf)
     }
 
+    /**
+     * The partial's path exactly as written — the `src="…"` value, else the text after `partial:` up to
+     * the next whitespace or closing delimiter. Text-based on purpose: it stays correct for forms the PSI
+     * fragments on, namely vendor namespaces (`ns::path`, where `:snippets` parses as a bound parameter)
+     * and interpolated paths (`page_builder/{type}`). Returns null when there is no path.
+     */
+    fun rawPartialPath(statement: AntlersStatement): String? {
+        srcParamValue(statement)?.let { return it }
+        val text = statement.text
+        val i = text.indexOf("partial:")
+        if (i < 0) return null
+        return text.substring(i + "partial:".length).takeWhile { !it.isWhitespace() && it != '}' }.ifBlank { null }
+    }
+
     private fun srcParamValue(statement: AntlersStatement): String? {
         val param = PsiTreeUtil.getChildrenOfTypeAsList(statement, AntlersParameterMixin::class.java)
             .firstOrNull { it.parameterName == "src" } ?: return null

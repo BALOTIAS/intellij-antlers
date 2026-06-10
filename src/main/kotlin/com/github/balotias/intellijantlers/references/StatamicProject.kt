@@ -50,8 +50,16 @@ object StatamicProject {
      */
     fun resolvePartial(element: PsiElement, rawPath: String): VirtualFile? {
         val root = viewsRoot(element) ?: return null
-        val path = rawPath.replace('.', '/')   // Laravel/Statamic dot notation: layouts.default.footer
         val exts = listOf("antlers.html", "antlers.php", "html")
+        // Vendor namespace: `ns::path` → views published to resources/views/vendor/<ns>/<path>.
+        if (rawPath.contains("::")) {
+            val ns = rawPath.substringBefore("::")
+            val sub = rawPath.substringAfter("::").replace('.', '/')
+            if (ns.isBlank() || sub.isBlank()) return null
+            for (ext in exts) root.findFileByRelativePath("vendor/$ns/$sub.$ext")?.let { return it }
+            return null
+        }
+        val path = rawPath.replace('.', '/')   // Laravel/Statamic dot notation: layouts.default.footer
         val names = listOf(path, underscoredPartial(path))   // exact name, then `_basename`
         for (loc in listOf("partials/", "")) {
             for (name in names) {

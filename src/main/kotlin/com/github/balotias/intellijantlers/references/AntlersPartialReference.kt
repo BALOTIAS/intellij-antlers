@@ -1,5 +1,6 @@
 package com.github.balotias.intellijantlers.references
 
+import com.github.balotias.intellijantlers.psi.AntlersStatement
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.LocalQuickFixProvider
 import com.intellij.openapi.util.TextRange
@@ -8,6 +9,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.util.PsiTreeUtil
 
 /**
  * Resolves a partial path (e.g. "blog/card") to its template file under `resources/views`.
@@ -25,13 +27,25 @@ class AntlersPartialReference(
 ) : PsiReferenceBase<PsiElement>(element, range), LocalQuickFixProvider {
 
     override fun resolve(): PsiElement? {
-        val vf = StatamicProject.resolvePartial(element, path) ?: return null
+        val vf = StatamicProject.resolvePartial(element, rawPath()) ?: return null
         return PsiManager.getInstance(element.project).findFile(vf)
     }
 
-    /** When the partial is unresolved, offer to create the view file (only on the tail ref, once). */
+    /**
+     * False for a dynamic (`{interpolation}`) or vendor-namespaced (`ns::path`) path — these aren't a
+     * creatable local view, so they're neither flagged as unresolved nor offered a "create" fix.
+     */
+    val isLocalViewPath: Boolean
+        get() = rawPath().let { !it.contains('{') && !it.contains('}') && !it.contains("::") }
+
+    /** When an *unresolved local* partial, offer to create the view file (only on the tail ref, once). */
     override fun getQuickFixes(): Array<LocalQuickFix> =
-        if (isPathTail && resolve() == null) arrayOf(CreatePartialFix(path)) else emptyArray()
+        if (isPathTail && isLocalViewPath && resolve() == null) arrayOf(CreatePartialFix(rawPath())) else emptyArray()
+
+    /** The path as written (robust to the `::`/`{}` the PSI fragments on), falling back to the PSI path. */
+    private fun rawPath(): String =
+        PsiTreeUtil.getParentOfType(element, AntlersStatement::class.java)
+            ?.let { AntlersPartialReferenceHelper.rawPartialPath(it) } ?: path
 
     override fun handleElementRename(newElementName: String): PsiElement {
         if (!isPathTail) return element   // dir-part references navigate but don't rewrite
