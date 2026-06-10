@@ -108,6 +108,24 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
             mismatch(text).isEmpty())
     }
 
+    // An unclosed pair tag offers an "Insert closing" fix that appends the matching closer.
+    fun testInsertCloserFixForUnclosedTag() {
+        myFixture.configureByText("p.antlers.html", "{{ collection:blog }}")
+        val fixes = myFixture.getAllQuickFixes()
+        val fix = fixes.firstOrNull { it.text.startsWith("Insert closing") }
+        assertNotNull("expected an insert-closer fix: ${fixes.map { it.text }}", fix)
+        myFixture.launchAction(fix!!)
+        assertTrue("closer appended: ${myFixture.file.text}", myFixture.file.text.contains("{{ /collection }}"))
+    }
+
+    fun testInsertCloserFixForUnclosedCondition() {
+        myFixture.configureByText("p.antlers.html", "{{ if x }}")
+        val fix = myFixture.getAllQuickFixes().firstOrNull { it.text.startsWith("Insert closing") }
+        assertNotNull(fix)
+        myFixture.launchAction(fix!!)
+        assertTrue("if closer appended: ${myFixture.file.text}", myFixture.file.text.contains("{{ /if }}"))
+    }
+
     // The name path of such an opener stops at the tag handle (`collection:events`), not the condition.
     fun testConditionNotAbsorbedIntoNamePath() {
         myFixture.configureByText("p.antlers.html", "{{ collection:events :event_date.start=\"today\" }}")

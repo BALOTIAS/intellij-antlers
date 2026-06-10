@@ -85,7 +85,9 @@ or an `@collection`-hinted view).
 
 **Diagnostics**
 - A tag-balance annotator (unclosed/stray conditions and paired tags) that leaves unknown/addon tags
-  alone, and an inspection for unknown modifiers.
+  alone, and an inspection for unknown modifiers — both with **quick-fixes**: *Insert closing
+  `{{ /… }}`* for an unclosed tag/condition, and *Change to `…`* (closest-match suggestions) for a
+  mistyped modifier.
 
 **Refactoring**
 - **Rename** and **Find Usages** for partials (file ↔ every include) and for blueprint field

@@ -71,7 +71,9 @@ class AntlersBalanceAnnotator : Annotator {
         for (n in nodes) {
             if (n.closer == null) {
                 holder.newAnnotation(HighlightSeverity.WARNING, "'{{ ${n.name} }}' is never closed.")
-                    .range(n.opener).create()
+                    .range(n.opener)
+                    .withFix(InsertClosingTagFix(n.name))
+                    .create()
             }
             reportUnclosed(n.children, holder)
         }

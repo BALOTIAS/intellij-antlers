@@ -13,6 +13,9 @@
   resolves to its blueprint declaration — Ctrl/⌘-click navigates to it, Find Usages lists the condition,
   and renaming the field updates the condition — resolved in the queried tag's collection/taxonomy/user
   blueprint.
+- **Quick-fixes on diagnostics.** An unknown modifier now offers *"Change to '…'"* suggestions (the
+  closest known modifiers, for typos like `uppr` → `upper`), and an unclosed pair tag / condition offers
+  *"Insert closing '{{ /… }}'"* to append the matching closer.
 
 ### Fixed
 

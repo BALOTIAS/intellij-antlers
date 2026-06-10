@@ -52,7 +52,9 @@
             parameter info for modifier arguments.</li>
 
             <li><b>Diagnostics</b> — a tag-balance annotator (unclosed/stray/ mismatched conditions and
-            paired tags) that leaves unknown/addon tags alone, plus an unknown-modifier inspection.</li>
+            paired tags) that leaves unknown/addon tags alone, plus an unknown-modifier inspection — both
+            with <b>quick-fixes</b> (insert the missing closing tag; change a mistyped modifier to the
+            closest known one).</li>
 
             <li><b>Refactoring</b> — Rename and Find Usages for partials and for blueprint field handles
             (the YAML <code>handle:</code> &harr; every <code>{{ &hellip; }}</code> usage, including a field

@@ -57,4 +57,21 @@ class AntlersUnknownModifierInspectionTest : BasePlatformTestCase() {
         assertTrue("a bare pipe with no modifier name produces no warning",
             unknownModifierWarnings("{{ title | }}").isEmpty())
     }
+
+    // A close typo of a real modifier offers a "Change to '…'" quick-fix that rewrites the name.
+    fun testQuickFixSuggestsClosestModifier() {
+        myFixture.configureByText("p.antlers.html", "{{ title | uppr }}")
+        val fixes = myFixture.getAllQuickFixes()
+        val fix = fixes.firstOrNull { it.text == "Change to 'upper'" }
+        assertNotNull("expected a 'Change to upper' fix: ${fixes.map { it.text }}", fix)
+        myFixture.launchAction(fix!!)
+        myFixture.checkResult("{{ title | upper }}")
+    }
+
+    // A name nowhere near a real modifier offers no spurious suggestion.
+    fun testNoSuggestionForUnrelatedName() {
+        myFixture.configureByText("p.antlers.html", "{{ title | zzzqqqxyz }}")
+        assertTrue("no 'Change to' fix for an unrelated name",
+            myFixture.getAllQuickFixes().none { it.text.startsWith("Change to ") })
+    }
 }
