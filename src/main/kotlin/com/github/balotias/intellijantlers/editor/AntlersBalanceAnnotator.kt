@@ -70,14 +70,23 @@ class AntlersBalanceAnnotator : Annotator {
     private fun reportUnclosed(nodes: List<NestingNode>, holder: AnnotationHolder) {
         for (n in nodes) {
             if (n.closer == null) {
-                holder.newAnnotation(HighlightSeverity.WARNING, "'{{ ${n.name} }}' is never closed.")
+                val handle = closerHandle(n)
+                holder.newAnnotation(HighlightSeverity.WARNING, "'{{ $handle }}' is never closed.")
                     .range(n.opener)
-                    .withFix(InsertClosingTagFix(n.name))
+                    .withFix(InsertClosingTagFix(handle))
                     .create()
             }
             reportUnclosed(n.children, holder)
         }
     }
+
+    /**
+     * The closer handle for an unclosed opener: the tag's full name path — keeping the shorthand
+     * (`collection:drinks`, not just `collection`) — or the condition keyword (`if`). Parameters and
+     * conditions sit outside the name path, so they're naturally excluded.
+     */
+    private fun closerHandle(node: NestingNode): String =
+        (node.opener.namePath as? AntlersNamePathMixin)?.text?.trim()?.takeIf { it.isNotBlank() } ?: node.name
 
     companion object {
         private val CONDITION_OPENERS = setOf("if", "unless")

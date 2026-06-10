@@ -8,7 +8,9 @@
 
 - **Quick-fixes on diagnostics.** An unknown modifier offers *"Change to '…'"* suggestions (the closest
   known modifiers, for typos like `uppr` → `upper`); an unclosed pair tag / condition offers *"Insert
-  closing '{{ /… }}'"*; a stray closer with no opener offers *"Remove stray closing tag"*; and a
+  closing '{{ /… }}'"* — keeping the shorthand handle (`{{ /collection:drinks }}`, not `{{ /collection }}`,
+  for `{{ collection:drinks type:is="tiki" … }}`); a stray closer with no opener offers *"Remove stray
+  closing tag"*; and a
   `{{ partial:… }}` that resolves to no **local** view file is flagged with a *"Create partial"* fix that
   creates it. Dynamic paths (`src="page_builder/{type}"`) and vendor-namespaced partials
   (`partial:addon::snippets/seo`) are not flagged (no false positives).

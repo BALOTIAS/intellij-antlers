@@ -118,14 +118,36 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
         assertFalse("stray closer removed: ${myFixture.file.text}", myFixture.file.text.contains("/collection"))
     }
 
-    // An unclosed pair tag offers an "Insert closing" fix that appends the matching closer.
+    // An unclosed pair tag offers an "Insert closing" fix that appends the matching closer — keeping the
+    // shorthand handle (`{{ /collection:blog }}`, not `{{ /collection }}`).
     fun testInsertCloserFixForUnclosedTag() {
         myFixture.configureByText("p.antlers.html", "{{ collection:blog }}")
         val fixes = myFixture.getAllQuickFixes()
         val fix = fixes.firstOrNull { it.text.startsWith("Insert closing") }
         assertNotNull("expected an insert-closer fix: ${fixes.map { it.text }}", fix)
         myFixture.launchAction(fix!!)
-        assertTrue("closer appended: ${myFixture.file.text}", myFixture.file.text.contains("{{ /collection }}"))
+        assertTrue("closer keeps the shorthand: ${myFixture.file.text}", myFixture.file.text.contains("{{ /collection:blog }}"))
+    }
+
+    // The closer respects the shorthand even with condition/parameter tail — params are not part of it.
+    fun testInsertCloserKeepsShorthandWithParams() {
+        myFixture.configureByText(
+            "p.antlers.html", "{{ collection:drinks type:is=\"tiki\" ingredients:in=\"Orgeat\" }}"
+        )
+        val fix = myFixture.getAllQuickFixes().firstOrNull { it.text.startsWith("Insert closing") }
+        assertNotNull(fix)
+        myFixture.launchAction(fix!!)
+        assertTrue("closer is the full handle, no params: ${myFixture.file.text}",
+            myFixture.file.text.contains("{{ /collection:drinks }}"))
+    }
+
+    // A plain tag with no shorthand still closes head-only.
+    fun testInsertCloserPlainTag() {
+        myFixture.configureByText("p.antlers.html", "{{ nocache }}")
+        val fix = myFixture.getAllQuickFixes().firstOrNull { it.text.startsWith("Insert closing") }
+        assertNotNull(fix)
+        myFixture.launchAction(fix!!)
+        assertTrue("plain closer: ${myFixture.file.text}", myFixture.file.text.contains("{{ /nocache }}"))
     }
 
     fun testInsertCloserFixForUnclosedCondition() {
