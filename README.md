@@ -56,7 +56,8 @@ or an `@collection`-hinted view).
   the condition operators (`is`, `contains`, `starts_with`, `is_after`, `in`, `gt`, …) are completed
   after a `field:`, the target blueprint fields are offered as condition targets, and the value side is
   completed too (`status:is="published"`, `exists="true"`, `is_after="now"`). The operator is highlighted
-  and hovering it shows its documentation.
+  and hovering it shows its documentation, and the **field resolves to its blueprint declaration** — so
+  Ctrl/⌘-click, Find Usages, and Rename work on a field used inside a condition.
 - Logic keywords (`if`, `unless`, `else`, `elseif`, `endif`) and the query/builder operators
   (`where`, `merge`, `orderby`, `groupby`, `take`, `skip`, `pluck`) offered inside `{{ }}`, context-aware —
   the condition followers (`else`/`elseif`/`endif`) appear only inside the matching open block.

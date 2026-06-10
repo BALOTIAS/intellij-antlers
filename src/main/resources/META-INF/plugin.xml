@@ -55,7 +55,8 @@
             paired tags) that leaves unknown/addon tags alone, plus an unknown-modifier inspection.</li>
 
             <li><b>Refactoring</b> — Rename and Find Usages for partials and for blueprint field handles
-            (the YAML <code>handle:</code> &harr; every <code>{{ &hellip; }}</code> usage).</li>
+            (the YAML <code>handle:</code> &harr; every <code>{{ &hellip; }}</code> usage, including a field
+            used inside a tag query condition such as <code>title:contains=&quot;&hellip;&quot;</code>).</li>
 
             <li><b>Formatting</b> — indentation-only Reformat Code designed to coexist with Prettier:
             normalizes spacing in <code>{{ }}</code>, indents tag/condition bodies, dedents
