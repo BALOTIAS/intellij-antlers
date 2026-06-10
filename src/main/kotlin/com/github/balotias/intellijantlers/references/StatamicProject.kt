@@ -50,6 +50,22 @@ object StatamicProject {
      */
     private val EXTS = listOf("antlers.html", "antlers.php", "html")
 
+    /**
+     * The SVG file the `svg` tag (`{{ svg:trash }}` / `{{ svg src="trash" }}`) renders, resolved through
+     * Statamic's path cascade: `resources/svg` → `resources` → `public/svg` → `public`. `.svg` is appended
+     * when the name doesn't already carry it (mirroring `Str::ensureRight($src, '.svg')` in the tag).
+     */
+    fun resolveSvg(element: PsiElement, rawName: String): VirtualFile? {
+        val resources = viewsRoot(element)?.parent ?: return null
+        val projectRoot = resources.parent ?: return null
+        val file = if (rawName.endsWith(".svg")) rawName else "$rawName.svg"
+        resources.findFileByRelativePath("svg/$file")?.let { return it }
+        resources.findFileByRelativePath(file)?.let { return it }
+        projectRoot.findFileByRelativePath("public/svg/$file")?.let { return it }
+        projectRoot.findFileByRelativePath("public/$file")?.let { return it }
+        return null
+    }
+
     fun resolvePartial(element: PsiElement, rawPath: String): VirtualFile? {
         val root = viewsRoot(element) ?: return null
         if (rawPath.contains("::")) return resolveVendorPartial(root, rawPath)

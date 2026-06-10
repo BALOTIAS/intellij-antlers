@@ -22,6 +22,9 @@
   recognized directive — highlighted, and suggested after `@` alongside `@param`/`@name`/… A partial's
   deprecated parameters are still offered at the include (so existing usages resolve) but shown **struck
   through** with a *Deprecated* marker, and hovering one shows its migration note.
+- **Go-to-declaration for the `svg` tag.** `{{ svg:trash }}` and `{{ svg src="trash" }}` resolve to the
+  SVG file — Ctrl/⌘-click opens it — through Statamic's path cascade (`resources/svg` → `resources` →
+  `public/svg` → `public`, with `.svg` appended when absent, verified against the Statamic source).
 
 ### Fixed
 
