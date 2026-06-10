@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-06-10
+
 ### Added
 
 - **Tag condition values** are now suggested on the right-hand side of a `field:operator="value"`
@@ -216,7 +218,8 @@ First public release.
 - Identifiers no longer swallow a trailing hyphen, so compound operators lex correctly (`{{ foo-=3 }}`
   is `foo` `-=` `3`); kebab-case names like `meta-title` / `count-1` are still single identifiers.
 
-[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.6...HEAD
+[Unreleased]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.7...HEAD
+[1.0.7]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.6...1.0.7
 [1.0.6]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/BALOTIAS/intellij-antlers/compare/1.0.3...1.0.4
