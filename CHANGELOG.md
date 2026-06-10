@@ -30,6 +30,9 @@
   inline `{{ … }}` in JS, `{{ … }}` in CSS values), the injected language can't parse the `{{ }}` — those
   spurious *"Expression expected"* / *"&lt;value&gt; expected"* errors are now suppressed. Real errors in
   a block with no Antlers are still reported, and Antlers/HTML highlighting is untouched.
+- The `:` of a **ternary / elvis** operator (`a ? b : c`, `x ?: y`) is now colored as an **operator** to
+  match the `?`, instead of as subtle path punctuation. Path / modifier / bound-parameter colons
+  (`collection:blog`, `upper:2`, `:src`) stay subtle.
 
 ## [1.0.8] - 2026-06-10
 

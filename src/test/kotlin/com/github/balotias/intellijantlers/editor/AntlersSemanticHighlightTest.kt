@@ -128,6 +128,25 @@ class AntlersSemanticHighlightTest : BasePlatformTestCase() {
     fun testBoundParamNotMiscoloredAsConditionOperator() =
         assertEquals(AntlersSyntaxHighlighter.PARAMETER, keyOver("{{ partial :src=\"x\" }}", "src"))
 
+    // The `:` of a ternary/elvis operator is a loose colon in the expression — painted as an operator to
+    // match the `?`, not left as subtle path punctuation.
+    fun testElvisColonColoredAsOperator() =
+        assertEquals(AntlersSyntaxHighlighter.OPERATOR, keyOver("{{ srcset_from ?: 'default' }}", ":"))
+
+    fun testTernaryColonColoredAsOperator() =
+        assertEquals(AntlersSyntaxHighlighter.OPERATOR, keyOver("{{ test ? 'something' : 'other' }}", ":"))
+
+    // The user-reported shape: an elvis inside a single-brace string interpolation.
+    fun testElvisColonInInterpolationColoredAsOperator() =
+        assertEquals(AntlersSyntaxHighlighter.OPERATOR,
+            keyOver("{{ partial src=\"{ srcset_from ?: 'snippets/srcset_default' }\" }}", ":"))
+
+    // Structural colons (path / modifier arg / bound parameter) stay subtle — the annotator must not
+    // repaint them as operators.
+    fun testPathColonNotOperatorColored() = assertNull(keyOver("{{ collection:blog }}", ":"))
+    fun testModifierColonNotOperatorColored() = assertNull(keyOver("{{ title | upper:2 }}", ":"))
+    fun testBoundParamColonNotOperatorColored() = assertNull(keyOver("{{ partial :src=\"x\" }}", ":"))
+
     /** Count keyword/tag-colored highlights over [token] — used to assert the closer is painted too. */
     private fun coloredCount(text: String, token: String, key: TextAttributesKey): Int {
         myFixture.configureByText("p.antlers.html", text)

@@ -61,6 +61,10 @@ class AntlersSemanticHighlightAnnotator : Annotator {
             }
 
             else -> when {
+                // The `:` of a ternary/elvis operator (`a ? b : c`, `x ?: y`) is a loose T_COLON in the
+                // expression — paint it like the `?` (operator), not as subtle path punctuation.
+                isTernaryColon(element) -> paint(holder, element, AntlersSyntaxHighlighter.OPERATOR)
+
                 // Logical word operators (`and`/`or`/`xor`/`not`) are Statamic LanguageKeywords lexed as
                 // plain T_IDENT; paint them as keywords (like `if`/`else`) so the word stands out rather
                 // than blending into default-foreground text. Only when standing as their own token in an
@@ -107,6 +111,25 @@ class AntlersSemanticHighlightAnnotator : Annotator {
         if (element.text !in valueKeywords) return false
         val parent = element.parent
         return parent is AntlersStatement || parent is AntlersConditionMixin
+    }
+
+    /**
+     * The `:` of a ternary/elvis operator — a loose `T_COLON` standing in an expression / condition body
+     * (so NOT a path `collection:blog`, modifier `upper:2`, or bound-parameter `:src` colon, which sit
+     * under their own node), with a `?` operator earlier in the same expression. (A ternary whose value
+     * after `:` is a bare identifier — `a ? b : c` or `… : void` — parses that colon into a parameter
+     * node and is left subtle; the common string/expression form is covered.)
+     */
+    private fun isTernaryColon(element: PsiElement): Boolean {
+        if (element.node?.elementType != AntlersTypes.T_COLON) return false
+        val parent = element.parent
+        if (parent !is AntlersStatement && parent !is AntlersConditionMixin) return false
+        var sib = element.prevSibling
+        while (sib != null) {
+            if (sib.node?.elementType == AntlersTypes.T_OP && sib.text.contains('?')) return true
+            sib = sib.prevSibling
+        }
+        return false
     }
 
     private fun isSwitchOperatorHead(element: PsiElement): Boolean =

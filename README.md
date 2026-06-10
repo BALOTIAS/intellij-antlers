@@ -28,13 +28,13 @@ or an `@collection`-hinted view).
 - Syntax highlighting for tags, variables, strings, numbers, comments, and PHP/noparse blocks, with
   **operators highlighted as keywords** — the logical word operators (`and`/`or`/`xor`/`not`), the
   query/builder operators (`where`/`merge`/`orderby`/`groupby`/`take`/`skip`/`pluck`), the inline
-  `switch` operator, the `void` placeholder, and the symbolic comparison/math operators all read
-  distinctly from plain text (separate **Operator** and **Punctuation** colors). All colors are
-  customizable (*Settings → Editor → Color Scheme → Antlers*). Antlers
-  interpolation inside strings (`"object-position: {logo:focus_css}"`) is highlighted as real Antlers.
-  Antlers that generates `<script>`/`<style>` content (e.g. a JSON-LD graph built with `{{ if }}` loops)
-  no longer triggers false JS/CSS/JSON parser errors. Plus,
-  and a view's `---` … `---` front matter is a real **YAML** island — comments, highlighting, and YAML
+  `switch` operator, the `void` placeholder, and the symbolic comparison/math operators — including the
+  `:` of a ternary/elvis (`a ? b : c`, `x ?: y`) — all read distinctly from plain text (separate
+  **Operator** and **Punctuation** colors). All colors are customizable (*Settings → Editor → Color
+  Scheme → Antlers*). Antlers interpolation inside strings (`"object-position: {logo:focus_css}"`) is
+  highlighted as real Antlers. Antlers that generates `<script>`/`<style>` content (e.g. a JSON-LD graph
+  built with `{{ if }}` loops) no longer triggers false JS/CSS/JSON parser errors. Plus, a view's
+  `---` … `---` front matter is a real **YAML** island — comments, highlighting, and YAML
   errors/warnings/completion all work inside it.
 - Brace matching (`{{ }}`, comments, noparse, PHP), commenting (`{{# … #}}`), and `{{ }}` auto-insert.
 - **Smart block editing**: completing a tag drops the caret where you'll actually type — a parameter
