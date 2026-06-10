@@ -23,4 +23,17 @@ object AntlersParserUtil : GeneratedParserUtilBase() {
         if (builder.tokenType != AntlersTypes.T_IDENT) return false
         return builder.tokenText in CONDITION_KEYWORDS
     }
+
+    /**
+     * Non-consuming predicate: true when the current token directly abuts the previous one (no
+     * whitespace between). Gates the name-path `:segment`/`.segment` extension so `collection:events`
+     * keeps extending but `collection:events :event_date.start` does NOT — a whitespace-separated `:…`
+     * is a bound-parameter condition, not part of the tag's path. (rawLookup does not skip whitespace.)
+     */
+    @JvmStatic
+    @Suppress("UNUSED_PARAMETER")
+    fun adjacent(builder: PsiBuilder, level: Int): Boolean {
+        val prev = builder.rawLookup(-1) ?: return false
+        return prev != AntlersTypes.T_WS && prev != com.intellij.psi.TokenType.WHITE_SPACE
+    }
 }

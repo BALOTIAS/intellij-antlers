@@ -12,6 +12,15 @@
   and renaming the field updates the condition — resolved in the queried tag's collection/taxonomy/user
   blueprint.
 
+### Fixed
+
+- A tag with a whitespace-separated leading-colon condition — e.g.
+  `{{ collection:events :event_date.start="today" }}` — no longer absorbs that condition into the tag's
+  name path. Previously the name path became `collection:events:event_date:start`, producing a false
+  *"Closing handle ':events' does not match the opening …"* error against `{{ /collection:events }}`. The
+  name path now stops at the tag handle (`collection:events`); a name path extends across `:`/`.` only
+  when the segments are directly adjacent.
+
 ## [1.0.7] - 2026-06-10
 
 ### Added

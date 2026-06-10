@@ -109,7 +109,7 @@ private expr_ ::= T_PERCENT? namePath tail_* | tail_+
 
 private tail_ ::= parameter | modifier | exprToken_
 
-namePath ::= pathSegment ((T_COLON pathSegment !T_EQUALS) | T_DOT pathSegment | bracketAccess)* {
+namePath ::= pathSegment ((<<adjacent>> T_COLON pathSegment !T_EQUALS) | (<<adjacent>> T_DOT pathSegment) | bracketAccess)* {
   mixin="com.github.balotias.intellijantlers.psi.AntlersNamePathMixin"
 }
 private pathSegment ::= T_DOLLAR? (T_IDENT | T_NUMBER)

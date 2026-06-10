@@ -98,4 +98,22 @@ class AntlersBalanceAnnotatorTest : BasePlatformTestCase() {
 
     fun testMultiSegmentMatchNotFlagged() =
         assertTrue(mismatch("{{ nav:collection:blog }}{{ /nav:collection:blog }}").isEmpty())
+
+    // #regression (user-reported): a whitespace-separated leading-colon sub-field condition
+    // `:field.sub="x"` must NOT be absorbed into the tag's name path, so the tag still balances against
+    // its `{{ /collection:events }}` closer.
+    fun testLeadingColonSubfieldConditionDoesNotBreakBalance() {
+        val text = "{{ collection:events :event_date.start=\"today\" }}{{ /collection:events }}"
+        assertTrue("condition absorbed into the opener handle: ${mismatch(text).map { it.description }}",
+            mismatch(text).isEmpty())
+    }
+
+    // The name path of such an opener stops at the tag handle (`collection:events`), not the condition.
+    fun testConditionNotAbsorbedIntoNamePath() {
+        myFixture.configureByText("p.antlers.html", "{{ collection:events :event_date.start=\"today\" }}")
+        val np = com.intellij.psi.util.PsiTreeUtil.findChildOfType(
+            myFixture.file, com.github.balotias.intellijantlers.psi.AntlersNamePathMixin::class.java
+        )!!
+        assertEquals(listOf("collection", "events"), np.segments)
+    }
 }

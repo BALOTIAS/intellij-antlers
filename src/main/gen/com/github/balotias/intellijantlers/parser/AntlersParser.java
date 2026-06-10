@@ -576,7 +576,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // pathSegment ((T_COLON pathSegment !T_EQUALS) | T_DOT pathSegment | bracketAccess)*
+  // pathSegment ((<<adjacent>> T_COLON pathSegment !T_EQUALS) | (<<adjacent>> T_DOT pathSegment) | bracketAccess)*
   public static boolean namePath(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath")) return false;
     boolean result_;
@@ -587,7 +587,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // ((T_COLON pathSegment !T_EQUALS) | T_DOT pathSegment | bracketAccess)*
+  // ((<<adjacent>> T_COLON pathSegment !T_EQUALS) | (<<adjacent>> T_DOT pathSegment) | bracketAccess)*
   private static boolean namePath_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath_1")) return false;
     while (true) {
@@ -598,7 +598,7 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // (T_COLON pathSegment !T_EQUALS) | T_DOT pathSegment | bracketAccess
+  // (<<adjacent>> T_COLON pathSegment !T_EQUALS) | (<<adjacent>> T_DOT pathSegment) | bracketAccess
   private static boolean namePath_1_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath_1_0")) return false;
     boolean result_;
@@ -610,21 +610,22 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // T_COLON pathSegment !T_EQUALS
+  // <<adjacent>> T_COLON pathSegment !T_EQUALS
   private static boolean namePath_1_0_0(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath_1_0_0")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, T_COLON);
+    result_ = adjacent(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, T_COLON);
     result_ = result_ && pathSegment(builder_, level_ + 1);
-    result_ = result_ && namePath_1_0_0_2(builder_, level_ + 1);
+    result_ = result_ && namePath_1_0_0_3(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
   }
 
   // !T_EQUALS
-  private static boolean namePath_1_0_0_2(PsiBuilder builder_, int level_) {
-    if (!recursion_guard_(builder_, level_, "namePath_1_0_0_2")) return false;
+  private static boolean namePath_1_0_0_3(PsiBuilder builder_, int level_) {
+    if (!recursion_guard_(builder_, level_, "namePath_1_0_0_3")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_, level_, _NOT_);
     result_ = !consumeToken(builder_, T_EQUALS);
@@ -632,12 +633,13 @@ public class AntlersParser implements PsiParser, LightPsiParser {
     return result_;
   }
 
-  // T_DOT pathSegment
+  // <<adjacent>> T_DOT pathSegment
   private static boolean namePath_1_0_1(PsiBuilder builder_, int level_) {
     if (!recursion_guard_(builder_, level_, "namePath_1_0_1")) return false;
     boolean result_;
     Marker marker_ = enter_section_(builder_);
-    result_ = consumeToken(builder_, T_DOT);
+    result_ = adjacent(builder_, level_ + 1);
+    result_ = result_ && consumeToken(builder_, T_DOT);
     result_ = result_ && pathSegment(builder_, level_ + 1);
     exit_section_(builder_, marker_, null, result_);
     return result_;
