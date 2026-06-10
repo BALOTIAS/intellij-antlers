@@ -58,6 +58,16 @@ class CatalogTagCoverageTest {
         assertTrue("nav reverse", params("nav").contains("reverse"))
         assertTrue("query_scope on collection", params("collection").contains("query_scope"))
         assertTrue("query_scope on users", params("users").contains("query_scope"))
+        // Minor params verified in the tag source classes.
+        assertTrue("children of/collection", params("children").containsAll(listOf("of", "collection")))
+        assertTrue("increment from/by/to", params("increment").containsAll(listOf("from", "by", "to")))
+        assertTrue("cache scope/store", params("cache").containsAll(listOf("scope", "store")))
+        assertTrue("vite src", params("vite").contains("src"))
+        assertTrue("mix src", params("mix").contains("src"))
+        assertTrue("svg src/sanitize", params("svg").containsAll(listOf("src", "sanitize")))
+        assertTrue("trans key/fallback", params("trans").containsAll(listOf("key", "fallback")))
+        assertTrue("get_files in", params("get_files").contains("in"))
+        assertTrue("get_content from/site", params("get_content").containsAll(listOf("from", "site")))
     }
 
     @Test fun subTagsPresent() {

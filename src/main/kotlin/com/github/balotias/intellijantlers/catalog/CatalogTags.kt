@@ -137,7 +137,9 @@ object CatalogTags {
             isPair = true,
             parameters = listOf(
                 ParamDef(name = "for", description = "Duration, e.g. 60 minutes."),
-                ParamDef(name = "key", description = "A custom cache key.")
+                ParamDef(name = "key", description = "A custom cache key."),
+                ParamDef(name = "scope", description = "Cache scope (site, page, or a custom value)."),
+                ParamDef(name = "store", description = "The cache store to use.")
             )
         ),
         TagDef(
@@ -203,7 +205,12 @@ object CatalogTags {
             name = "increment",
             description = "An auto-incrementing counter.",
             docUrl = "https://statamic.dev/tags/increment",
-            isPair = false
+            isPair = false,
+            parameters = listOf(
+                ParamDef(name = "from", description = "Start value.", type = "integer"),
+                ParamDef(name = "by", description = "Step amount.", type = "integer"),
+                ParamDef(name = "to", description = "Reset after this value.", type = "integer")
+            )
         ),
         TagDef(
             name = "markdown",
@@ -229,26 +236,47 @@ object CatalogTags {
             name = "mix",
             description = "Laravel Mix asset url.",
             docUrl = "https://statamic.dev/tags/mix",
-            isPair = false
+            isPair = false,
+            parameters = listOf(
+                ParamDef(name = "src", description = "Path to the asset."),
+                ParamDef(name = "from", description = "Manifest directory.")
+            )
         ),
         TagDef(
             name = "vite",
             description = "Vite asset tags.",
             docUrl = "https://statamic.dev/tags/vite",
             isPair = false,
-            methods = listOf("content")
+            methods = listOf("content"),
+            parameters = listOf(
+                ParamDef(name = "src", description = "Entry point(s) to include."),
+                ParamDef(name = "directory", description = "Build output directory."),
+                ParamDef(name = "hot", description = "Path to the hot file.")
+            )
         ),
         TagDef(
             name = "svg",
             description = "Inline an SVG.",
             docUrl = "https://statamic.dev/tags/svg",
-            isPair = false
+            isPair = false,
+            parameters = listOf(
+                ParamDef(name = "src", description = "The SVG asset/path."),
+                ParamDef(name = "sanitize", description = "Sanitize the SVG markup.", type = "boolean"),
+                ParamDef(name = "allow_attrs", description = "Extra attributes to allow when sanitizing."),
+                ParamDef(name = "allow_tags", description = "Extra tags to allow when sanitizing."),
+                ParamDef(name = "title", description = "Accessible <title> for the SVG."),
+                ParamDef(name = "desc", description = "Accessible <desc> for the SVG.")
+            )
         ),
         TagDef(
             name = "trans",
             description = "Translate a string.",
             docUrl = "https://statamic.dev/tags/trans",
-            isPair = false
+            isPair = false,
+            parameters = listOf(
+                ParamDef(name = "key", description = "The translation key."),
+                ParamDef(name = "fallback", description = "Fallback string if the key is missing.")
+            )
         ),
         TagDef(
             name = "link",
@@ -266,7 +294,11 @@ object CatalogTags {
             name = "get_content",
             description = "Fetch content by id/url.",
             docUrl = "https://statamic.dev/tags/get_content",
-            isPair = false
+            isPair = false,
+            parameters = listOf(
+                ParamDef(name = "from", description = "The id/URI to fetch."),
+                ParamDef(name = "site", description = "The site to fetch from.")
+            )
         ),
         TagDef(
             name = "search",
@@ -290,7 +322,11 @@ object CatalogTags {
             name = "children",
             description = "Loop over the children of the current page.",
             docUrl = "https://statamic.dev/tags/children",
-            isPair = true
+            isPair = true,
+            parameters = listOf(
+                ParamDef(name = "of", description = "Fetch children of another entry/URI."),
+                ParamDef(name = "collection", description = "Limit to a collection.")
+            )
         ),
         TagDef(
             name = "cookie",
@@ -353,7 +389,18 @@ object CatalogTags {
             docUrl = "https://statamic.dev/tags/get_files",
             isPair = true,
             parameters = listOf(
-                ParamDef(name = "from", description = "Directory path.", required = true)
+                ParamDef(name = "in", description = "Directory path to read.", required = true),
+                ParamDef(name = "from", description = "Alias of in."),
+                ParamDef(name = "depth", description = "How deep to recurse.", type = "integer"),
+                ParamDef(name = "extension", description = "Filter by file extension(s)."),
+                ParamDef(name = "include", description = "Glob(s) to include."),
+                ParamDef(name = "exclude", description = "Glob(s) to exclude."),
+                ParamDef(name = "not_in", description = "Directories to skip."),
+                ParamDef(name = "file_size", description = "Filter by file size."),
+                ParamDef(name = "file_date", description = "Filter by file date."),
+                ParamDef(name = "limit", description = "Maximum number of files.", type = "integer"),
+                ParamDef(name = "offset", description = "Skip this many files.", type = "integer"),
+                ParamDef(name = "sort", description = "Sort field and direction.")
             )
         ),
         TagDef(

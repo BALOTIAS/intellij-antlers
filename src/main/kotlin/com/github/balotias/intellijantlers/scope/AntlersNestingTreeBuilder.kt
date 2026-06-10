@@ -126,6 +126,34 @@ object AntlersNestingTreeBuilder {
         return stack.lastOrNull()
     }
 
+    /** The innermost still-open `foreach` opener strictly before [beforeOffset], or null. */
+    fun enclosingForeachAt(root: PsiElement, beforeOffset: Int, project: Project): AntlersStatement? {
+        val catalog = if (project.isDefault) null else AntlersCatalogService.getInstance(project)
+        val stack = ArrayDeque<Pair<String, AntlersStatement>>()
+        val statements = cachedStatements(root).filter { it.textRange.startOffset < beforeOffset }
+        for (stmt in statements) {
+            val closing = stmt.closingTag
+            if (closing != null) {
+                val name = (closing as? AntlersClosingTagMixin)?.closedName?.substringBefore(':')
+                if (name != null) { val i = stack.indexOfLast { it.first == name }; if (i >= 0) while (stack.size > i) stack.removeLast() }
+                continue
+            }
+            val condition = stmt.condition
+            if (condition != null) {
+                val kw = (condition as? AntlersConditionMixin)?.keyword
+                if (kw != null) {
+                    val opener = CONDITION_CLOSERS[kw]
+                    if (opener != null) { val i = stack.indexOfLast { it.first == opener }; if (i >= 0) while (stack.size > i) stack.removeLast() }
+                    else if (kw in CONDITION_OPENERS) stack.addLast(kw to stmt)
+                }
+                continue
+            }
+            val head = (stmt.namePath as? AntlersNamePathMixin)?.head
+            if (head != null && head.isNotBlank() && catalog?.tag(head)?.isPair == true) stack.addLast(head to stmt)
+        }
+        return stack.lastOrNull { it.first == "foreach" }?.second
+    }
+
     /** Close the frame at [idx] with [closer]; drop inner frames but hoist their closed children up. */
     private fun closeMatched(stack: ArrayDeque<Frame>, idx: Int, closer: AntlersStatement, roots: MutableList<NestingNode>) {
         // Inner unmatched openers are DROPPED (not flagged — matching the original walk), but their

@@ -88,6 +88,10 @@ object FieldtypeProperties {
         FieldProperty("title", "The link title."),
         FieldProperty("element", "The rendered anchor element.")
     )
+    private val CODE = listOf(
+        FieldProperty("code", "The code string."),
+        FieldProperty("mode", "The configured language/mode."),
+    )
     private val DATE = listOf(
         FieldProperty("timestamp", "The Unix timestamp."),
         FieldProperty("iso", "The ISO-8601 string."),
@@ -104,6 +108,7 @@ object FieldtypeProperties {
         "terms", "term", "taxonomy" -> TERMS
         "link" -> LINK
         "date" -> DATE
+        "code" -> CODE
         else -> emptyList()
     }
 }

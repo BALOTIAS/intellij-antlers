@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Inside a **`{{ foreach }}`** loop, the `key` and `value` variables are suggested — or the `as="k|v"`
+  aliases when set.
+- The **`void`** placeholder (`{{ x ? 'a' : void }}`) is highlighted as a language keyword.
+- More source-verified tag parameters (`children` of/collection, `increment` from/by/to, `cache`
+  scope/store, `vite`/`mix`/`svg`/`trans` params, `get_files` filters, `get_content` from/site) and a
+  `code` fieldtype augmentation (`code`/`mode`).
+
 ## [1.0.6] - 2026-06-09
 
 ### Added

@@ -24,6 +24,12 @@ class FieldtypePropertiesTest {
         assertTrue(FieldtypeProperties.forType("text").isEmpty())
     }
 
+    @Test fun codeFieldtypeHasCodeAndMode() {
+        val names = FieldtypeProperties.forType("code").map { it.name }
+        assertTrue(names.contains("code"))
+        assertTrue(names.contains("mode"))
+    }
+
     // Source-verified asset augmentation keys (AugmentedAsset.php) that were missing.
     @Test fun assetsHaveSourceVerifiedImageProps() {
         val names = FieldtypeProperties.forType("assets").map { it.name }.toSet()

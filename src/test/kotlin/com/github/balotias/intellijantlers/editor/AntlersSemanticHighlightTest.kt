@@ -111,6 +111,14 @@ class AntlersSemanticHighlightTest : BasePlatformTestCase() {
     fun testQueryOperatorAsLoneVariableNotColored() =
         assertNull(keyOver("{{ take }}", "take"))
 
+    // The `void` placeholder (nullifies a value, e.g. `{{ x ? 'a' : void }}`) is a language keyword.
+    fun testVoidKeywordColored() =
+        assertEquals(AntlersSyntaxHighlighter.KEYWORD, keyOver("{{ x ? 'a' : void }}", "void"))
+
+    // …but a field access sharing the spelling (`foo.void`) stays an identifier.
+    fun testVoidAsPathSegmentNotColored() =
+        assertNull(keyOver("{{ foo.void }}", "void"))
+
     // A tag query condition `field:operator="value"` — the operator reads as an operator, not a param.
     fun testConditionOperatorColored() =
         assertEquals(AntlersSyntaxHighlighter.OPERATOR,

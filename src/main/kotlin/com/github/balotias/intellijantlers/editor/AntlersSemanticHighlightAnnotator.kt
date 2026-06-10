@@ -32,11 +32,15 @@ class AntlersSemanticHighlightAnnotator : Annotator {
                 firstIdent(element)?.let { paint(holder, it, AntlersSyntaxHighlighter.MODIFIER) }
 
             is AntlersParameterMixin -> {
-                // A `field:operator="value"` query condition parses as a bound parameter named after the
-                // operator — paint it as an operator, not a parameter name.
                 firstIdent(element)?.let { ident ->
-                    val key = if (AntlersConditionOperators.isConditionOperatorIdent(ident))
-                        AntlersSyntaxHighlighter.OPERATOR else AntlersSyntaxHighlighter.PARAMETER
+                    val key = when {
+                        // The `void` placeholder (`{{ x ? 'a' : void }}`) parses as a bound param `:void`.
+                        ident.text in valueKeywords -> AntlersSyntaxHighlighter.KEYWORD
+                        // A `field:operator="value"` query condition parses as a bound parameter named
+                        // after the operator — paint it as an operator, not a parameter name.
+                        AntlersConditionOperators.isConditionOperatorIdent(ident) -> AntlersSyntaxHighlighter.OPERATOR
+                        else -> AntlersSyntaxHighlighter.PARAMETER
+                    }
                     paint(holder, ident, key)
                 }
             }
@@ -63,6 +67,9 @@ class AntlersSemanticHighlightAnnotator : Annotator {
                 // expression or condition body — not as a `.`/`:` path segment or a modifier argument.
                 isWordOperator(element) -> paint(holder, element, AntlersSyntaxHighlighter.KEYWORD)
 
+                // The `void` value placeholder (`{{ x ? 'a' : void }}`) — a language keyword, not a variable.
+                isValueKeyword(element) -> paint(holder, element, AntlersSyntaxHighlighter.KEYWORD)
+
                 // The inline switch *operator* `{ switch(…) }` — e.g. the single-brace form Antlers string
                 // interpolation rewrites `{{ switch(…) }}` into. Here `switch` is a bare T_IDENT (the leading
                 // `{` blocks a name-path), so it never hits the NAME_PATH branch above. Catch it before the
@@ -88,6 +95,16 @@ class AntlersSemanticHighlightAnnotator : Annotator {
         if (element.text !in wordOperators) return false
         // Paint only when the operator stands directly in an expression or condition body — a path
         // segment (`foo.or`), parameter, or modifier argument lands under a different parent.
+        val parent = element.parent
+        return parent is AntlersStatement || parent is AntlersConditionMixin
+    }
+
+    /** Bare-ident value keywords (not operators) — currently the `void` placeholder. */
+    private val valueKeywords = setOf("void")
+
+    private fun isValueKeyword(element: PsiElement): Boolean {
+        if (element.node?.elementType != AntlersTypes.T_IDENT) return false
+        if (element.text !in valueKeywords) return false
         val parent = element.parent
         return parent is AntlersStatement || parent is AntlersConditionMixin
     }

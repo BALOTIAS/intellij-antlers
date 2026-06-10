@@ -35,8 +35,8 @@ class AntlersTagInsertTest : BasePlatformTestCase() {
     }
 
     fun testNoParamSingleNoSession() {
-        completeTag("{{ svg<caret> }}", "svg")
-        assertEquals("{{ svg }}", myFixture.file.text)
+        completeTag("{{ dump<caret> }}", "dump")
+        assertEquals("{{ dump }}", myFixture.file.text)
         assertNull(AntlersParamSession.of(myFixture.editor))
     }
 

@@ -186,6 +186,19 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                         }
                     }
                 }
+                // `{{ foreach }}` exposes its key/value vars (default key/value, or the `as="k|v"` aliases).
+                AntlersNestingTreeBuilder.enclosingForeachAt(file, stmtStart, project)?.let { opener ->
+                    for (v in foreachVars(opener)) {
+                        if (seen.add(v)) {
+                            result.addElement(
+                                LookupElementBuilder.create(v)
+                                    .withIcon(AntlersIcons.FILE)
+                                    .withTypeText("Loop")
+                                    .withTailText("  foreach key/value", true)
+                            )
+                        }
+                    }
+                }
                 // `view` namespace — only when this file actually has front matter.
                 if (com.github.balotias.intellijantlers.view.ViewFrontMatterService.getInstance(project)
                         .frontMatter(file) != null && seen.add("view")
@@ -396,6 +409,15 @@ class AntlersCompletionProvider : CompletionProvider<CompletionParameters>() {
                 .withTypeText("Logic")
                 .withInsertHandler(AntlersKeywordInsertHandler(kw))
         )
+    }
+
+    /** The key/value variable names a foreach loop exposes: the `as="k|v"` aliases, else [key, value]. */
+    private fun foreachVars(opener: AntlersStatement): List<String> {
+        val asValue = PsiTreeUtil.getChildrenOfTypeAsList(
+            opener, com.github.balotias.intellijantlers.psi.AntlersParameterMixin::class.java
+        ).firstOrNull { it.parameterName == "as" }?.valueElement?.text?.trim()?.trim('"', '\'')
+        return if (!asValue.isNullOrBlank()) asValue.split("|").map { it.trim() }.filter { it.isNotEmpty() }
+        else listOf("key", "value")
     }
 
     /** Blueprint fields of the collection/taxonomy/users tag at [position] — the targets of a condition. */
