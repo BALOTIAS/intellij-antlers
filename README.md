@@ -9,6 +9,7 @@
 ![Build](https://github.com/BALOTIAS/intellij-antlers/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/32139-antlers.svg)](https://plugins.jetbrains.com/plugin/32139-antlers)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/32139-antlers.svg)](https://plugins.jetbrains.com/plugin/32139-antlers)
+[![Sponsor](https://img.shields.io/github/sponsors/BALOTIAS?logo=githubsponsors&label=Sponsor&color=ea4aaa)](https://github.com/sponsors/BALOTIAS)
 
 </div>
 
